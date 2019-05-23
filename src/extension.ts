@@ -1,27 +1,12 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { TMSProvider, TMSTreeItem } from './ui/TMSProvider';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-		console.log('Congratulations, your extension "vscode-crowdin" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
-	});
-
-	context.subscriptions.push(disposable);
+	const tmsProvider = new TMSProvider(vscode.workspace.workspaceFolders);
+	vscode.window.registerTreeDataProvider('tmsFiles', tmsProvider);
+	vscode.commands.registerCommand('tmsFiles.refreshEntry', () => tmsProvider.refresh());
+	vscode.commands.registerCommand('tmsFiles.addEntry', () => vscode.window.showInformationMessage(`Successfully called add entry.`));
+	vscode.commands.registerCommand('tmsFiles.editEntry', (item: TMSTreeItem) => vscode.window.showInformationMessage(`Successfully called edit entry on ${item.label}.`));
+	vscode.commands.registerCommand('tmsFiles.deleteEntry', (item: TMSTreeItem) => vscode.window.showInformationMessage(`Successfully called delete entry on ${item.label}.`));
 }
-
-// this method is called when your extension is deactivated
-export function deactivate() {}
