@@ -33,51 +33,48 @@
 		},
 		"commands": [
 			{
-				"command": "tmsFiles.refreshEntry",
-				"title": "Refresh",
+				"command": "tmsFiles.update",
+				"title": "Update",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/update.svg",
+					"dark": "resources/dark/update.svg"
 				}
 			},
 			{
-				"command": "tmsFiles.addEntry",
-				"title": "Add"
-			},
-			{
-				"command": "tmsFiles.editEntry",
-				"title": "Edit",
+				"command": "tmsFiles.saveAll",
+				"title": "Save All",
 				"icon": {
-					"light": "resources/light/edit.svg",
-					"dark": "resources/dark/edit.svg"
+					"light": "resources/light/save.svg",
+					"dark": "resources/dark/save.svg"
 				}
 			},
 			{
-				"command": "tmsFiles.deleteEntry",
-				"title": "Delete"
+				"command": "tmsFiles.save",
+				"title": "Save",
+				"icon": {
+					"light": "resources/light/save.svg",
+					"dark": "resources/dark/save.svg"
+				}
 			}
 		],
 		"menus": {
 			"view/title": [
 				{
-					"command": "tmsFiles.refreshEntry",
+					"command": "tmsFiles.update",
 					"when": "view == tmsFiles",
 					"group": "navigation"
 				},
 				{
-					"command": "tmsFiles.addEntry",
-					"when": "view == tmsFiles"
+					"command": "tmsFiles.saveAll",
+					"when": "view == tmsFiles",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "tmsFiles.editEntry",
+					"command": "tmsFiles.save",
 					"when": "view == tmsFiles && viewItem == tmsItem",
 					"group": "inline"
-				},
-				{
-					"command": "tmsFiles.deleteEntry",
-					"when": "view == tmsFiles && viewItem == tmsItem"
 				}
 			]
 		}
