@@ -1,16 +1,19 @@
 import * as vscode from 'vscode';
 import { TmsTreeItem } from './TmsTreeItem';
+import { ConfigProvider } from '../config/ConfigProvider';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
     private _onDidChangeTreeData: vscode.EventEmitter<TmsTreeItem | undefined> = new vscode.EventEmitter<TmsTreeItem | undefined>();
     readonly onDidChangeTreeData: vscode.Event<TmsTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-    constructor(private workspaceFolders?: vscode.WorkspaceFolder[]) {
-    }
+    private workspaceFolders?: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders;
 
-    update(): void {
-        //TODO implement downloading files
+    update(download: boolean): void {
+        this.workspaceFolders = vscode.workspace.workspaceFolders;
+        if (download) {
+            //TODO implement download
+        }
         this._onDidChangeTreeData.fire();
     }
 
@@ -39,13 +42,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     getChildren(element?: TmsTreeItem): Thenable<TmsTreeItem[]> {
         //TODO implement
         if (!this.workspaceFolders || this.workspaceFolders.length === 0) {
-            vscode.window.showInformationMessage('Project workspace is empty');
+            vscode.window.showWarningMessage('Project workspace is empty');
             return Promise.resolve([]);
         }
         if (!element) {
-            return Promise.resolve([
-                new TmsTreeItem('folder', vscode.TreeItemCollapsibleState.Collapsed)
-            ]);
+            return this.buildTree(this.workspaceFolders);
         } else {
             return Promise.resolve([
                 new TmsTreeItem('strings.xml', vscode.TreeItemCollapsibleState.None, {
@@ -58,4 +59,18 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
     }
 
+    private buildTree(workspaceFolders: vscode.WorkspaceFolder[]): Thenable<TmsTreeItem[]> {
+        const promises = workspaceFolders
+            .map(async workspace => {
+                try {
+                    const config = await new ConfigProvider(workspace).load();
+                    return new TmsTreeItem(workspace.name, vscode.TreeItemCollapsibleState.Collapsed);
+                }
+                catch (err) {
+                    vscode.window.showWarningMessage(err.message);
+                }
+                return null as unknown as TmsTreeItem;
+            });
+        return Promise.all(promises).then(arr => arr.filter(e => e !== null));
+    }
 }

@@ -33,16 +33,20 @@
 		},
 		"commands": [
 			{
-				"command": "tmsFiles.update",
-				"title": "Update",
+				"command": "tmsFiles.refresh",
+				"title": "Refresh folders",
 				"icon": {
 					"light": "resources/light/update.svg",
 					"dark": "resources/dark/update.svg"
 				}
 			},
 			{
+				"command": "tmsFiles.download",
+				"title": "Download files"
+			},
+			{
 				"command": "tmsFiles.saveAll",
-				"title": "Save All",
+				"title": "Upload All",
 				"icon": {
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"
@@ -50,7 +54,7 @@
 			},
 			{
 				"command": "tmsFiles.save",
-				"title": "Save",
+				"title": "Upload",
 				"icon": {
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"
@@ -60,9 +64,13 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "tmsFiles.update",
+					"command": "tmsFiles.refresh",
 					"when": "view == tmsFiles",
 					"group": "navigation"
+				},
+				{
+					"command": "tmsFiles.download",
+					"when": "view == tmsFiles"
 				},
 				{
 					"command": "tmsFiles.saveAll",

@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 import * as yaml from 'yaml';
+import * as vscode from 'vscode';
 import { ConfigModel } from './ConfigModel';
 import { FileModel } from './FileModel';
 
@@ -9,21 +10,22 @@ export class ConfigProvider {
 
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
 
-    constructor(public readonly baseDir: string) { }
+    constructor(public readonly workspace: vscode.WorkspaceFolder) { }
 
     async load(): Promise<ConfigModel> {
-        let filePath;
+        let filePath = '';
+        let exists = false;
 
         for (let i = 0; i < ConfigProvider.crowdinFileNames.length; i++) {
-            filePath = path.join(this.baseDir, ConfigProvider.crowdinFileNames[i]);
-            const exists = await util.promisify(fs.exists)(filePath);
+            filePath = path.join(this.workspace.uri.fsPath, ConfigProvider.crowdinFileNames[i]);
+            exists = await util.promisify(fs.exists)(filePath);
             if (exists) {
                 break;
             }
         }
 
-        if (!filePath) {
-            throw new Error('Could not find configuration file');
+        if (!exists) {
+            throw new Error(`Could not find configuration file in ${this.workspace.name}`);
         }
 
         const file = await util.promisify(fs.readFile)(filePath, 'utf8');
@@ -41,18 +43,18 @@ export class ConfigProvider {
 
     private validate(config: InternalConfigModel): void {
         if (this.isEmpty(config.api_key)) {
-            throw Error('Api key is empty');
+            throw Error(`Api key is empty in ${this.workspace.name}`);
         }
         if (this.isEmpty(config.base_path)) {
-            throw Error('Base path is empty');
+            throw Error(`Base path is empty in ${this.workspace.name}`);
         }
         if (this.isEmpty(config.project_identifier)) {
-            throw Error('Project identifier is empty');
+            throw Error(`Project identifier is empty in ${this.workspace.name}`);
         }
     }
 
     private isEmpty(prop: string): boolean {
-        return !!prop && prop.length > 0;
+        return !prop || prop.length === 0;
     }
 }
 
