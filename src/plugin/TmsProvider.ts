@@ -1,4 +1,7 @@
 import * as vscode from 'vscode';
+import * as util from 'util';
+import * as glob from 'glob';
+import * as path from 'path';
 import { TmsTreeItem } from './TmsTreeItem';
 import { ConfigProvider } from '../config/ConfigProvider';
 import { ConfigModel } from '../config/ConfigModel';
@@ -64,7 +67,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         if (!element) {
             return this.buildRootTree(this.workspaceFolders);
         } else {
-            return Promise.resolve(element.childs);
+            return element.childs;
         }
 
     }
@@ -74,7 +77,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             .map(async workspace => {
                 try {
                     const config = await new ConfigProvider(workspace).load();
-                    return new TmsTreeItem(workspace.name, vscode.TreeItemCollapsibleState.Collapsed, this.buildSubTree(config));
+                    return new TmsTreeItem(
+                        workspace.name,
+                        vscode.TreeItemCollapsibleState.Collapsed,
+                        this.buildSubTree(config, workspace)
+                    );
                 }
                 catch (err) {
                     vscode.window.showWarningMessage(err.message);
@@ -84,14 +91,20 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         return Promise.all(promises).then(arr => arr.filter(e => e !== null));
     }
 
-    private buildSubTree(config: ConfigModel): TmsTreeItem[] {
-        //TODO buil sub tree based on config
-        return [
-            new TmsTreeItem('strings.xml', vscode.TreeItemCollapsibleState.None, [], {
+    private async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
+        config.files.forEach(async f => {
+            const asyncGlob = util.promisify(glob);
+            let foundFiles = await asyncGlob(f.source, { root: workspace.uri.fsPath });
+            foundFiles = foundFiles.map(e => path.relative(workspace.uri.fsPath, e));
+            console.log(`Found for workspace ${workspace.name} | for source ${f.source} : ${foundFiles.join(',')} files`);
+        });
+        //TODO build sub tree based on found files
+        return Promise.resolve([
+            new TmsTreeItem('strings.xml', vscode.TreeItemCollapsibleState.None, Promise.resolve([]), {
                 command: 'extension.openTmsFile',
                 title: '',
                 arguments: ['strings.xml'],
             })
-        ];
+        ]);
     }
 }
