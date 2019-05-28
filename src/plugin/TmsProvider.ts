@@ -1,20 +1,37 @@
 import * as vscode from 'vscode';
 import { TmsTreeItem } from './TmsTreeItem';
 import { ConfigProvider } from '../config/ConfigProvider';
+import { ConfigModel } from '../config/ConfigModel';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
     private _onDidChangeTreeData: vscode.EventEmitter<TmsTreeItem | undefined> = new vscode.EventEmitter<TmsTreeItem | undefined>();
     readonly onDidChangeTreeData: vscode.Event<TmsTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-    private workspaceFolders?: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders;
+    private workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
 
-    update(download: boolean): void {
-        this.workspaceFolders = vscode.workspace.workspaceFolders;
-        if (download) {
-            //TODO implement download
+    update(download: boolean = false): void {
+        this.workspaceFolders = vscode.workspace.workspaceFolders || [];
+        if (!download) {
+            this._onDidChangeTreeData.fire();
+            return;
         }
-        this._onDidChangeTreeData.fire();
+        vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: `Downloading files from server...`
+            },
+            (progress, token) => {
+                //TODO implement downloading
+                var p = new Promise(resolve => {
+                    setTimeout(() => {
+                        this._onDidChangeTreeData.fire();
+                        resolve();
+                    }, 3000);
+                });
+                return p;
+            }
+        );
     }
 
     save(): void {
@@ -40,31 +57,24 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     }
 
     getChildren(element?: TmsTreeItem): Thenable<TmsTreeItem[]> {
-        //TODO implement
-        if (!this.workspaceFolders || this.workspaceFolders.length === 0) {
+        if (this.workspaceFolders.length === 0) {
             vscode.window.showWarningMessage('Project workspace is empty');
             return Promise.resolve([]);
         }
         if (!element) {
-            return this.buildTree(this.workspaceFolders);
+            return this.buildRootTree(this.workspaceFolders);
         } else {
-            return Promise.resolve([
-                new TmsTreeItem('strings.xml', vscode.TreeItemCollapsibleState.None, {
-                    command: 'extension.openTmsFile',
-                    title: '',
-                    arguments: ['strings.xml']
-                })
-            ]);
+            return Promise.resolve(element.childs);
         }
 
     }
 
-    private buildTree(workspaceFolders: vscode.WorkspaceFolder[]): Thenable<TmsTreeItem[]> {
+    private buildRootTree(workspaceFolders: vscode.WorkspaceFolder[]): Thenable<TmsTreeItem[]> {
         const promises = workspaceFolders
             .map(async workspace => {
                 try {
                     const config = await new ConfigProvider(workspace).load();
-                    return new TmsTreeItem(workspace.name, vscode.TreeItemCollapsibleState.Collapsed);
+                    return new TmsTreeItem(workspace.name, vscode.TreeItemCollapsibleState.Collapsed, this.buildSubTree(config));
                 }
                 catch (err) {
                     vscode.window.showWarningMessage(err.message);
@@ -72,5 +82,16 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 return null as unknown as TmsTreeItem;
             });
         return Promise.all(promises).then(arr => arr.filter(e => e !== null));
+    }
+
+    private buildSubTree(config: ConfigModel): TmsTreeItem[] {
+        //TODO buil sub tree based on config
+        return [
+            new TmsTreeItem('strings.xml', vscode.TreeItemCollapsibleState.None, [], {
+                command: 'extension.openTmsFile',
+                title: '',
+                arguments: ['strings.xml'],
+            })
+        ];
     }
 }

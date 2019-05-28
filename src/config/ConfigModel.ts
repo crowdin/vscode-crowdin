@@ -1,10 +1,8 @@
-import { FileModel } from "./FileModel";
+import { FileModel } from './FileModel';
 
-export class ConfigModel {
-    constructor(
-        public readonly projectId: string,
-        public readonly apiKey: string,
-        public readonly basePath: string,
-        public readonly files: FileModel[],
-    ) { }
+export interface ConfigModel {
+    projectId: string;
+    apiKey: string;
+    basePath: string;
+    files: FileModel[];
 }

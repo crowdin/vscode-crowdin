@@ -3,12 +3,16 @@ import * as path from 'path';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
+    readonly childs: TmsTreeItem[];
+
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        childs?: TmsTreeItem[],
         public readonly command?: vscode.Command
     ) {
         super(label, collapsibleState);
+        this.childs = childs || [];
     }
 
     iconPath = {

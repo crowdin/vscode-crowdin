@@ -29,19 +29,19 @@ export class ConfigProvider {
         }
 
         const file = await util.promisify(fs.readFile)(filePath, 'utf8');
-        const config = yaml.parse(file) as InternalConfigModel;
+        const config = yaml.parse(file) as PrivateConfigModel;
 
         this.validate(config);
 
-        return new ConfigModel(
-            config.project_identifier,
-            config.api_key,
-            config.base_path,
-            config.files
-        );
+        return {
+            projectId: config.project_identifier,
+            apiKey: config.api_key,
+            basePath: config.base_path,
+            files: config.files
+        };
     }
 
-    private validate(config: InternalConfigModel): void {
+    private validate(config: PrivateConfigModel): void {
         if (this.isEmpty(config.api_key)) {
             throw Error(`Api key is empty in ${this.workspace.name}`);
         }
@@ -58,11 +58,9 @@ export class ConfigProvider {
     }
 }
 
-class InternalConfigModel {
-    constructor(
-        public readonly project_identifier: string,
-        public readonly api_key: string,
-        public readonly base_path: string,
-        public readonly files: FileModel[],
-    ) { }
+interface PrivateConfigModel {
+    project_identifier: string;
+    api_key: string;
+    base_path: string;
+    files: FileModel[];
 }
