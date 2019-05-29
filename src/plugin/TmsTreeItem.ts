@@ -1,18 +1,19 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { ConfigModel } from '../config/ConfigModel';
 
 export class TmsTreeItem extends vscode.TreeItem {
-
-    readonly childs: Thenable<TmsTreeItem[]>;
 
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        childs?: Thenable<TmsTreeItem[]>,
-        public readonly command?: vscode.Command
+        public childs?: Thenable<TmsTreeItem[]>,
+        public readonly command?: vscode.Command,
+        public filePath?: string,
+        public translation?: string,
+        public config?: ConfigModel
     ) {
         super(label, collapsibleState);
-        this.childs = childs || Promise.resolve([]);
     }
 
     iconPath = {
