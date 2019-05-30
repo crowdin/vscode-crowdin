@@ -7,9 +7,10 @@ export class TmsTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public childs?: Thenable<TmsTreeItem[]>,
+        public childs: Promise<TmsTreeItem[]>,
         public readonly command?: vscode.Command,
         public filePath?: string,
+        public relativePath?: string,
         public translation?: string,
         public config?: ConfigModel
     ) {
@@ -29,21 +30,40 @@ export class TmsTreeItem extends vscode.TreeItem {
             : 'folder.svg';
     }
 
-    save(): void {
-        vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title: `Saving ${this.label}...`
-            },
-            (progress, token) => {
-                //TODO implement saving
-                var p = new Promise(resolve => {
-                    setTimeout(() => {
-                        resolve();
-                    }, 2000);
-                });
-                return p;
+    async save(progress: boolean = false): Promise<void> {
+        const arr = await this.childs;
+        if (progress) {
+            let title = `Saving files under the folder ${this.label}`;
+            if (arr.length === 0 && !!this.relativePath) {
+                title = `Saving file ${this.relativePath}`;
             }
-        );
+            vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: title
+                },
+                async (progress, token) => {
+                    return this._save(arr);
+                }
+            );
+        } else {
+            return this._save(arr);
+        }
+    }
+
+    private async _save(arr: TmsTreeItem[]): Promise<void> {
+        if (arr.length === 0) {
+            //TODO implement saving
+            return new Promise<void>(resolve => {
+                setTimeout(() => {
+                    console.log(`saved ${this.relativePath}`);
+                    resolve();
+                }, 1000);
+            });
+        } else {
+            for (const item of arr) {
+                await item.save();
+            }
+        }
     }
 }

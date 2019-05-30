@@ -5,7 +5,7 @@ import * as path from 'path';
 import { TmsTreeItem } from './TmsTreeItem';
 import { ConfigProvider } from '../config/ConfigProvider';
 import { ConfigModel } from '../config/ConfigModel';
-import { stringify } from 'querystring';
+import { Constants } from '../Constants';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
@@ -13,6 +13,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     readonly onDidChangeTreeData: vscode.Event<TmsTreeItem | undefined> = this._onDidChangeTreeData.event;
 
     private workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
+    private rootTree: TmsTreeItem[] = [];
 
     update(download: boolean = false): void {
         this.workspaceFolders = vscode.workspace.workspaceFolders || [];
@@ -45,13 +46,8 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 title: `Saving all files...`
             },
             (progress, token) => {
-                //TODO implement bulk saving
-                var p = new Promise(resolve => {
-                    setTimeout(() => {
-                        resolve();
-                    }, 3000);
-                });
-                return p;
+                const promises = this.rootTree.map(e => e.save());
+                return Promise.all(promises);
             }
         );
     }
@@ -66,6 +62,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             return Promise.resolve([]);
         }
         if (!element) {
+            this.rootTree.length = 0;
             return this.buildRootTree(this.workspaceFolders);
         } else {
             return element.childs || Promise.resolve([]);
@@ -78,11 +75,13 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             .map(async workspace => {
                 try {
                     const config = await new ConfigProvider(workspace).load();
-                    return new TmsTreeItem(
+                    const rootTreeFolder = new TmsTreeItem(
                         workspace.name,
                         vscode.TreeItemCollapsibleState.Collapsed,
                         this.buildSubTree(config, workspace)
                     );
+                    this.rootTree.push(rootTreeFolder);
+                    return rootTreeFolder;
                 }
                 catch (err) {
                     vscode.window.showWarningMessage(err.message);
@@ -93,7 +92,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     }
 
     private async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
-        let matrix: Array<Map<string, [string | undefined, string, string, boolean]>> = [];
+        let matrix: Array<Map<string, [string | undefined, string, string, string, boolean]>> = [];
         for (const f of config.files) {
             const asyncGlob = util.promisify(glob);
             let foundFiles = await asyncGlob(f.source, { root: workspace.uri.fsPath });
@@ -108,7 +107,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                         if (matrix.length - 1 < i) {
                             matrix[i] = new Map();
                         }
-                        matrix[i].set(part, [parentPart, f.translation, filePath, isLeaf]);
+                        matrix[i].set(part, [parentPart, f.translation, path.join(workspace.uri.fsPath, filePath), filePath, isLeaf]);
                         parentPart = part;
                     }
                 });
@@ -119,12 +118,12 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             const map = matrix[i];
             let temp = new Map(childs);
             childs.clear();
-            map.forEach(([parent, translation, path, isLeaf], label) => {
+            map.forEach(([parent, translation, path, relativePath, isLeaf], label) => {
                 let item;
                 if (isLeaf) {
-                    item = this.buildLeaf(label, path, translation, config);
+                    item = this.buildLeaf(label, path, relativePath, translation, config);
                 } else {
-                    item = this.buildFolder(label, (temp.get(label) || []).sort(this.sort) || []);
+                    item = this.buildFolder(label, (temp.get(label) || []).sort(this.sort));
                 }
                 if (!!parent) {
                     let childElements = childs.get(parent) || [];
@@ -138,12 +137,12 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         return subtree.sort(this.sort);
     }
 
-    private buildLeaf(label: string, filePath: string, translation: string, config: ConfigModel): TmsTreeItem {
+    private buildLeaf(label: string, filePath: string, relativePath: string, translation: string, config: ConfigModel): TmsTreeItem {
         return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]), {
-            command: 'extension.openTmsFile',
+            command: Constants.OPEN_TMS_FILE_COMMAND,
             title: '',
             arguments: [filePath],
-        }, filePath, translation, config);
+        }, filePath, relativePath, translation, config);
     }
 
     private buildFolder(label: string, childs: TmsTreeItem[]) {

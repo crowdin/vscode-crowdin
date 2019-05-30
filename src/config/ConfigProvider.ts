@@ -36,7 +36,6 @@ export class ConfigProvider {
         return {
             projectId: config.project_identifier,
             apiKey: config.api_key,
-            basePath: config.base_path,
             branch: config.branch,
             files: config.files
         };
@@ -45,9 +44,6 @@ export class ConfigProvider {
     private validate(config: PrivateConfigModel): void {
         if (this.isEmpty(config.api_key)) {
             throw Error(`Api key is empty in ${this.workspace.name}`);
-        }
-        if (this.isEmpty(config.base_path)) {
-            throw Error(`Base path is empty in ${this.workspace.name}`);
         }
         if (this.isEmpty(config.project_identifier)) {
             throw Error(`Project identifier is empty in ${this.workspace.name}`);
@@ -62,7 +58,6 @@ export class ConfigProvider {
 interface PrivateConfigModel {
     project_identifier: string;
     api_key: string;
-    base_path: string;
     branch: string;
     files: FileModel[];
 }
