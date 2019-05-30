@@ -8,9 +8,9 @@ export class TmsTreeItem extends vscode.TreeItem {
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public childs: Promise<TmsTreeItem[]>,
+        public relativePath: string,
         public readonly command?: vscode.Command,
         public filePath?: string,
-        public relativePath?: string,
         public translation?: string,
         public config?: ConfigModel
     ) {
@@ -33,8 +33,8 @@ export class TmsTreeItem extends vscode.TreeItem {
     async save(progress: boolean = false): Promise<void> {
         const arr = await this.childs;
         if (progress) {
-            let title = `Saving files under the folder ${this.label}`;
-            if (arr.length === 0 && !!this.relativePath) {
+            let title = `Saving files in ${this.relativePath}`;
+            if (arr.length === 0 && !this.filePath) {
                 title = `Saving file ${this.relativePath}`;
             }
             vscode.window.withProgress(
