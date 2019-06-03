@@ -5,6 +5,8 @@ import { Constants } from '../Constants';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
+    contextValue = 'tmsItem';
+
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -16,19 +18,15 @@ export class TmsTreeItem extends vscode.TreeItem {
         public translation?: string
     ) {
         super(label, collapsibleState);
-    }
-
-    iconPath = {
-        light: path.join(__filename, '..', '..', '..', 'resources', 'light', this.iconFile),
-        dark: path.join(__filename, '..', '..', '..', 'resources', 'dark', this.iconFile)
-    };
-
-    contextValue = 'tmsItem';
-
-    get iconFile(): string {
-        return this.collapsibleState === vscode.TreeItemCollapsibleState.None
-            ? 'document.svg'
-            : 'folder.svg';
+        if (filePath) {
+            this.resourceUri = vscode.Uri.file(filePath);
+        } else {
+            const icon = collapsibleState === vscode.TreeItemCollapsibleState.None ? 'document.svg' : 'folder.svg';
+            this.iconPath = {
+                light: path.join(__filename, '..', '..', '..', 'resources', 'light', icon),
+                dark: path.join(__filename, '..', '..', '..', 'resources', 'dark', icon)
+            };
+        }
     }
 
     update(): Promise<void> {
