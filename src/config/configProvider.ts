@@ -16,8 +16,8 @@ export class ConfigProvider {
         let filePath = '';
         let exists = false;
 
-        for (let i = 0; i < ConfigProvider.crowdinFileNames.length; i++) {
-            filePath = path.join(this.workspace.uri.fsPath, ConfigProvider.crowdinFileNames[i]);
+        for (let i = 0; i < this.fileNames().length; i++) {
+            filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
             exists = await util.promisify(fs.exists)(filePath);
             if (exists) {
                 break;
@@ -39,6 +39,10 @@ export class ConfigProvider {
             branch: config.branch,
             files: config.files
         };
+    }
+
+    protected fileNames(): string[] {
+        return ConfigProvider.crowdinFileNames;
     }
 
     private validate(config: PrivateConfigModel): void {
