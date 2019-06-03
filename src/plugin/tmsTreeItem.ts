@@ -18,15 +18,18 @@ export class TmsTreeItem extends vscode.TreeItem {
         public translation?: string
     ) {
         super(label, collapsibleState);
-        if (filePath) {
+        if (!!filePath) {
             this.resourceUri = vscode.Uri.file(filePath);
         } else {
-            const icon = collapsibleState === vscode.TreeItemCollapsibleState.None ? 'document.svg' : 'folder.svg';
             this.iconPath = {
-                light: path.join(__filename, '..', '..', '..', 'resources', 'light', icon),
-                dark: path.join(__filename, '..', '..', '..', 'resources', 'dark', icon)
+                light: path.join(__filename, '..', '..', '..', 'resources', 'light', 'folder.svg'),
+                dark: path.join(__filename, '..', '..', '..', 'resources', 'dark', 'folder.svg')
             };
         }
+    }
+
+    get isLeaf(): boolean {
+        return !!this.filePath;
     }
 
     update(): Promise<void> {
@@ -42,10 +45,9 @@ export class TmsTreeItem extends vscode.TreeItem {
     async save(progress: boolean = false): Promise<void> {
         const arr = await this.childs;
         if (progress) {
-            let title = `Saving files in ${this.relativePath}`;
-            if (arr.length === 0 && !this.filePath) {
-                title = `Saving file ${this.relativePath}`;
-            }
+            let title = this.isLeaf
+                ? `Saving files in ${this.relativePath}`
+                : `Saving file ${this.relativePath}`;
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
@@ -61,7 +63,7 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     private _save(arr: TmsTreeItem[]): Promise<any> {
-        if (arr.length === 0) {
+        if (this.isLeaf) {
             //TODO implement saving
             return new Promise<void>(resolve => {
                 setTimeout(() => {

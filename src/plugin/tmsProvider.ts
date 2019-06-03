@@ -59,7 +59,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             this.rootTree.length = 0;
             return this.buildRootTree(this.workspaceFolders);
         } else {
-            return element.childs || Promise.resolve([]);
+            return element.childs;
         }
     }
 
