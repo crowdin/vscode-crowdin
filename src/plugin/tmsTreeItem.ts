@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ConfigModel } from '../config/ConfigModel';
+import { ConfigModel } from '../config/configModel';
 import { Constants } from '../Constants';
 
 export class TmsTreeItem extends vscode.TreeItem {

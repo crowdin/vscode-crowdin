@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { TmsProvider } from './plugin/TmsProvider';
-import { TmsTreeItem } from './plugin/TmsTreeItem';
-import { Constants } from './Constants';
+import { TmsProvider } from './plugin/tmsProvider';
+import { TmsTreeItem } from './plugin/tmsTreeItem';
+import { Constants } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
 	const tmsProvider = new TmsProvider();

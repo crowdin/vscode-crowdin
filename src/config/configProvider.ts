@@ -3,8 +3,8 @@ import * as path from 'path';
 import * as util from 'util';
 import * as yaml from 'yaml';
 import * as vscode from 'vscode';
-import { ConfigModel } from './ConfigModel';
-import { FileModel } from './FileModel';
+import { ConfigModel } from './configModel';
+import { FileModel } from './fileModel';
 
 export class ConfigProvider {
 

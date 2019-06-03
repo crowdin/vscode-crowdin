@@ -3,8 +3,8 @@ import * as util from 'util';
 import * as glob from 'glob';
 import * as path from 'path';
 import { TmsTreeItem } from './TmsTreeItem';
-import { ConfigProvider } from '../config/ConfigProvider';
-import { ConfigModel } from '../config/ConfigModel';
+import { ConfigProvider } from '../config/configProvider';
+import { ConfigModel } from '../config/configModel';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 

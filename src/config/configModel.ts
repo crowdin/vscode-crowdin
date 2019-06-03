@@ -1,4 +1,4 @@
-import { FileModel } from './FileModel';
+import { FileModel } from './fileModel';
 
 export interface ConfigModel {
     projectId: string;
