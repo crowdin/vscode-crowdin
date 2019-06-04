@@ -81,7 +81,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         return arr.filter(e => e !== null);
     }
 
-    private async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
+    protected async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
         let matrix = await this.buildFilesMatrix(config, workspace);
         let subtree: TmsTreeItem[] = [];
         let childs: Map<string, TmsTreeItem[]> = new Map();
@@ -89,10 +89,10 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             const map = matrix[i];
             let temp = new Map(childs);
             childs.clear();
-            map.forEach(([parent, translation, path, relativePath, isLeaf], label) => {
+            map.forEach(([parent, translation, fullPath, relativePath, isLeaf], label) => {
                 let item;
                 if (isLeaf) {
-                    item = TmsTreeItem.buildLeaf(label, path, relativePath, translation, config);
+                    item = TmsTreeItem.buildLeaf(label, fullPath, relativePath, translation, config);
                 } else {
                     item = TmsTreeItem.buildFolder(label, relativePath, (temp.get(label) || []).sort(TmsTreeItem.compare));
                 }
@@ -108,7 +108,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         return subtree.sort(TmsTreeItem.compare);
     }
 
-    private async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, string, boolean]>>> {
+    protected async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, string, boolean]>>> {
         let matrix: Array<Map<string, [string | undefined, string, string, string, boolean]>> = [];
         const promises = config.files.map(async f => {
             const asyncGlob = util.promisify(glob);
