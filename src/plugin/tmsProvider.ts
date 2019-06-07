@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as util from 'util';
 import * as glob from 'glob';
 import * as path from 'path';
-import { TmsTreeItem } from './TmsTreeItem';
+import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
 import { ConfigModel } from '../config/configModel';
 

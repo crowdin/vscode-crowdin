@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { TmsProvider } from '../../plugin/tmsProvider';
 import { ConfigModel } from '../../config/configModel';
-import { TmsTreeItem } from '../../plugin/TmsTreeItem';
+import { TmsTreeItem } from '../../plugin/tmsTreeItem';
 
 suite("Plugin tree", function () {
 
