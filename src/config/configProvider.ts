@@ -37,6 +37,7 @@ export class ConfigProvider {
             projectId: config.project_identifier,
             apiKey: config.api_key,
             branch: config.branch,
+            basePath: config.base_path,
             files: config.files
         };
     }
@@ -62,6 +63,7 @@ export class ConfigProvider {
 interface PrivateConfigModel {
     project_identifier: string;
     api_key: string;
-    branch: string;
+    branch?: string;
+    base_path?: string;
     files: FileModel[];
 }

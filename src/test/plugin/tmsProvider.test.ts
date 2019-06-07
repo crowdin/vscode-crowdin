@@ -15,6 +15,7 @@ suite("Plugin tree", function () {
             apiKey: 'key',
             projectId: 'id',
             branch: 'master',
+            basePath: 'folder1/folder2',
             files: [{
                 source: '/**/[^0-2].txt',
                 translation: '/**/%two_letters_code%_%original_file_name%'
@@ -45,11 +46,10 @@ suite("Plugin tree", function () {
         const level2 = matrix[1];
         const level3 = matrix[2];
         assert.equal(1, level1.size);
-        assert.equal(2, level2.size);
+        assert.equal(1, level2.size);
         assert.equal(1, level3.size);
         testMatrix(level1, 'folder1', undefined, config.files[0].translation, path.join(workspace.name, 'folder1'), false);
         testMatrix(level2, 'folder2', 'folder1', config.files[0].translation, path.join(workspace.name, 'folder1', 'folder2'), false);
-        testMatrix(level2, 'a.txt', 'folder1', config.files[0].translation, path.join(workspace.name, 'folder1', 'a.txt'), true);
         testMatrix(level3, '3.txt', 'folder2', config.files[0].translation, path.join(workspace.name, 'folder1', 'folder2', '3.txt'), true);
     });
 
@@ -58,12 +58,12 @@ suite("Plugin tree", function () {
         const tree = await provider.buildSubTree(config, workspace);
         assert.equal(1, tree.length);
         const subtree1 = await tree[0].childs;
-        assert.equal(2, subtree1.length);
+        assert.equal(1, subtree1.length);
         const subtree2 = subtree1[0];
         const childs = await subtree2.childs;
         assert.equal(1, childs.length);
-        const leaf = subtree1[1];
-        assert.equal('a.txt', leaf.label);
+        const leaf = childs[0];
+        assert.equal('3.txt', leaf.label);
     });
 
 });
