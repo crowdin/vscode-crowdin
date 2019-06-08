@@ -6,6 +6,8 @@ import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
 import { ConfigModel } from '../config/configModel';
 
+const asyncGlob = util.promisify(glob);
+
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
     private _onDidChangeTreeData: vscode.EventEmitter<TmsTreeItem | undefined> = new vscode.EventEmitter<TmsTreeItem | undefined>();
@@ -112,7 +114,6 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         let matrix: Array<Map<string, [string | undefined, string, string, string, boolean]>> = [];
         const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
         const promises = config.files.map(async f => {
-            const asyncGlob = util.promisify(glob);
             let foundFiles = await asyncGlob(f.source, { root: root });
             foundFiles
                 .map(e => path.relative(workspace.uri.fsPath, e))

@@ -6,6 +6,9 @@ import * as vscode from 'vscode';
 import { ConfigModel } from './configModel';
 import { FileModel } from './fileModel';
 
+const asyncFileExists = util.promisify(fs.exists);
+const asyncReadFile = util.promisify(fs.readFile);
+
 export class ConfigProvider {
 
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
@@ -18,7 +21,7 @@ export class ConfigProvider {
 
         for (let i = 0; i < this.fileNames().length; i++) {
             filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
-            exists = await util.promisify(fs.exists)(filePath);
+            exists = await asyncFileExists(filePath);
             if (exists) {
                 break;
             }
@@ -28,7 +31,7 @@ export class ConfigProvider {
             throw new Error(`Could not find configuration file in ${this.workspace.name}`);
         }
 
-        const file = await util.promisify(fs.readFile)(filePath, 'utf8');
+        const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
         this.validate(config);

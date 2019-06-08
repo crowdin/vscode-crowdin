@@ -8,14 +8,14 @@ export class TmsTreeItem extends vscode.TreeItem {
     contextValue = 'tmsItem';
 
     constructor(
-        public readonly label: string,
-        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public childs: Promise<TmsTreeItem[]>,
-        public relativePath: string,
-        public config?: ConfigModel,
-        public readonly command?: vscode.Command,
-        public filePath?: string,
-        public translation?: string
+        readonly label: string,
+        readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        readonly childs: Promise<TmsTreeItem[]>,
+        readonly relativePath: string,
+        readonly config?: ConfigModel,
+        readonly command?: vscode.Command,
+        readonly filePath?: string,
+        readonly translation?: string
     ) {
         super(label, collapsibleState);
         if (!!filePath) {
