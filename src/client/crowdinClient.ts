@@ -1,5 +1,8 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import axios, { AxiosResponse } from 'axios';
 import * as AdmZip from 'adm-zip';
+import * as FormData from 'form-data';
 import { Constants } from '../constants';
 
 export class CrowdinClient {
@@ -23,61 +26,93 @@ export class CrowdinClient {
         });
     }
 
-    async upload(fsPath: string, translation: string, file: string): Promise<void> {
+    async upload(fsPath: string, translation: string, file: string): Promise<any> {
         if (!!this.branch) {
-            const branchCreated = await this.addDirectory(this.branch, true);
-            //TODO check if branch create or exists, otherwise cancel the execution
+            try {
+                //create branch if not exists
+                await this.addDirectory(this.branch, true);
+            } catch (error) {
+                if (!this.objectsExists(error, 50)) {
+                    return Promise.reject(error);
+                }
+            }
         }
-        const response1 = await this.addFile(fsPath, translation, file);
-        //TODO check if file created (then complete the execution) or already exists (then proceed with update file), otherwise cancel the execution
-        const response2 = await this.updateFile(fsPath, translation, file);
-        //TODO check if file updated and complete the execution, otherwise cancel the execution
+        const folder = path.dirname(file);
+        try {
+            //create file folders if not exists
+            await this.addDirectory(folder, false, true, this.branch);
+        } catch (error) {
+            if (!this.objectsExists(error, 50)) {
+                return Promise.reject(error);
+            }
+        }
+        //add or update file
+        try {
+            await this.addFile(fsPath, translation, file);
+            return Promise.resolve();
+        } catch (error) {
+            if (!this.objectsExists(error, 5)) {
+                return Promise.reject(error);
+            }
+        }
+        return this.updateFile(fsPath, translation, file);
     }
 
     private async downloadTranslations(): Promise<AxiosResponse> {
         await this.exportTranslations();
-        const url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/download/all.zip`;
-        let parameters = this.buildQueryParams();
-        return axios.get(url, { params: parameters, responseType: 'arraybuffer' });
+        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/download/all.zip?key=${this.apiKey}`;
+        if (!!this.branch) {
+            url += `&branch=${this.branch}`;
+        }
+        return axios.get(url, { responseType: 'arraybuffer' });
     }
 
     private exportTranslations(): Promise<void> {
-        const url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/export`;
-        let parameters = this.buildQueryParams();
-        return axios.get(url, { params: parameters });
+        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/export?key=${this.apiKey}`;
+        if (!!this.branch) {
+            url += `&branch=${this.branch}`;
+        }
+        return axios.get(url);
     }
 
-    private addDirectory(name: string, isBranch = false): Promise<AxiosResponse> {
-        const url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-directory`;
-        const parameters = {
-            key: this.apiKey,
-            json: true,
-            name: name,
-            is_branch: isBranch
-        };
-        return axios.post(url, { params: parameters });
+    private addDirectory(name: string, isBranch = false, recursive = false, branch?: string): Promise<AxiosResponse> {
+        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-directory`;
+        url += `?key=${this.apiKey}&json=true&name=${name}&is_branch=${isBranch}&recursive=${recursive}&json=true`;
+        if (!!branch) {
+            url += `&branch=${branch}`;
+        }
+        return axios.post(url);
     }
 
     private addFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
-        //TODO implement
-        return Promise.resolve(null as unknown as AxiosResponse);
+        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-file?key=${this.apiKey}&json=true`;
+        if (!!this.branch) {
+            url += `&branch=${this.branch}`;
+        }
+        return this.uploadFile(fsPath, translation, file, url);
     }
 
     private updateFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
-        //TODO implement
-        return Promise.resolve(null as unknown as AxiosResponse);
+        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/update-file?key=${this.apiKey}&json=true`;
+        if (!!this.branch) {
+            url += `&branch=${this.branch}`;
+        }
+        return this.uploadFile(fsPath, translation, file, url);
     }
 
-    private buildQueryParams(): any {
-        let parameters: any = {
-            key: this.apiKey
-        };
-        if (!!this.branch) {
-            parameters = {
-                key: this.apiKey,
-                branch: this.branch
-            };
-        }
-        return parameters;
+    private uploadFile(fsPath: string, translation: string, file: string, url: string): Promise<AxiosResponse> {
+        const data = new FormData();
+        data.append(`files[${file}]`, fs.createReadStream(fsPath));
+        data.append(`export_patterns[${file}]`, translation);
+        return axios.post(url, data, {
+            headers: data.getHeaders()
+        });
+    }
+
+    private objectsExists(error: any, code: number): boolean {
+        return error.response.data
+            && error.response.data.error
+            && error.response.data.error.code
+            && error.response.data.error.code === code;
     }
 }
