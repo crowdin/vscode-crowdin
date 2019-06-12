@@ -12,13 +12,13 @@ export class CrowdinClient {
         readonly apiKey: string,
         readonly branch?: string) { }
 
-    async download(unzipFolder: string): Promise<void> {
+    async download(unzipFolder: string): Promise<any> {
         const response = await this.downloadTranslations();
         const zip = new AdmZip(response.data);
         return new Promise((resolve, reject) => {
             zip.extractAllToAsync(unzipFolder, true, (error) => {
                 if (!!error) {
-                    reject(error);
+                    reject(`Failed to unzip translations for project ${this.projectId}. ${error}`);
                 } else {
                     resolve();
                 }
@@ -33,17 +33,20 @@ export class CrowdinClient {
                 await this.addDirectory(this.branch, true);
             } catch (error) {
                 if (!this.objectsExists(error, 50)) {
-                    return Promise.reject(error);
+                    return Promise.reject(`Failed to create branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
                 }
             }
         }
-        const folder = path.dirname(file);
-        try {
-            //create file folders if not exists
-            await this.addDirectory(folder, false, true, this.branch);
-        } catch (error) {
-            if (!this.objectsExists(error, 50)) {
-                return Promise.reject(error);
+        //check if file has parent folders
+        if (path.basename(file) !== file) {
+            const folder = path.dirname(file);
+            try {
+                //create file folders if not exists
+                await this.addDirectory(folder, false, true, this.branch);
+            } catch (error) {
+                if (!this.objectsExists(error, 50)) {
+                    return Promise.reject(`Failed to create folders for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                }
             }
         }
         //add or update file
@@ -52,14 +55,22 @@ export class CrowdinClient {
             return Promise.resolve();
         } catch (error) {
             if (!this.objectsExists(error, 5)) {
-                return Promise.reject(error);
+                return Promise.reject(`Failed to add file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
             }
         }
-        return this.updateFile(fsPath, translation, file);
+        try {
+            await this.updateFile(fsPath, translation, file);
+        } catch (error) {
+            return Promise.reject(`Failed to update file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+        }
     }
 
     private async downloadTranslations(): Promise<AxiosResponse> {
-        await this.exportTranslations();
+        try {
+            await this.exportTranslations();
+        } catch (error) {
+            return Promise.reject(`Failed to export translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+        }
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/download/all.zip?key=${this.apiKey}`;
         if (!!this.branch) {
             url += `&branch=${this.branch}`;
@@ -67,8 +78,8 @@ export class CrowdinClient {
         return axios.get(url, { responseType: 'arraybuffer' });
     }
 
-    private exportTranslations(): Promise<void> {
-        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/export?key=${this.apiKey}`;
+    private exportTranslations(): Promise<AxiosResponse> {
+        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/export?key=${this.apiKey}&json=true`;
         if (!!this.branch) {
             url += `&branch=${this.branch}`;
         }
@@ -114,5 +125,15 @@ export class CrowdinClient {
             && error.response.data.error
             && error.response.data.error.code
             && error.response.data.error.code === code;
+    }
+
+    private getErrorMessage(error: any): string {
+        if (error.response.data
+            && error.response.data.error
+            && error.response.data.error.message) {
+            return error.response.data.error.message;
+        } else {
+            return '';
+        }
     }
 }

@@ -48,9 +48,9 @@ suite("Plugin tree", function () {
         assert.equal(1, level1.size);
         assert.equal(1, level2.size);
         assert.equal(1, level3.size);
-        testMatrix(level1, 'folder1', undefined, config.files[0].translation, path.join(workspace.name, 'folder1'), false);
-        testMatrix(level2, 'folder2', 'folder1', config.files[0].translation, path.join(workspace.name, 'folder1', 'folder2'), false);
-        testMatrix(level3, '3.txt', 'folder2', config.files[0].translation, path.join(workspace.name, 'folder1', 'folder2', '3.txt'), true);
+        testMatrix(level1, 'folder1', undefined, config.files[0].translation, false);
+        testMatrix(level2, 'folder2', 'folder1', config.files[0].translation, false);
+        testMatrix(level3, '3.txt', 'folder2', config.files[0].translation, true);
     });
 
     test("Building subtree", async () => {
@@ -68,12 +68,11 @@ suite("Plugin tree", function () {
 
 });
 
-function testMatrix(map: Map<string, [string | undefined, string, string, string, boolean]>,
-    key: string, parent: string | undefined, translation: string, relativePath: string, isLeaf: boolean) {
-    const [parent1, translation1, fullPath1, relativePath1, isLeaf1] = map.get(key) || ['', '', '', '', false];
+function testMatrix(map: Map<string, [string | undefined, string, string, boolean]>,
+    key: string, parent: string | undefined, translation: string, isLeaf: boolean) {
+    const [parent1, translation1, fullPath1, isLeaf1] = map.get(key) || ['', '', '', '', false];
     assert.equal(parent1, parent);
     assert.equal(translation1, translation);
-    assert.equal(relativePath1, relativePath);
     assert.equal(isLeaf1, isLeaf);
 }
 
@@ -83,7 +82,7 @@ class TestTmsProvider extends TmsProvider {
         return super.buildSubTree(config, workspace);
     }
 
-    async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, string, boolean]>>> {
+    async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, boolean]>>> {
         return super.buildFilesMatrix(config, workspace);
     }
 }

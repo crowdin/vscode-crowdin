@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigModel } from '../config/configModel';
 import { Constants } from '../constants';
+import { CrowdinClient } from '../client/crowdinClient';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
@@ -11,8 +12,8 @@ export class TmsTreeItem extends vscode.TreeItem {
         readonly label: string,
         readonly collapsibleState: vscode.TreeItemCollapsibleState,
         readonly childs: Promise<TmsTreeItem[]>,
-        readonly relativePath: string,
-        readonly config?: ConfigModel,
+        readonly config: ConfigModel,
+        readonly rootPath: string,
         readonly command?: vscode.Command,
         readonly filePath?: string,
         readonly translation?: string
@@ -28,26 +29,24 @@ export class TmsTreeItem extends vscode.TreeItem {
         }
     }
 
-    get isLeaf(): boolean {
-        return !!this.filePath;
+    get client(): CrowdinClient {
+        return new CrowdinClient(this.config.projectId, this.config.apiKey, this.config.branch);
     }
 
     update(): Promise<void> {
-        //TODO implement download
-        return new Promise(resolve => {
-            setTimeout(() => {
-                console.log(`downoading files in ${this.label}`);
-                resolve();
-            }, 2000);
-        });
+        let unzipFolder = this.rootPath;
+        if (!!this.config.basePath) {
+            unzipFolder = path.join(unzipFolder, this.config.basePath);
+        }
+        return this.client.download(unzipFolder);
     }
 
     async save(progress: boolean = false): Promise<void> {
         const arr = await this.childs;
         if (progress) {
-            let title = this.isLeaf
-                ? `Saving file ${this.relativePath}`
-                : `Saving files in ${this.relativePath}`;
+            let title = !!this.filePath && !!this.translation
+                ? `Saving file ${this.label}`
+                : `Saving files in ${this.label}`;
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
@@ -63,14 +62,13 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     private _save(arr: TmsTreeItem[]): Promise<any> {
-        if (this.isLeaf) {
-            //TODO implement saving
-            return new Promise<void>(resolve => {
-                setTimeout(() => {
-                    console.log(`saved ${this.relativePath}`);
-                    resolve();
-                }, 1000);
-            });
+        if (!!this.filePath && !!this.translation) {
+            let basePath = this.rootPath;
+            if (!!this.config.basePath) {
+                basePath = path.join(basePath, this.config.basePath);
+            }
+            const file = path.relative(basePath, this.filePath);
+            return this.client.upload(this.filePath, this.translation, file);
         } else {
             let promises: Promise<any>[] = [];
             for (const item of arr) {
@@ -85,21 +83,21 @@ export class TmsTreeItem extends vscode.TreeItem {
             workspace.name,
             vscode.TreeItemCollapsibleState.Collapsed,
             childs,
-            workspace.name,
-            config
+            config,
+            workspace.uri.fsPath
         );
     }
 
-    static buildLeaf(label: string, filePath: string, relativePath: string, translation: string, config: ConfigModel): TmsTreeItem {
-        return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]), relativePath, config, {
+    static buildLeaf(workspace: vscode.WorkspaceFolder, label: string, filePath: string, translation: string, config: ConfigModel): TmsTreeItem {
+        return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]), config, workspace.uri.fsPath, {
             command: Constants.OPEN_TMS_FILE_COMMAND,
             title: '',
             arguments: [filePath],
         }, filePath, translation);
     }
 
-    static buildFolder(label: string, relativePath: string, childs: TmsTreeItem[]) {
-        return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.Collapsed, Promise.resolve(childs), relativePath);
+    static buildFolder(workspace: vscode.WorkspaceFolder, label: string, childs: TmsTreeItem[], config: ConfigModel) {
+        return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.Collapsed, Promise.resolve(childs), config, workspace.uri.fsPath);
     }
 
     static compare(e1: TmsTreeItem, e2: TmsTreeItem): number {

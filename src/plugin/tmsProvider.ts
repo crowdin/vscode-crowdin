@@ -28,7 +28,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 title: `Downloading files from server...`
             },
             async () => {
-                const promises = this.rootTree.map(rootFolder => rootFolder.update());
+                const promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => {
+                    if (typeof e === 'string') {
+                        vscode.window.showErrorMessage(e);
+                    }
+                }));
                 await Promise.all(promises);
                 return this._onDidChangeTreeData.fire();
             }
@@ -42,7 +46,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 title: `Saving all files...`
             },
             () => {
-                const promises = this.rootTree.map(e => e.save());
+                const promises = this.rootTree.map(e => e.save().catch(e => {
+                    if (typeof e === 'string') {
+                        vscode.window.showErrorMessage(e);
+                    }
+                }));
                 return Promise.all(promises);
             }
         );
@@ -91,12 +99,12 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             const map = matrix[i];
             let temp = new Map(childs);
             childs.clear();
-            map.forEach(([parent, translation, fullPath, relativePath, isLeaf], label) => {
+            map.forEach(([parent, translation, fullPath, isLeaf], label) => {
                 let item;
                 if (isLeaf) {
-                    item = TmsTreeItem.buildLeaf(label, fullPath, relativePath, translation, config);
+                    item = TmsTreeItem.buildLeaf(workspace, label, fullPath, translation, config);
                 } else {
-                    item = TmsTreeItem.buildFolder(label, relativePath, (temp.get(label) || []).sort(TmsTreeItem.compare));
+                    item = TmsTreeItem.buildFolder(workspace, label, (temp.get(label) || []).sort(TmsTreeItem.compare), config);
                 }
                 if (!!parent) {
                     let childElements = childs.get(parent) || [];
@@ -110,8 +118,8 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         return subtree.sort(TmsTreeItem.compare);
     }
 
-    protected async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, string, boolean]>>> {
-        let matrix: Array<Map<string, [string | undefined, string, string, string, boolean]>> = [];
+    protected async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, boolean]>>> {
+        let matrix: Array<Map<string, [string | undefined, string, string, boolean]>> = [];
         const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
         const promises = config.files.map(async f => {
             let foundFiles = await asyncGlob(f.source, { root: root });
@@ -128,7 +136,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                         }
                         const fsPath = path.join(workspace.uri.fsPath, filePath);
                         const relativePath = path.join(workspace.name, ...fileParts.slice(0, i + 1));
-                        matrix[i].set(part, [parentPart, f.translation, fsPath, relativePath, isLeaf]);
+                        matrix[i].set(part, [parentPart, f.translation, fsPath, isLeaf]);
                         parentPart = part;
                     }
                 });
