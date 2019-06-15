@@ -12,6 +12,11 @@ export class CrowdinClient {
         readonly apiKey: string,
         readonly branch?: string) { }
 
+    /**
+     * Downloads zip archive from Crowdin system and unzip it in pre-defined folder
+     * 
+     * @param unzipFolder folder where to unzip downloaded files
+     */
     async download(unzipFolder: string): Promise<any> {
         const response = await this.downloadTranslations();
         const zip = new AdmZip(response.data);
@@ -26,11 +31,18 @@ export class CrowdinClient {
         });
     }
 
+    /**
+     * Uploads file to the Crowdin system. Creates needed folders/branch is they are missing.
+     * 
+     * @param fsPath full path to file
+     * @param translation file translation
+     * @param file file path in crowdin system
+     */
     async upload(fsPath: string, translation: string, file: string): Promise<any> {
         if (!!this.branch) {
             try {
                 //create branch if not exists
-                await this.addDirectory(this.branch, true);
+                await this.addDirectory(this.branch, true, false);
             } catch (error) {
                 if (!this.objectsExists(error, 50)) {
                     return Promise.reject(`Failed to create branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
@@ -39,7 +51,7 @@ export class CrowdinClient {
         }
         //check if file has parent folders
         if (path.basename(file) !== file) {
-            const folder = path.dirname(file);
+            const folder = this.normalizePath(path.dirname(file));
             try {
                 //create file folders if not exists
                 await this.addDirectory(folder, false, true, this.branch);
@@ -49,9 +61,10 @@ export class CrowdinClient {
                 }
             }
         }
+        const fileName = this.normalizePath(file);
         //add or update file
         try {
-            await this.addFile(fsPath, translation, file);
+            await this.addFile(fsPath, translation, fileName);
             return Promise.resolve();
         } catch (error) {
             if (!this.objectsExists(error, 5)) {
@@ -59,7 +72,7 @@ export class CrowdinClient {
             }
         }
         try {
-            await this.updateFile(fsPath, translation, file);
+            await this.updateFile(fsPath, translation, fileName);
         } catch (error) {
             return Promise.reject(`Failed to update file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
@@ -88,7 +101,7 @@ export class CrowdinClient {
 
     private addDirectory(name: string, isBranch = false, recursive = false, branch?: string): Promise<AxiosResponse> {
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-directory`;
-        url += `?key=${this.apiKey}&json=true&name=${name}&is_branch=${isBranch}&recursive=${recursive}&json=true`;
+        url += `?key=${this.apiKey}&json=true&name=${name}&is_branch=${this.convertToNumber(isBranch)}&recursive=${recursive}`;
         if (!!branch) {
             url += `&branch=${branch}`;
         }
@@ -118,6 +131,14 @@ export class CrowdinClient {
         return axios.post(url, data, {
             headers: data.getHeaders()
         });
+    }
+
+    private normalizePath(fileName: string): string {
+        return fileName.replace(new RegExp('\\' + path.sep, 'g'), Constants.CROWDIN_PATH_SEPARATOR);
+    }
+
+    private convertToNumber(flag: boolean): number {
+        return flag ? 1 : 0;
     }
 
     private objectsExists(error: any, code: number): boolean {

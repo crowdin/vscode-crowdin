@@ -56,6 +56,14 @@ export class ConfigProvider {
         if (this.isEmpty(config.project_identifier)) {
             throw Error(`Project identifier is empty in ${this.workspace.name}`);
         }
+        config.files.forEach(file => {
+            if (this.isEmpty(file.source)) {
+                throw Error(`File source is empty in ${this.workspace.name}`);
+            }
+            if (this.isEmpty(file.translation)) {
+                throw Error(`File translation is empty in ${this.workspace.name}`);
+            }
+        });
     }
 
     private isEmpty(prop: string): boolean {
