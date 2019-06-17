@@ -10,7 +10,7 @@ suite("Plugin tree", function () {
     let config: ConfigModel;
     let workspace: vscode.WorkspaceFolder;
 
-    setup(() => {
+    suiteSetup(() => {
         config = {
             apiKey: 'key',
             projectId: 'id',
@@ -38,7 +38,7 @@ suite("Plugin tree", function () {
         };
     });
 
-    test("Building files matrix", async () => {
+    test('Build files matrix', async () => {
         const provider = new TestTmsProvider();
         const matrix = await provider.buildFilesMatrix(config, workspace);
         assert.equal(3, matrix.length);
@@ -53,7 +53,7 @@ suite("Plugin tree", function () {
         testMatrix(level3, '3.txt', 'folder2', config.files[0].translation, true);
     });
 
-    test("Building subtree", async () => {
+    test('Build subtree', async () => {
         const provider = new TestTmsProvider();
         const tree = await provider.buildSubTree(config, workspace);
         assert.equal(1, tree.length);

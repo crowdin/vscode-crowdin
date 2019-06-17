@@ -18,6 +18,11 @@ export class CrowdinClient {
      * @param unzipFolder folder where to unzip downloaded files
      */
     async download(unzipFolder: string): Promise<any> {
+        try {
+            await this.exportTranslations();
+        } catch (error) {
+            return Promise.reject(`Failed to export translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+        }
         const response = await this.downloadTranslations();
         const zip = new AdmZip(response.data);
         return new Promise((resolve, reject) => {
@@ -78,12 +83,7 @@ export class CrowdinClient {
         }
     }
 
-    private async downloadTranslations(): Promise<AxiosResponse> {
-        try {
-            await this.exportTranslations();
-        } catch (error) {
-            return Promise.reject(`Failed to export translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
-        }
+    async downloadTranslations(): Promise<AxiosResponse> {
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/download/all.zip?key=${this.apiKey}`;
         if (!!this.branch) {
             url += `&branch=${this.branch}`;
@@ -91,7 +91,7 @@ export class CrowdinClient {
         return axios.get(url, { responseType: 'arraybuffer' });
     }
 
-    private exportTranslations(): Promise<AxiosResponse> {
+    exportTranslations(): Promise<AxiosResponse> {
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/export?key=${this.apiKey}&json=true`;
         if (!!this.branch) {
             url += `&branch=${this.branch}`;
@@ -99,16 +99,16 @@ export class CrowdinClient {
         return axios.get(url);
     }
 
-    private addDirectory(name: string, isBranch = false, recursive = false, branch?: string): Promise<AxiosResponse> {
+    addDirectory(name: string, isBranch = false, recursive = false, branch?: string): Promise<AxiosResponse> {
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-directory`;
-        url += `?key=${this.apiKey}&json=true&name=${name}&is_branch=${this.convertToNumber(isBranch)}&recursive=${recursive}`;
+        url += `?key=${this.apiKey}&json=true&name=${name}&is_branch=${this.convertToNumber(isBranch)}&recursive=${this.convertToNumber(recursive)}`;
         if (!!branch) {
             url += `&branch=${branch}`;
         }
         return axios.post(url);
     }
 
-    private addFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
+    addFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-file?key=${this.apiKey}&json=true`;
         if (!!this.branch) {
             url += `&branch=${this.branch}`;
@@ -116,7 +116,7 @@ export class CrowdinClient {
         return this.uploadFile(fsPath, translation, file, url);
     }
 
-    private updateFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
+    updateFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
         let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/update-file?key=${this.apiKey}&json=true`;
         if (!!this.branch) {
             url += `&branch=${this.branch}`;

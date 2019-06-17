@@ -3,13 +3,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigProvider } from '../../config/configProvider';
 
-suite("Configuration file", function () {
+suite('Configuration file', function () {
 
     let workspaceName;
     let uri: vscode.Uri;
     let workspace: vscode.WorkspaceFolder;
 
-    setup(() => {
+    suiteSetup(() => {
         workspaceName = 'testWorkspace';
         uri = {
             scheme: '',
@@ -29,7 +29,7 @@ suite("Configuration file", function () {
         };
     });
 
-    test("Loading valid config", async () => {
+    test('Load valid config', async () => {
         const file = 'valid_crowdin.yaml';
         const provider = new TestConfigProvider(workspace, file);
         const config = await provider.load();
@@ -40,7 +40,7 @@ suite("Configuration file", function () {
         assert.equal(1, config.files.length);
     });
 
-    test("Loading invalid config", async () => {
+    test('Load invalid config', async () => {
         const file = 'invalid_crowdin.yaml';
         const provider = new TestConfigProvider(workspace, file);
         try {
