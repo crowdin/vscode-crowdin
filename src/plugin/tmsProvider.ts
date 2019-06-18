@@ -13,11 +13,10 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     private _onDidChangeTreeData: vscode.EventEmitter<TmsTreeItem | undefined> = new vscode.EventEmitter<TmsTreeItem | undefined>();
     readonly onDidChangeTreeData: vscode.Event<TmsTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-    private workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
     private rootTree: TmsTreeItem[] = [];
+    private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
 
     update(download: boolean = false): void {
-        this.workspaceFolders = vscode.workspace.workspaceFolders || [];
         if (!download) {
             this._onDidChangeTreeData.fire();
             return;
@@ -61,23 +60,25 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     }
 
     getChildren(element?: TmsTreeItem): Thenable<TmsTreeItem[]> {
-        if (this.workspaceFolders.length === 0) {
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showWarningMessage('Project workspace is empty');
             return Promise.resolve([]);
         }
         if (!element) {
             this.rootTree.length = 0;
-            return this.buildRootTree(this.workspaceFolders);
+            return this.buildRootTree(vscode.workspace.workspaceFolders);
         } else {
             return element.childs;
         }
     }
 
     private async buildRootTree(workspaceFolders: vscode.WorkspaceFolder[]): Promise<TmsTreeItem[]> {
+        let configFiles: string[] = [];
         const promises = workspaceFolders
             .map(async workspace => {
                 try {
                     const config = await new ConfigProvider(workspace).load();
+                    configFiles.push(config.configPath);
                     const rootTreeFolder = TmsTreeItem.buildRootFolder(workspace, config, this.buildSubTree(config, workspace));
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
@@ -88,6 +89,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 return null as unknown as TmsTreeItem;
             });
         const arr = await Promise.all(promises);
+        this.updateConfigWatchers(configFiles);
         return arr.filter(e => e !== null);
     }
 
@@ -144,5 +146,28 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         });
         await Promise.all(promises);
         return matrix;
+    }
+
+    private updateConfigWatchers(configFiles: string[]) {
+        let watchersToRemove: string[] = [];
+        let watchersToAdd = configFiles.filter(file => !this.configWatchers.has(file));
+        this.configWatchers.forEach((_watcher, file) => {
+            if (!configFiles.includes(file)) {
+                watchersToRemove.push(file);
+            }
+        });
+        watchersToRemove.forEach(file => {
+            const watcher = this.configWatchers.get(file);
+            if (!!watcher) {
+                watcher.dispose();
+            }
+            this.configWatchers.delete(file);
+        });
+        watchersToAdd.forEach(file => {
+            const wather = vscode.workspace.createFileSystemWatcher(file);
+            wather.onDidChange(() => this.update());
+            wather.onDidDelete(() => this.update());
+            this.configWatchers.set(file, wather);
+        });
     }
 }

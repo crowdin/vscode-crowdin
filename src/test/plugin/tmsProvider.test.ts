@@ -12,6 +12,7 @@ suite("Plugin tree", function () {
 
     suiteSetup(() => {
         config = {
+            configPath: '',
             apiKey: 'key',
             projectId: 'id',
             branch: 'master',

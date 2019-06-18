@@ -37,6 +37,7 @@ export class ConfigProvider {
         this.validate(config);
 
         return {
+            configPath: filePath,
             projectId: config.project_identifier,
             apiKey: config.api_key,
             branch: config.branch,
