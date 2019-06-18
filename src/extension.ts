@@ -13,4 +13,10 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('tmsFiles.download', () => tmsProvider.update(true));
 	vscode.commands.registerCommand('tmsFiles.saveAll', () => tmsProvider.save());
 	vscode.commands.registerCommand('tmsFiles.save', (item: TmsTreeItem) => item.save(true));
+
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+		if (e.affectsConfiguration(Constants.AUTO_REFRESH_PROPERTY)) {
+			tmsProvider.update();
+		}
+	}));
 }

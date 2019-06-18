@@ -14,6 +14,19 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": [
+			{
+				"title": "Crowdin Explorer",
+				"properties": {
+					"tms.autoRefresh": {
+						"type": "boolean",
+						"default": "true",
+						"description": "Enables or disables auto refresh after each change in Crowdin configuration file.",
+						"scope": "window"
+					}
+				}
+			}
+		],
 		"viewsContainers": {
 			"activitybar": [
 				{

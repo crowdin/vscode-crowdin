@@ -16,18 +16,9 @@ export class ConfigProvider {
     constructor(public readonly workspace: vscode.WorkspaceFolder) { }
 
     async load(): Promise<ConfigModel> {
-        let filePath = '';
-        let exists = false;
+        let filePath = await this.getFile();
 
-        for (let i = 0; i < this.fileNames().length; i++) {
-            filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
-            exists = await asyncFileExists(filePath);
-            if (exists) {
-                break;
-            }
-        }
-
-        if (!exists) {
+        if (!filePath || filePath === '') {
             throw new Error(`Could not find configuration file in ${this.workspace.name}`);
         }
 
@@ -44,6 +35,20 @@ export class ConfigProvider {
             basePath: config.base_path,
             files: config.files
         };
+    }
+
+    async getFile(): Promise<string> {
+        let filePath = '';
+        let exists = false;
+
+        for (let i = 0; i < this.fileNames().length; i++) {
+            filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
+            exists = await asyncFileExists(filePath);
+            if (exists) {
+                break;
+            }
+        }
+        return filePath;
     }
 
     protected fileNames(): string[] {

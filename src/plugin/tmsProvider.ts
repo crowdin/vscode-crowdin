@@ -5,6 +5,7 @@ import * as path from 'path';
 import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
 import { ConfigModel } from '../config/configModel';
+import { Constants } from '../constants';
 
 const asyncGlob = util.promisify(glob);
 
@@ -76,14 +77,19 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         let configFiles: string[] = [];
         const promises = workspaceFolders
             .map(async workspace => {
+                const configProvider =  new ConfigProvider(workspace);
                 try {
-                    const config = await new ConfigProvider(workspace).load();
+                    const config = await configProvider.load();
                     configFiles.push(config.configPath);
                     const rootTreeFolder = TmsTreeItem.buildRootFolder(workspace, config, this.buildSubTree(config, workspace));
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
                 }
                 catch (err) {
+                    const file = await configProvider.getFile();
+                    if (!!file && file !== '') {
+                        configFiles.push(file);
+                    }
                     vscode.window.showWarningMessage(err.message);
                 }
                 return null as unknown as TmsTreeItem;
@@ -149,6 +155,12 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     }
 
     private updateConfigWatchers(configFiles: string[]) {
+        const autoRefresh = vscode.workspace.getConfiguration().get<boolean>(Constants.AUTO_REFRESH_PROPERTY);
+        if (!autoRefresh) {
+            this.configWatchers.forEach((watcher, _file) => watcher.dispose());
+            this.configWatchers.clear();
+            return;
+        }
         let watchersToRemove: string[] = [];
         let watchersToAdd = configFiles.filter(file => !this.configWatchers.has(file));
         this.configWatchers.forEach((_watcher, file) => {
