@@ -3,10 +3,9 @@ import * as path from 'path';
 import { ConfigModel } from '../config/configModel';
 import { Constants } from '../constants';
 import { CrowdinClient } from '../client/crowdinClient';
+import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 
 export class TmsTreeItem extends vscode.TreeItem {
-
-    contextValue = 'tmsItem';
 
     constructor(
         readonly label: string,
@@ -14,11 +13,13 @@ export class TmsTreeItem extends vscode.TreeItem {
         readonly childs: Promise<TmsTreeItem[]>,
         readonly config: ConfigModel,
         readonly rootPath: string,
+        contextValue: TmsTreeItemContextValue,
         readonly command?: vscode.Command,
         readonly filePath?: string,
         readonly translation?: string
     ) {
         super(label, collapsibleState);
+        this.contextValue = contextValue;
         if (!!filePath) {
             this.resourceUri = vscode.Uri.file(filePath);
         } else {
@@ -85,24 +86,28 @@ export class TmsTreeItem extends vscode.TreeItem {
 
     static buildRootFolder(workspace: vscode.WorkspaceFolder, config: ConfigModel, childs: Promise<TmsTreeItem[]>) {
         return new TmsTreeItem(
-            workspace.name,
-            vscode.TreeItemCollapsibleState.Collapsed,
-            childs,
-            config,
-            workspace.uri.fsPath
+            workspace.name, vscode.TreeItemCollapsibleState.Collapsed,
+            childs, config, workspace.uri.fsPath, TmsTreeItemContextValue.ROOT
         );
     }
 
     static buildLeaf(workspace: vscode.WorkspaceFolder, label: string, filePath: string, translation: string, config: ConfigModel): TmsTreeItem {
-        return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]), config, workspace.uri.fsPath, {
+        const command: vscode.Command = {
             command: Constants.OPEN_TMS_FILE_COMMAND,
             title: '',
             arguments: [filePath],
-        }, filePath, translation);
+        };
+        return new TmsTreeItem(
+            label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]),
+            config, workspace.uri.fsPath, TmsTreeItemContextValue.FILE, command, filePath, translation
+        );
     }
 
     static buildFolder(workspace: vscode.WorkspaceFolder, label: string, childs: TmsTreeItem[], config: ConfigModel) {
-        return new TmsTreeItem(label, vscode.TreeItemCollapsibleState.Collapsed, Promise.resolve(childs), config, workspace.uri.fsPath);
+        return new TmsTreeItem(
+            label, vscode.TreeItemCollapsibleState.Collapsed,
+            Promise.resolve(childs), config, workspace.uri.fsPath, TmsTreeItemContextValue.FOLDER
+        );
     }
 
     static compare(e1: TmsTreeItem, e2: TmsTreeItem): number {

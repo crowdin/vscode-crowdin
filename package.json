@@ -72,6 +72,14 @@
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"
 				}
+			},
+			{
+				"command": "tmsFiles.edit",
+				"title": "Edit configuration",
+				"icon": {
+					"light": "resources/light/edit.svg",
+					"dark": "resources/dark/edit.svg"
+				}
 			}
 		],
 		"menus": {
@@ -94,7 +102,12 @@
 			"view/item/context": [
 				{
 					"command": "tmsFiles.save",
-					"when": "view == tmsFiles && viewItem == tmsItem",
+					"when": "view == tmsFiles",
+					"group": "inline"
+				},
+				{
+					"command": "tmsFiles.edit",
+					"when": "view == tmsFiles && viewItem == tmsRoot",
 					"group": "inline"
 				}
 			]
