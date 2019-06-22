@@ -16,14 +16,16 @@ export class TmsTreeItem extends vscode.TreeItem {
         readonly config: ConfigModel,
         readonly rootPath: string,
         contextValue: TmsTreeItemContextValue,
+        readonly fullPath: string,
+        readonly isLeaf: boolean = false,
         readonly command?: vscode.Command,
-        readonly filePath?: string,
         readonly translation?: string
     ) {
         super(label, collapsibleState);
         this.contextValue = contextValue;
-        if (!!filePath) {
-            this.resourceUri = vscode.Uri.file(filePath);
+        this.id = fullPath;
+        if (isLeaf) {
+            this.resourceUri = vscode.Uri.file(fullPath);
         } else {
             this.iconPath = {
                 light: path.join(__filename, '..', '..', '..', 'resources', 'light', 'folder.svg'),
@@ -49,7 +51,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         new ConfigProvider(this.workspace).validate(this.config);
         const arr = await this.childs;
         if (progress) {
-            let title = !!this.filePath && !!this.translation
+            let title = this.isLeaf
                 ? `Saving file ${this.label}`
                 : `Saving files in ${this.label}`;
             vscode.window.withProgress(
@@ -67,13 +69,13 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     private _save(arr: TmsTreeItem[]): Promise<any> {
-        if (!!this.filePath && !!this.translation) {
+        if (this.isLeaf) {
             let basePath = this.rootPath;
             if (!!this.config.basePath) {
                 basePath = path.join(basePath, this.config.basePath);
             }
-            const file = path.relative(basePath, this.filePath);
-            return this.client.upload(this.filePath, this.translation, file);
+            const file = path.relative(basePath, this.fullPath);
+            return this.client.upload(this.fullPath, this.translation || '', file);
         } else {
             let promises: Promise<any>[] = [];
             for (const item of arr) {
@@ -81,40 +83,5 @@ export class TmsTreeItem extends vscode.TreeItem {
             }
             return Promise.all(promises);
         }
-    }
-
-    static buildRootFolder(workspace: vscode.WorkspaceFolder, config: ConfigModel, childs: Promise<TmsTreeItem[]>) {
-        return new TmsTreeItem(
-            workspace, workspace.name, vscode.TreeItemCollapsibleState.Collapsed,
-            childs, config, workspace.uri.fsPath, TmsTreeItemContextValue.ROOT
-        );
-    }
-
-    static buildLeaf(workspace: vscode.WorkspaceFolder, label: string, filePath: string, translation: string, config: ConfigModel): TmsTreeItem {
-        const command: vscode.Command = {
-            command: Constants.OPEN_TMS_FILE_COMMAND,
-            title: '',
-            arguments: [filePath],
-        };
-        return new TmsTreeItem(
-            workspace, label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]),
-            config, workspace.uri.fsPath, TmsTreeItemContextValue.FILE, command, filePath, translation
-        );
-    }
-
-    static buildFolder(workspace: vscode.WorkspaceFolder, label: string, childs: TmsTreeItem[], config: ConfigModel) {
-        return new TmsTreeItem(
-            workspace, label, vscode.TreeItemCollapsibleState.Collapsed,
-            Promise.resolve(childs), config, workspace.uri.fsPath, TmsTreeItemContextValue.FOLDER
-        );
-    }
-
-    static compare(e1: TmsTreeItem, e2: TmsTreeItem): number {
-        if (e1.collapsibleState === e2.collapsibleState) {
-            if (e1.label < e2.label) { return -1; }
-            if (e1.label > e2.label) { return 1; }
-            return 0;
-        }
-        return e1.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed ? -1 : 1;
     }
 }

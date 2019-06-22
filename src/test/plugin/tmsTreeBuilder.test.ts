@@ -1,9 +1,8 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { TmsProvider } from '../../plugin/tmsProvider';
 import { ConfigModel } from '../../config/configModel';
-import { TmsTreeItem } from '../../plugin/tmsTreeItem';
+import { TmsTreeBuilder } from '../../plugin/tmsTreeBuilder';
 
 suite("Plugin tree", function () {
 
@@ -40,8 +39,7 @@ suite("Plugin tree", function () {
     });
 
     test('Build files matrix', async () => {
-        const provider = new TestTmsProvider();
-        const matrix = await provider.buildFilesMatrix(config, workspace);
+        const matrix = await TmsTreeBuilder.buildFilesMatrix(config, workspace);
         assert.equal(3, matrix.length);
         const level1 = matrix[0];
         const level2 = matrix[1];
@@ -55,8 +53,7 @@ suite("Plugin tree", function () {
     });
 
     test('Build subtree', async () => {
-        const provider = new TestTmsProvider();
-        const tree = await provider.buildSubTree(config, workspace);
+        const tree = await TmsTreeBuilder.buildSubTree(config, workspace);
         assert.equal(1, tree.length);
         const subtree1 = await tree[0].childs;
         assert.equal(1, subtree1.length);
@@ -75,15 +72,4 @@ function testMatrix(map: Map<string, [string | undefined, string, string, boolea
     assert.equal(parent1, parent);
     assert.equal(translation1, translation);
     assert.equal(isLeaf1, isLeaf);
-}
-
-class TestTmsProvider extends TmsProvider {
-
-    async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
-        return super.buildSubTree(config, workspace);
-    }
-
-    async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, boolean]>>> {
-        return super.buildFilesMatrix(config, workspace);
-    }
 }

@@ -1,13 +1,8 @@
 import * as vscode from 'vscode';
-import * as util from 'util';
-import * as glob from 'glob';
-import * as path from 'path';
 import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
-import { ConfigModel } from '../config/configModel';
 import { Constants } from '../constants';
-
-const asyncGlob = util.promisify(glob);
+import { TmsTreeBuilder } from './tmsTreeBuilder';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
@@ -76,7 +71,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 try {
                     const config = await configProvider.load();
                     configFiles.push(config.configPath);
-                    const rootTreeFolder = TmsTreeItem.buildRootFolder(workspace, config, this.buildSubTree(config, workspace));
+                    const rootTreeFolder = TmsTreeBuilder.buildRootFolder(workspace, config, TmsTreeBuilder.buildSubTree(config, workspace));
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
                 }
@@ -88,61 +83,6 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         const arr = await Promise.all(promises);
         this.updateConfigWatchers(configFiles);
         return arr.filter(e => e !== null);
-    }
-
-    protected async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
-        let matrix = await this.buildFilesMatrix(config, workspace);
-        let subtree: TmsTreeItem[] = [];
-        let childs: Map<string, TmsTreeItem[]> = new Map();
-        for (let i = matrix.length - 1; i >= 0; i--) {
-            const map = matrix[i];
-            let temp = new Map(childs);
-            childs.clear();
-            map.forEach(([parent, translation, fullPath, isLeaf], label) => {
-                let item;
-                if (isLeaf) {
-                    item = TmsTreeItem.buildLeaf(workspace, label, fullPath, translation, config);
-                } else {
-                    item = TmsTreeItem.buildFolder(workspace, label, (temp.get(label) || []).sort(TmsTreeItem.compare), config);
-                }
-                if (!!parent) {
-                    let childElements = childs.get(parent) || [];
-                    childElements.push(item);
-                    childs.set(parent, childElements);
-                } else {
-                    subtree.push(item);
-                }
-            });
-        }
-        return subtree.sort(TmsTreeItem.compare);
-    }
-
-    protected async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, string, boolean]>>> {
-        let matrix: Array<Map<string, [string | undefined, string, string, boolean]>> = [];
-        const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
-        const promises = config.files.map(async f => {
-            let foundFiles = await asyncGlob(f.source, { root: root });
-            foundFiles
-                .map(e => path.relative(workspace.uri.fsPath, e))
-                .forEach(filePath => {
-                    const fileParts = filePath.split(path.sep);
-                    let parentPart: string | undefined;
-                    for (let i = 0; i < fileParts.length; i++) {
-                        const part = fileParts[i];
-                        const isLeaf = i === fileParts.length - 1;
-                        if (matrix.length - 1 < i) {
-                            matrix[i] = new Map();
-                        }
-                        const fsPath = path.join(workspace.uri.fsPath, filePath);
-                        const relativePath = path.join(workspace.name, ...fileParts.slice(0, i + 1));
-                        matrix[i].set(part, [parentPart, f.translation, fsPath, isLeaf]);
-                        parentPart = part;
-                    }
-                });
-            return foundFiles;
-        });
-        await Promise.all(promises);
-        return matrix;
     }
 
     private updateConfigWatchers(configFiles: string[]) {
