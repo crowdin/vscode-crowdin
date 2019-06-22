@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('tmsFiles.refresh', () => tmsProvider.update());
 	vscode.commands.registerCommand('tmsFiles.download', () => tmsProvider.update(true));
 	vscode.commands.registerCommand('tmsFiles.saveAll', () => tmsProvider.save());
-	vscode.commands.registerCommand('tmsFiles.save', (item: TmsTreeItem) => item.save(true));
+	vscode.commands.registerCommand('tmsFiles.save', (item: TmsTreeItem) => tmsProvider.save(item));
 	vscode.commands.registerCommand('tmsFiles.edit', (item: TmsTreeItem) => vscode.commands.executeCommand('vscode.open', vscode.Uri.file(item.config.configPath)));
 
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {

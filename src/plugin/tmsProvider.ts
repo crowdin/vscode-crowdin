@@ -27,30 +27,25 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 location: vscode.ProgressLocation.Notification,
                 title: `Downloading files from server...`
             },
-            async () => {
-                const promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => {
-                    if (typeof e === 'string') {
-                        vscode.window.showErrorMessage(e);
-                    }
-                }));
-                await Promise.all(promises);
-                return this._onDidChangeTreeData.fire();
+            () => {
+                const promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => this.handleError(e)));
+                return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire());
             }
         );
     }
 
-    save(): void {
+    save(item?: TmsTreeItem): void {
+        if (!!item) {
+            item.save(true).catch(e => this.handleError(e));
+            return;
+        }
         vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
                 title: `Saving all files...`
             },
             () => {
-                const promises = this.rootTree.map(e => e.save().catch(e => {
-                    if (typeof e === 'string') {
-                        vscode.window.showErrorMessage(e);
-                    }
-                }));
+                const promises = this.rootTree.map(e => e.save().catch(e => this.handleError(e)));
                 return Promise.all(promises);
             }
         );
@@ -77,7 +72,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         let configFiles: string[] = [];
         const promises = workspaceFolders
             .map(async workspace => {
-                const configProvider =  new ConfigProvider(workspace);
+                const configProvider = new ConfigProvider(workspace);
                 try {
                     const config = await configProvider.load();
                     configFiles.push(config.configPath);
@@ -86,10 +81,6 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                     return rootTreeFolder;
                 }
                 catch (err) {
-                    const file = await configProvider.getFile();
-                    if (!!file && file !== '') {
-                        configFiles.push(file);
-                    }
                     vscode.window.showWarningMessage(err.message);
                 }
                 return null as unknown as TmsTreeItem;
@@ -181,5 +172,13 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             wather.onDidDelete(() => this.update());
             this.configWatchers.set(file, wather);
         });
+    }
+
+    private handleError(e: any) {
+        if (typeof e === 'string') {
+            vscode.window.showErrorMessage(e);
+        } else if (!!e.message) {
+            vscode.window.showErrorMessage(e.message);
+        }
     }
 }

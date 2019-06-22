@@ -25,8 +25,6 @@ export class ConfigProvider {
         const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
-        this.validate(config);
-
         return {
             configPath: filePath,
             projectId: config.project_identifier,
@@ -51,15 +49,11 @@ export class ConfigProvider {
         return filePath;
     }
 
-    protected fileNames(): string[] {
-        return ConfigProvider.crowdinFileNames;
-    }
-
-    private validate(config: PrivateConfigModel): void {
-        if (this.isEmpty(config.api_key)) {
+    validate(config: ConfigModel): void {
+        if (this.isEmpty(config.apiKey)) {
             throw Error(`Api key is empty in ${this.workspace.name}`);
         }
-        if (this.isEmpty(config.project_identifier)) {
+        if (this.isEmpty(config.projectId)) {
             throw Error(`Project identifier is empty in ${this.workspace.name}`);
         }
         config.files.forEach(file => {
@@ -70,6 +64,10 @@ export class ConfigProvider {
                 throw Error(`File translation is empty in ${this.workspace.name}`);
             }
         });
+    }
+
+    protected fileNames(): string[] {
+        return ConfigProvider.crowdinFileNames;
     }
 
     private isEmpty(prop: string): boolean {
