@@ -1,9 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import * as AdmZip from 'adm-zip';
 import * as FormData from 'form-data';
 import { Constants } from '../constants';
+import { AxisProvider } from './axiosProvider';
+
+const axios = new AxisProvider().axios;
 
 export class CrowdinClient {
 

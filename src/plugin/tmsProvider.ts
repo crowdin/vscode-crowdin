@@ -81,7 +81,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                     return rootTreeFolder;
                 }
                 catch (err) {
-                    vscode.window.showWarningMessage(err.message);
+                    this.handleError(err);
                 }
                 return null as unknown as TmsTreeItem;
             });

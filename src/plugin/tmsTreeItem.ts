@@ -66,7 +66,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         }
     }
 
-    private async _save(arr: TmsTreeItem[]): Promise<any> {
+    private _save(arr: TmsTreeItem[]): Promise<any> {
         if (!!this.filePath && !!this.translation) {
             let basePath = this.rootPath;
             if (!!this.config.basePath) {
@@ -75,16 +75,11 @@ export class TmsTreeItem extends vscode.TreeItem {
             const file = path.relative(basePath, this.filePath);
             return this.client.upload(this.filePath, this.translation, file);
         } else {
-            //Uncomment it when back end will be fixed
-            // let promises: Promise<any>[] = [];
-            // for (const item of arr) {
-            //     promises.push(item.save());
-            // }
-            // return Promise.all(promises);
-            //!NOTE do save in sequantial manner as it might create multiple branches on back end
+            let promises: Promise<any>[] = [];
             for (const item of arr) {
-                await item.save();
+                promises.push(item.save());
             }
+            return Promise.all(promises);
         }
     }
 
