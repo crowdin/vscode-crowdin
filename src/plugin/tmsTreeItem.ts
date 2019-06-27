@@ -52,8 +52,8 @@ export class TmsTreeItem extends vscode.TreeItem {
         const arr = await this.childs;
         if (progress) {
             let title = this.isLeaf
-                ? `Saving file ${this.label}`
-                : `Saving files in ${this.label}`;
+                ? `Uploading file ${this.label}`
+                : `Uploading files in ${this.label}`;
             vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,

@@ -12,7 +12,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     private rootTree: TmsTreeItem[] = [];
     private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
 
-    update(download: boolean = false): void {
+    update(download: boolean = false, folder?: TmsTreeItem): void {
         if (!download) {
             this._onDidChangeTreeData.fire();
             return;
@@ -20,10 +20,15 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
-                title: `Downloading files from server...`
+                title: `Downloading translations...`
             },
             () => {
-                const promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => this.handleError(e)));
+                let promises: Promise<void>[];
+                if (!!folder) {
+                    promises = [folder.update().catch(e => this.handleError(e))];
+                } else {
+                    promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => this.handleError(e)));
+                }
                 return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire());
             }
         );
@@ -37,7 +42,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
-                title: `Saving all files...`
+                title: `Uploading all files...`
             },
             () => {
                 const promises = this.rootTree.map(e => e.save().catch(e => this.handleError(e)));

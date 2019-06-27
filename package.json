@@ -54,12 +54,24 @@
 				}
 			},
 			{
+				"command": "tmsFiles.downloadAll",
+				"title": "Download translations",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
 				"command": "tmsFiles.download",
-				"title": "Download files"
+				"title": "Download translations",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
 			},
 			{
 				"command": "tmsFiles.saveAll",
-				"title": "Upload All",
+				"title": "Upload translations",
 				"icon": {
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"
@@ -67,7 +79,7 @@
 			},
 			{
 				"command": "tmsFiles.save",
-				"title": "Upload",
+				"title": "Upload translations",
 				"icon": {
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"
@@ -87,28 +99,34 @@
 				{
 					"command": "tmsFiles.refresh",
 					"when": "view == tmsFiles",
-					"group": "navigation"
-				},
-				{
-					"command": "tmsFiles.download",
-					"when": "view == tmsFiles"
+					"group": "navigation@0"
 				},
 				{
 					"command": "tmsFiles.saveAll",
 					"when": "view == tmsFiles",
-					"group": "navigation"
+					"group": "navigation@1"
+				},
+				{
+					"command": "tmsFiles.downloadAll",
+					"when": "view == tmsFiles",
+					"group": "navigation@2"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "tmsFiles.save",
-					"when": "view == tmsFiles",
-					"group": "inline"
-				},
-				{
 					"command": "tmsFiles.edit",
 					"when": "view == tmsFiles && viewItem == tmsRoot",
-					"group": "inline"
+					"group": "inline@0"
+				},
+				{
+					"command": "tmsFiles.save",
+					"when": "view == tmsFiles",
+					"group": "inline@1"
+				},
+				{
+					"command": "tmsFiles.download",
+					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"group": "inline@2"
 				}
 			]
 		}

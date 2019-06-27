@@ -1,4 +1,3 @@
-
 export enum TmsTreeItemContextValue {
     ROOT = 'tmsRoot',
     FOLDER = 'tmsFolder',
