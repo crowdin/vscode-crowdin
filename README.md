@@ -1,65 +1,59 @@
-# vscode-crowdin README
+# Crowdin Visual Studio Code Plugin
 
-This is the README for your extension "vscode-crowdin". After writing up a brief description, we recommend including the following sections.
+The plugin lets you integrate your project with Crowdin. It enables you to upload new translations to the system instantly as well as download translations from your Crowdin project.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+New component will be introduced in Activity Bar called Crowdin Explorer.
+Plugin will scan each workspace for Crowdin specific configuration file and will build tree with translations.
+In Crowdin Explorer you can upload those translations into Crowdin or download them from it.
+![Plugin](resources/plugin.png)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+In order to work with this plugin in workspace there should be Crowdin configuration file. It should be called either `crowdin.yml` or `crowdin.yaml`.
+
+Here is an example configuration file:
+
+```json
+"project_identifier" : "projectId"
+"api_key" : "apiKey"
+"base_path" : "folder" // optional
+"branch" : "master" // optional
+
+"files": [
+  {
+    "source" : "/locale/en/folder1/[0-2].txt",
+    "translation" : "/locale/%two_letters_code%/folder1/%original_file_name%"
+  },
+  {
+    "source" : "/locale/en/folder2/[0-2].txt",
+    "translation" : "/locale/%two_letters_code%/folder2/%original_file_name%"
+  }
+]
+```
+
+Properties `project_identifier`, `api_key` can be found in your project settings page.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `tms.autoRefresh`: enable/disable auto refresh of translations tree after each change in Crowdin configuration file
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+At the moment plugin is not support all possible properties in configuration file (see [Configuration file](https://support.crowdin.com/configuration-file/)). All properties which are supported by this plugin are listed in the example above (see Requirements section).
 
-## Release Notes
+## Contributing
 
-Users appreciate release notes as you update your extension.
+1. Fork it
+2. Create your feature branch (git checkout -b my-new-feature)
+3. Commit your changes (git commit -am 'Added some feature')
+4. Push to the branch (git push origin my-new-feature)
+5. Create new Pull Request
 
-### 1.0.0
+## Seeking Assistance
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Need help working with Crowdin Visual Studio Code Plugin or have any questions?
+[Contact Customer Success Service](https://crowdin.com/contacts).
