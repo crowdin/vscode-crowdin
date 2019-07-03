@@ -4,6 +4,7 @@ import { ConfigModel } from '../config/configModel';
 import { CrowdinClient } from '../client/crowdinClient';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 import { ConfigProvider } from '../config/configProvider';
+import { Constants } from '../constants';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
@@ -26,12 +27,10 @@ export class TmsTreeItem extends vscode.TreeItem {
         if (isLeaf) {
             this.resourceUri = vscode.Uri.file(fullPath);
         } else {
-            //TODO fix
-            // this.iconPath = {
-            //     light: path.join('resources', 'light', 'folder.svg'),
-            //     dark: path.join('resources', 'dark', 'folder.svg')
-            // };
-            this.resourceUri = vscode.Uri.file(fullPath);
+            this.iconPath = {
+                light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
+                dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg'))
+            };
         }
     }
 

@@ -4,6 +4,8 @@ import { TmsTreeItem } from './plugin/tmsTreeItem';
 import { Constants } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
+	Constants.initialize(context);
+
 	const tmsProvider = new TmsProvider();
 
 	vscode.window.registerTreeDataProvider('tmsFiles', tmsProvider);

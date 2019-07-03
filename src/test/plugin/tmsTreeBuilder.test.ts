@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigModel } from '../../config/configModel';
 import { TmsTreeBuilder } from '../../plugin/tmsTreeBuilder';
+import { Constants } from '../../constants';
 
 suite("Plugin tree", function () {
 
@@ -36,6 +37,7 @@ suite("Plugin tree", function () {
                 with: () => null as unknown as vscode.Uri
             }
         };
+        Constants.initialize(new TestContext());
     });
 
     test('Build files matrix', async () => {
@@ -72,4 +74,30 @@ function testMatrix(map: Map<string, [string | undefined, string, string, boolea
     assert.equal(parent1, parent);
     assert.equal(translation1, translation);
     assert.equal(isLeaf1, isLeaf);
+}
+
+class TestContext implements vscode.ExtensionContext {
+    subscriptions: { dispose(): any; }[] = [];
+    workspaceState: vscode.Memento = new TestMemento();
+    globalState: vscode.Memento = new TestMemento();
+    extensionPath: string = '';
+    asAbsolutePath(relativePath: string): string {
+        return '';
+    }
+    storagePath: string | undefined;
+    globalStoragePath: string = '';
+    logPath: string = '';
+}
+
+class TestMemento implements vscode.Memento {
+    get<T>(key: string): T | undefined;
+    get<T>(key: string, defaultValue: T): T;
+    get(key: any, defaultValue?: any) {
+        throw new Error('Method not implemented.');
+    }
+    update(key: string, value: any): Thenable<void> {
+        throw new Error('Method not implemented.');
+    }
+
+
 }
