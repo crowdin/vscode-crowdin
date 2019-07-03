@@ -4,6 +4,8 @@ node_modules
 out/
 src/
 .gitignore
+.git
+.idea
 **/tsconfig.json
 **/tslint.json
 **/*.map
