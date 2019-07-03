@@ -1,0 +1,175 @@
+{
+	"name": "vscode-crowdin",
+	"displayName": "Crowdin",
+	"description": "Crowdin Explorer for Visual Studio Code",
+	"publisher": "Crowdin",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.35.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"keywords": [
+		"Crowdin",
+		"Localization"
+	],
+	"activationEvents": [
+		"onView:tmsFiles"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"configuration": [
+			{
+				"title": "Crowdin Explorer",
+				"properties": {
+					"tms.autoRefresh": {
+						"type": "boolean",
+						"default": "true",
+						"description": "Enables or disables auto refresh after each change in Crowdin configuration file.",
+						"scope": "window"
+					}
+				}
+			}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "crowdin-explorer",
+					"title": "Crowdin Explorer",
+					"icon": "resources/icon.svg"
+				}
+			]
+		},
+		"views": {
+			"crowdin-explorer": [
+				{
+					"id": "tmsFiles",
+					"name": "TMS Files"
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "tmsFiles.refresh",
+				"title": "Refresh folders",
+				"icon": {
+					"light": "resources/light/update.svg",
+					"dark": "resources/dark/update.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.downloadAll",
+				"title": "Download translations",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.download",
+				"title": "Download translations",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.saveAll",
+				"title": "Upload translations",
+				"icon": {
+					"light": "resources/light/save.svg",
+					"dark": "resources/dark/save.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.save",
+				"title": "Upload translations",
+				"icon": {
+					"light": "resources/light/save.svg",
+					"dark": "resources/dark/save.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.edit",
+				"title": "Edit configuration",
+				"icon": {
+					"light": "resources/light/edit.svg",
+					"dark": "resources/dark/edit.svg"
+				}
+			}
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "tmsFiles.refresh",
+					"when": "view == tmsFiles",
+					"group": "navigation@0"
+				},
+				{
+					"command": "tmsFiles.saveAll",
+					"when": "view == tmsFiles",
+					"group": "navigation@1"
+				},
+				{
+					"command": "tmsFiles.downloadAll",
+					"when": "view == tmsFiles",
+					"group": "navigation@2"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "tmsFiles.edit",
+					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"group": "inline@0"
+				},
+				{
+					"command": "tmsFiles.save",
+					"when": "view == tmsFiles",
+					"group": "inline@1"
+				},
+				{
+					"command": "tmsFiles.download",
+					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"group": "inline@2"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "webpack --mode production",
+		"compile": "webpack --mode none",
+		"watch": "webpack --mode none --watch",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test-compile": "tsc -p ./",
+		"test": "node ./node_modules/vscode/bin/test"
+	},
+	"icon": "icon.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/crowdin/vscode-crowdin.git"
+	},
+	"devDependencies": {
+		"@types/adm-zip": "^0.4.32",
+		"@types/form-data": "^2.2.1",
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^2.2.42",
+		"@types/nock": "^10.0.3",
+		"@types/node": "^10.14.10",
+		"@types/yaml": "^1.0.2",
+		"ts-loader": "^6.0.1",
+		"tslint": "^5.12.1",
+		"typescript": "^3.5.2",
+		"vscode": "^1.1.35",
+		"webpack": "^4.35.2",
+		"webpack-cli": "^3.3.5"
+	},
+	"dependencies": {
+		"adm-zip": "^0.4.13",
+		"axios": "^0.19.0",
+		"form-data": "^2.3.3",
+		"glob": "^7.1.4",
+		"nock": "^10.0.6",
+		"yaml": "^1.6.0"
+	}
+}

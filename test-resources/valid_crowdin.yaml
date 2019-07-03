@@ -1,0 +1,11 @@
+"project_identifier" : "123"
+"api_key" : "456"
+"branch" : "master"
+"base_path" : "/home"
+
+"files": [
+  {
+    "source" : "/**/[^0-2].txt",
+    "translation" : "/**/%two_letters_code%_%original_file_name%"
+  }
+]
