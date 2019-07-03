@@ -7,6 +7,7 @@ The plugin lets you integrate your project with Crowdin. It enables you to uploa
 New component will be introduced in Activity Bar called Crowdin Explorer.
 Plugin will scan each workspace for Crowdin specific configuration file and will build tree with translations.
 In Crowdin Explorer you can upload those translations into Crowdin or download them from it.
+
 ![Plugin](resources/plugin.png)
 
 ## Requirements
