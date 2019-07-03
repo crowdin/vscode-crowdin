@@ -2,9 +2,10 @@
 	"name": "vscode-crowdin",
 	"displayName": "Crowdin",
 	"description": "Crowdin Explorer for Visual Studio Code",
+	"publisher": "Crowdin",
 	"version": "0.0.1",
 	"engines": {
-		"vscode": "^1.34.0"
+		"vscode": "^1.35.0"
 	},
 	"categories": [
 		"Other"
@@ -12,7 +13,7 @@
 	"activationEvents": [
 		"onView:tmsFiles"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"configuration": [
 			{
@@ -132,25 +133,34 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
+		"vscode:prepublish": "tsc -p ./ && webpack --mode production",
+		"precompile": "tsc -p ./",
+		"compile": "webpack --mode none",
+		"prewatch": "tsc -p ./ --watch",
+		"watch": "webpack --mode none --watch",
 		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "npm run compile && node ./node_modules/vscode/bin/test"
+		"pretest": "tsc -p ./",
+		"test": "node ./node_modules/vscode/bin/test"
 	},
 	"icon": "icon.png",
-	"repository": "github:crowdin/vscode-crowdin",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/crowdin/vscode-crowdin.git"
+	},
 	"devDependencies": {
 		"@types/adm-zip": "^0.4.32",
 		"@types/form-data": "^2.2.1",
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^2.2.42",
 		"@types/nock": "^10.0.3",
-		"@types/node": "^10.12.21",
+		"@types/node": "^10.14.10",
+		"@types/vscode": "^1.35.0",
 		"@types/yaml": "^1.0.2",
 		"tslint": "^5.12.1",
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28"
+		"typescript": "^3.5.2",
+		"vscode": "^1.1.35",
+		"webpack": "^4.35.2",
+		"webpack-cli": "^3.3.5"
 	},
 	"dependencies": {
 		"adm-zip": "^0.4.13",
