@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigModel } from '../config/configModel';
-import { Constants } from '../constants';
 import { CrowdinClient } from '../client/crowdinClient';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 import { ConfigProvider } from '../config/configProvider';
