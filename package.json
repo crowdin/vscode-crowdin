@@ -3,7 +3,7 @@
 	"displayName": "Crowdin",
 	"description": "Crowdin Explorer for Visual Studio Code",
 	"publisher": "Crowdin",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.35.0"
 	},
@@ -12,7 +12,12 @@
 	],
 	"keywords": [
 		"Crowdin",
-		"Localization"
+		"Localization",
+		"Internationalization",
+		"i18n",
+		"Translation",
+		"Translate",
+		"Multi-language"
 	],
 	"activationEvents": [
 		"onView:tmsFiles"
