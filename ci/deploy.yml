@@ -50,4 +50,4 @@ stages:
           - script: |
               vsce publish -p $(PERSONAL_ACCESS_TOKEN)
             displayName: 'vsce publish'
-            condition: succeeded()
+            condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
