@@ -2,6 +2,8 @@
 
 Integrate your Visual Studio projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project and downloading translations.
 
+[Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
+
 ## Features
 
 New component will be introduced in Activity Bar called *Crowdin Explorer*.
