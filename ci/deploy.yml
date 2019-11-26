@@ -48,6 +48,7 @@ stages:
             condition: failed()
 
           - script: |
+              vsce login Crowdin
               vsce publish -p $(PERSONAL_ACCESS_TOKEN)
             displayName: 'vsce publish'
             condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
