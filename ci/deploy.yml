@@ -1,0 +1,53 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  branches:
+    include:
+      - refs/tags/*
+    exclude:
+      - refs/heads/*
+
+stages:
+  - stage: Tests
+    jobs:
+      - job:
+        steps:
+          - script: |
+              echo "tests TODO"
+            displayName: "Running tests"
+
+  - stage: Publish
+    dependsOn: Tests
+    jobs:
+      - job:
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '10.x'
+            displayName: 'Install Node.js'
+
+          - script: |
+              npm install
+            displayName: 'Command `npm install`'
+
+          - script: |
+              sudo npm install -g vsce
+              vsce package
+            displayName: 'Create VSIX'
+
+          - script: |
+              npm run vscode:prepublish
+            displayName: 'Command `npm run vscode:prepublish`'
+
+          - script: |
+              cat /home/vsts/.npm/_logs/*.log
+            displayName: 'Echo npm error logs on failure'
+            condition: failed()
+
+          - script: |
+              vsce publish -p $(PERSONAL_ACCESS_TOKEN)
+            displayName: 'vsce publish'
+            condition: succeeded()
