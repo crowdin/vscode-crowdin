@@ -84,7 +84,7 @@ Need help working with Crowdin Visual Studio Code Plugin or have any questions?
 
 ## License
 <pre>
-Copyright © 2019 Crowdin
+Copyright © 2020 Crowdin
 
 The Crowdin Visual Studio Code Plugin is licensed under the MIT License.
 See the LICENSE file distributed with this work for additional
