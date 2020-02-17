@@ -4,7 +4,7 @@
 [![Visual Studio Marketplace Rating (Stars)](https://img.shields.io/visual-studio-marketplace/stars/Crowdin.vscode-crowdin?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin&ssr=false#review-details)
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/Crowdin.vscode-crowdin?cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 
-Integrate your Visual Studio projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project and downloading translations.
+Integrate your Visual Studio Code projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project and downloading translations.
 
 [Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 
@@ -18,7 +18,7 @@ In *Crowdin Explorer* you can upload those translations into Crowdin or download
 
 ## Configuration
 
-To work with plugin in the Visual Studio workspace, there should be Crowdin configuration file called either `crowdin.yml` or `crowdin.yaml`.
+To work with plugin in the Visual Studio Code workspace, there should be Crowdin configuration file called either `crowdin.yml` or `crowdin.yaml`.
 
 Configuration file example:
 
@@ -44,7 +44,7 @@ Properties `project_identifier`, `api_key` can be found in your project settings
 
 ## Setup
 
-1. Prepare `crowdin.yml` or `crowdin.yaml` configuration file and add it to the needed workspace in Visual Studio.
+1. Prepare `crowdin.yml` or `crowdin.yaml` configuration file and add it to the needed workspace in Visual Studio Code.
 2. Install *Crowdin* plugin using one of the following methods:
     * open VS Code Extensions (**Ctrl+Shift+X**), search for *Crowdin* and click **Install**
 
@@ -54,7 +54,7 @@ Properties `project_identifier`, `api_key` can be found in your project settings
         ```
         ext install Crowdin.vscode-crowdin
         ```
-3. *Crowdin* plugin scans each Visual Studio workspace to find Crowdin configuration file (*crowdin.yml* or *crowdin.yaml*). It automatically builds the tree with source files in *Crowdin Explorer* component available on your Activity Bar.
+3. *Crowdin* plugin scans each Visual Studio Code workspace to find Crowdin configuration file (*crowdin.yml* or *crowdin.yaml*). It automatically builds the tree with source files in *Crowdin Explorer* component available on your Activity Bar.
 4. Use upward and downward arrows in *Crowdin Explorer* component to upload source files to Crowdin and download translations correspondingly.
 
 ## Extension Settings
