@@ -25,13 +25,17 @@ export class ConfigProvider {
         const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
+        if (isNaN(Number(config.project_identifier))) {
+            throw new Error(`Invalid project id in ${this.workspace.name}`);
+        }
         return {
             configPath: filePath,
-            projectId: config.project_identifier,
+            projectId: parseInt(config.project_identifier),
             apiKey: config.api_key,
             branch: config.branch,
             basePath: config.base_path,
-            files: config.files
+            files: config.files,
+            organization: config.organization
         };
     }
 
@@ -50,7 +54,7 @@ export class ConfigProvider {
         if (this.isEmpty(config.apiKey)) {
             throw Error(`Api key is empty in ${this.workspace.name}`);
         }
-        if (this.isEmpty(config.projectId)) {
+        if (!config.projectId || config.projectId === 0) {
             throw Error(`Project identifier is empty in ${this.workspace.name}`);
         }
         config.files.forEach(file => {
@@ -74,6 +78,7 @@ export class ConfigProvider {
 
 interface PrivateConfigModel {
     project_identifier: string;
+    organization?: string;
     api_key: string;
     branch?: string;
     base_path?: string;

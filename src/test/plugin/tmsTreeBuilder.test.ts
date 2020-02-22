@@ -14,7 +14,7 @@ suite("Plugin tree", function () {
         config = {
             configPath: '',
             apiKey: 'key',
-            projectId: 'id',
+            projectId: 5,
             branch: 'master',
             basePath: 'folder1/folder2',
             files: [{

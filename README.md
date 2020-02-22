@@ -27,6 +27,7 @@ Configuration file example:
 "api_key": "apiKey"
 "base_path": "folder" // optional
 "branch": "master" // optional
+"organization": "organizationName" // optional
 
 "files": [
   {
