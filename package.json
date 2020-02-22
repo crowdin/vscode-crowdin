@@ -82,7 +82,7 @@
 			},
 			{
 				"command": "tmsFiles.saveAll",
-				"title": "Upload translations",
+				"title": "Upload source files",
 				"icon": {
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"
@@ -90,7 +90,7 @@
 			},
 			{
 				"command": "tmsFiles.save",
-				"title": "Upload translations",
+				"title": "Upload source files",
 				"icon": {
 					"light": "resources/light/save.svg",
 					"dark": "resources/dark/save.svg"

@@ -11,8 +11,8 @@ Integrate your Visual Studio Code projects with Crowdin to optimize the localiza
 ## Features
 
 New component will be introduced in Activity Bar called *Crowdin Explorer*.
-Plugin will scan each workspace for Crowdin specific configuration file and will build tree with translations.
-In *Crowdin Explorer* you can upload those translations into Crowdin or download them from it.
+Plugin will scan each workspace for Crowdin specific configuration file and will build tree with source files.
+In *Crowdin Explorer* you can upload those files into Crowdin and download translations.
 
 ![Plugin](resources/plugin.png)
 
@@ -62,7 +62,7 @@ Properties `project_identifier`, `api_key` can be found in your project settings
 
 This extension contributes the following settings:
 
-* `tms.autoRefresh`: enable/disable auto refresh of translations tree after each change in Crowdin configuration file
+* `tms.autoRefresh`: enable/disable auto refresh of files tree after each change in Crowdin configuration file
 
 ## Known Issues
 
