@@ -36,17 +36,14 @@ export class ConfigProvider {
     }
 
     async getFile(): Promise<string> {
-        let filePath = '';
-        let exists = false;
-
         for (let i = 0; i < this.fileNames().length; i++) {
-            filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
-            exists = await asyncFileExists(filePath);
+            const filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
+            const exists = await asyncFileExists(filePath);
             if (exists) {
-                break;
+                return filePath;
             }
         }
-        return filePath;
+        return undefined as unknown as string;
     }
 
     validate(config: ConfigModel): void {
