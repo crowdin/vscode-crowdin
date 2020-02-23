@@ -143,12 +143,11 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "webpack --mode production",
-		"compile": "webpack --mode none",
-		"watch": "webpack --mode none --watch",
 		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test-compile": "tsc -p ./",
-		"test": "node ./node_modules/vscode/bin/test"
+		"vscode:prepublish": "webpack --mode production",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"test-compile": "tsc -p ./"
 	},
 	"icon": "icon.png",
 	"repository": {
@@ -165,8 +164,8 @@
 		"tslint": "^5.12.1",
 		"typescript": "^3.5.2",
 		"vscode": "^1.1.35",
-		"webpack": "^4.35.2",
-		"webpack-cli": "^3.3.5"
+		"webpack": "^4.38.0",
+		"webpack-cli": "^3.3.6"
 	},
 	"dependencies": {
 		"@crowdin/crowdin-api-client": "^1.5.7",
