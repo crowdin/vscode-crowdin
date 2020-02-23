@@ -32,8 +32,13 @@ export class ConfigProvider {
         if (!!config.base_url) {
             if ((config.base_url.endsWith('.crowdin.com') || config.base_url.endsWith('.crowdin.com/'))
                 && config.base_url.startsWith('https://')) {
+                //enterprise
                 organization = config.base_url.substring(8).split('.crowdin.com')[0];
+            } else if (config.base_url.startsWith('https://crowdin.com')) {
+                //standard
+                organization = undefined;
             } else {
+                //unknown url
                 throw new Error(`Invalid base url in ${this.workspace.name}`);
             }
         }

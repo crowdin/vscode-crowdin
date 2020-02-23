@@ -27,7 +27,7 @@ Configuration file example:
 "api_key": "apiKey"
 "base_path": "folder" // optional
 "branch": "master" // optional
-"base_url": "https://{organization-name}.crowdin.com" // optional
+"base_url": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)
 
 "files": [
   {
