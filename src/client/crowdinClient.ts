@@ -125,7 +125,6 @@ export class CrowdinClient {
                 await this.crowdin.sourceFilesApi.updateOrRestoreFile(this.projectId, foundFile.data.id, {
                     storageId: storageId,
                     exportOptions: {
-                        //TODO probably export pattern should be updated same as in java cli
                         exportPattern: exportPattern
                     }
                 });
@@ -136,7 +135,6 @@ export class CrowdinClient {
                     name: fileName,
                     storageId: storageId,
                     exportOptions: {
-                        //TODO probably export pattern should be updated same as in java cli
                         exportPattern: exportPattern
                     }
                 });
