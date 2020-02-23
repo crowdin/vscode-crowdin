@@ -28,6 +28,15 @@ export class ConfigProvider {
         if (isNaN(Number(config.project_identifier))) {
             throw new Error(`Invalid project id in ${this.workspace.name}`);
         }
+        let organization: string | undefined;
+        if (!!config.base_url) {
+            if ((config.base_url.endsWith('.crowdin.com') || config.base_url.endsWith('.crowdin.com/'))
+                && config.base_url.startsWith('https://')) {
+                organization = config.base_url.substring(8).split('.crowdin.com')[0];
+            } else {
+                throw new Error(`Invalid base url in ${this.workspace.name}`);
+            }
+        }
         return {
             configPath: filePath,
             projectId: parseInt(config.project_identifier),
@@ -35,7 +44,7 @@ export class ConfigProvider {
             branch: config.branch,
             basePath: config.base_path,
             files: config.files,
-            organization: config.organization
+            organization: organization
         };
     }
 
@@ -78,7 +87,7 @@ export class ConfigProvider {
 
 interface PrivateConfigModel {
     project_identifier: string;
-    organization?: string;
+    base_url?: string;
     api_key: string;
     branch?: string;
     base_path?: string;

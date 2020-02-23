@@ -27,16 +27,12 @@ Configuration file example:
 "api_key": "apiKey"
 "base_path": "folder" // optional
 "branch": "master" // optional
-"organization": "organizationName" // optional
+"base_url": "https://{organization-name}.crowdin.com" // optional
 
 "files": [
   {
-    "source": "/locale/en/folder1/[0-2].txt",
-    "translation": "/locale/%two_letters_code%/folder1/%original_file_name%"
-  },
-  {
-    "source": "/locale/en/folder2/[0-2].txt",
-    "translation": "/locale/%two_letters_code%/folder2/%original_file_name%"
+    "source": "/sources/**/*.xml",
+    "translation": "/translations/%two_letters_code%/%original_file_name%"
   }
 ]
 ```

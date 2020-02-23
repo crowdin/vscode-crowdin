@@ -2,6 +2,7 @@
 "api_key" : "456"
 "branch" : "master"
 "base_path" : "/home"
+"base_url" : "https://testOrg.crowdin.com"
 
 "files": [
   {
