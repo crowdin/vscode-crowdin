@@ -157,10 +157,8 @@
 	},
 	"devDependencies": {
 		"@types/adm-zip": "^0.4.32",
-		"@types/form-data": "^2.2.1",
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^2.2.42",
-		"@types/nock": "^10.0.3",
 		"@types/node": "^10.14.10",
 		"@types/yaml": "^1.0.2",
 		"ts-loader": "^6.0.1",
@@ -172,9 +170,10 @@
 	},
 	"dependencies": {
 		"@crowdin/crowdin-api-client": "^1.5.7",
-		"adm-zip": "^0.4.13",
+		"adm-zip": "^0.4.14",
 		"axios": "^0.19.2",
 		"glob": "^7.1.4",
+		"original-fs": "^1.1.0",
 		"yaml": "^1.6.0"
 	}
 }

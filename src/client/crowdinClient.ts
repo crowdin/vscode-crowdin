@@ -69,27 +69,98 @@ export class CrowdinClient {
      * @param file file path in crowdin system
      */
     async upload(fsPath: string, exportPattern: string, file: string): Promise<any> {
+        let branchId: number | undefined;
+
         if (!!this.branch) {
-            //TODO get or create branch
             try {
-                //create branch if not exists
+                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
+                const foundBranch = branches.data.find(e => e.data.name === this.branch);
+                if (!!foundBranch) {
+                    branchId = foundBranch.data.id;
+                } else {
+                    const res = await this.crowdin.sourceFilesApi.createBranch(this.projectId, {
+                        name: this.branch
+                    });
+                    branchId = res.data.id;
+                }
             } catch (error) {
                 return Promise.reject(`Failed to create branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
             }
         }
+
+        let parentId: number | undefined;
         //check if file has parent folders
         if (path.basename(file) !== file) {
-            //TODO create directories
-            const folders = this.normalizePath(path.dirname(file)).split(Constants.CROWDIN_PATH_SEPARATOR);
+            const folders = this.normalizePath(path.dirname(file))
+                .split(Constants.CROWDIN_PATH_SEPARATOR)
+                .filter(f => f !== '');
             try {
-                //TODO create file folders if not exists
+                for (let i = 0; i < folders.length; i++) {
+                    const folder = folders[i];
+                    try {
+                        const resp = await this.crowdin.sourceFilesApi.createDirectory(this.projectId, {
+                            branchId: branchId,
+                            directoryId: parentId,
+                            name: folder
+                        });
+                        parentId = resp.data.id;
+                    } catch (error) {
+                        parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
+                    }
+                }
             } catch (error) {
                 return Promise.reject(`Failed to create folders for project ${this.projectId}. ${this.getErrorMessage(error)}`);
             }
         }
-        //TODO create or update file
+
         const fileName = path.basename(file);
         const fileContent = fs.readFileSync(fsPath, 'utf8');
+
+        try {
+            const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
+            const storageId = resp.data.id;
+            const files = await this.crowdin.sourceFilesApi.listProjectFiles(this.projectId, branchId, parentId, 500);
+            const foundFile = files.data.find(f => f.data.name === fileName);
+            if (!!foundFile) {
+                await this.crowdin.sourceFilesApi.updateOrRestoreFile(this.projectId, foundFile.data.id, {
+                    storageId: storageId,
+                    exportOptions: {
+                        //TODO probably export pattern should be updated same as in java cli
+                        exportPattern: exportPattern
+                    }
+                });
+            } else {
+                await this.crowdin.sourceFilesApi.createFile(this.projectId, {
+                    branchId: branchId,
+                    directoryId: parentId,
+                    name: fileName,
+                    storageId: storageId,
+                    exportOptions: {
+                        //TODO probably export pattern should be updated same as in java cli
+                        exportPattern: exportPattern
+                    }
+                });
+            }
+        } catch (error) {
+            return Promise.reject(`Failed to create/update file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+        }
+    }
+
+    private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {
+        return new Promise((res, rej) => {
+            setTimeout(() => {
+                this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, branchId, parentId, 500)
+                    .then(dirs => {
+                        const foundDir = dirs.data.find(dir => dir.data.name.toLowerCase() === name.toLowerCase());
+                        if (!!foundDir) {
+                            res(foundDir.data.id);
+                        } else {
+                            rej('Directory could not be created/found in Crowdin');
+                        }
+                    })
+                    .catch(e => rej(e));
+            }, 500);
+        });
     }
 
     private normalizePath(fileName: string): string {
