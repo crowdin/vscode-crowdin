@@ -18,7 +18,9 @@ export class CrowdinClient {
             token: apiKey,
             organization: organization
         };
-        this.crowdin = new Crowdin(credentials);
+        this.crowdin = new Crowdin(credentials, {
+            userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`
+        });
     }
 
     /**
