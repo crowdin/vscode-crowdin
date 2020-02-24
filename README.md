@@ -23,8 +23,8 @@ To work with plugin in the Visual Studio Code workspace, there should be Crowdin
 Configuration file example:
 
 ```json
-"project_identifier": "projectId"
-"api_key": "apiKey"
+"project_id": "projectId"
+"api_token": "apiToken"
 "base_path": "folder" // optional
 "branch": "master" // optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)

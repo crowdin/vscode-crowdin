@@ -25,7 +25,7 @@ export class ConfigProvider {
         const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
-        if (isNaN(Number(config.project_identifier))) {
+        if (isNaN(Number(config.project_id))) {
             throw new Error(`Invalid project id in ${this.workspace.name}`);
         }
         let organization: string | undefined;
@@ -44,8 +44,8 @@ export class ConfigProvider {
         }
         return {
             configPath: filePath,
-            projectId: parseInt(config.project_identifier),
-            apiKey: config.api_key,
+            projectId: parseInt(config.project_id),
+            apiKey: config.api_token,
             branch: config.branch,
             basePath: config.base_path,
             files: config.files,
@@ -91,9 +91,9 @@ export class ConfigProvider {
 }
 
 interface PrivateConfigModel {
-    project_identifier: string;
+    project_id: string;
     base_url?: string;
-    api_key: string;
+    api_token: string;
     branch?: string;
     base_path?: string;
     files: FileModel[];
