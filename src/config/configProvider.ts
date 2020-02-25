@@ -66,10 +66,10 @@ export class ConfigProvider {
 
     validate(config: ConfigModel): void {
         if (this.isEmpty(config.apiKey)) {
-            throw Error(`Api key is empty in ${this.workspace.name}`);
+            throw Error(`Api token is empty in ${this.workspace.name}`);
         }
         if (!config.projectId || config.projectId === 0) {
-            throw Error(`Project identifier is empty in ${this.workspace.name}`);
+            throw Error(`Project id is empty in ${this.workspace.name}`);
         }
         config.files.forEach(file => {
             if (this.isEmpty(file.source)) {

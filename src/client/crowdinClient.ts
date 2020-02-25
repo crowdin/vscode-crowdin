@@ -86,7 +86,20 @@ export class CrowdinClient {
                     branchId = res.data.id;
                 }
             } catch (error) {
-                return Promise.reject(`Failed to create branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                try {
+                    //there is a possibility to not find branch/directory in response because it's in `creating` state so we will try 5 times to fetch it
+                    for (let i = 0; i < 5; i++) {
+                        branchId = await this.waitAndFindBranch(this.branch);
+                        if (!!branchId) {
+                            break;
+                        }
+                    }
+                    if (!branchId) {
+                        throw new Error(`Could not find branch ${this.branch} in Crowdin response`);
+                    }
+                } catch (error) {
+                    return Promise.reject(`Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                }
             }
         }
 
@@ -107,7 +120,16 @@ export class CrowdinClient {
                         });
                         parentId = resp.data.id;
                     } catch (error) {
-                        parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
+                        //there is a possibility to not find branch/directory in response because it's in `creating` state so we will try 5 times to fetch it
+                        for (let i = 0; i < 5; i++) {
+                            parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
+                            if (!!parentId) {
+                                break;
+                            }
+                        }
+                        if (!parentId) {
+                            throw new Error(`Could not find directory ${folder} in Crowdin response`);
+                        }
                     }
                 }
             } catch (error) {
@@ -142,7 +164,7 @@ export class CrowdinClient {
                 });
             }
         } catch (error) {
-            return Promise.reject(`Failed to create/update file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+            return Promise.reject(`Failed to create/update file ${path.basename(file)} for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
     }
 
@@ -155,7 +177,24 @@ export class CrowdinClient {
                         if (!!foundDir) {
                             res(foundDir.data.id);
                         } else {
-                            rej('Directory could not be created/found in Crowdin');
+                            res(undefined);
+                        }
+                    })
+                    .catch(e => rej(e));
+            }, 500);
+        });
+    }
+
+    private waitAndFindBranch(name: string): Promise<number> {
+        return new Promise((res, rej) => {
+            setTimeout(() => {
+                this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, name, 500)
+                    .then(branches => {
+                        const foundBranch = branches.data.find(branch => branch.data.name.toLowerCase() === name.toLowerCase());
+                        if (!!foundBranch) {
+                            res(foundBranch.data.id);
+                        } else {
+                            res(undefined);
                         }
                     })
                     .catch(e => rej(e));

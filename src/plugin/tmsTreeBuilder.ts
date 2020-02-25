@@ -21,10 +21,11 @@ export class TmsTreeBuilder {
             childs.clear();
             map.forEach(([parent, translation, fullPath, isLeaf], label) => {
                 let item;
+                const labelToDisplay = label.split(path.sep)[label.split(path.sep).length - 1];
                 if (isLeaf) {
-                    item = TmsTreeBuilder.buildLeaf(workspace, label, fullPath, translation, config);
+                    item = TmsTreeBuilder.buildLeaf(workspace, labelToDisplay, fullPath, translation, config);
                 } else {
-                    item = TmsTreeBuilder.buildFolder(workspace, label, (temp.get(label) || []).sort(TmsTreeBuilder.compare), config, fullPath);
+                    item = TmsTreeBuilder.buildFolder(workspace, labelToDisplay, (temp.get(label) || []).sort(TmsTreeBuilder.compare), config, fullPath);
                 }
                 if (!!parent) {
                     let childElements = childs.get(parent) || [];
@@ -55,8 +56,12 @@ export class TmsTreeBuilder {
                             matrix[i] = new Map();
                         }
                         const fullPath = path.join(workspace.uri.fsPath, ...fileParts.slice(0, i + 1));
-                        matrix[i].set(part, [parentPart, f.translation, fullPath, isLeaf]);
-                        parentPart = part;
+                        matrix[i].set(path.join(...fileParts.slice(0, i + 1)), [parentPart, f.translation, fullPath, isLeaf]);
+                        if (!!parentPart) {
+                            parentPart = parentPart + path.sep + part;
+                        } else {
+                            parentPart = part;
+                        }
                     }
                 });
             return foundFiles;
