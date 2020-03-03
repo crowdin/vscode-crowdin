@@ -121,12 +121,14 @@ export class CrowdinClient {
                         parentId = resp.data.id;
                     } catch (error) {
                         //there is a possibility to not find branch/directory in response because it's in `creating` state so we will try 5 times to fetch it
+                        let newParentId: number | undefined;
                         for (let i = 0; i < 5; i++) {
-                            parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
-                            if (!!parentId) {
+                            newParentId = await this.waitAndFindDirectory(folder, parentId, branchId);
+                            if (!!newParentId) {
                                 break;
                             }
                         }
+                        parentId = newParentId;
                         if (!parentId) {
                             throw new Error(`Could not find directory ${folder} in Crowdin response`);
                         }
@@ -143,8 +145,16 @@ export class CrowdinClient {
         try {
             const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
             const storageId = resp.data.id;
-            const files = await this.crowdin.sourceFilesApi.listProjectFiles(this.projectId, branchId, parentId, 500);
-            const foundFile = files.data.find(f => f.data.name === fileName);
+            const files = await this.crowdin.sourceFilesApi.listProjectFiles(this.projectId, undefined, parentId, 500);
+            const foundFile = files.data
+                .filter(f => {
+                    if (!branchId) {
+                        return !f.data.branchId;
+                    } else {
+                        return f.data.branchId === branchId;
+                    }
+                })
+                .find(f => f.data.name === fileName);
             if (!!foundFile) {
                 await this.crowdin.sourceFilesApi.updateOrRestoreFile(this.projectId, foundFile.data.id, {
                     storageId: storageId,
@@ -154,7 +164,6 @@ export class CrowdinClient {
                 });
             } else {
                 await this.crowdin.sourceFilesApi.createFile(this.projectId, {
-                    branchId: branchId,
                     directoryId: parentId,
                     name: fileName,
                     storageId: storageId,
@@ -171,9 +180,17 @@ export class CrowdinClient {
     private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {
         return new Promise((res, rej) => {
             setTimeout(() => {
-                this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, branchId, parentId, 500)
+                this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, undefined, parentId, 500)
                     .then(dirs => {
-                        const foundDir = dirs.data.find(dir => dir.data.name.toLowerCase() === name.toLowerCase());
+                        const foundDir = dirs.data
+                            .filter(dir => {
+                                if (!branchId) {
+                                    return !dir.data.branchId;
+                                } else {
+                                    return dir.data.branchId === branchId;
+                                }
+                            })
+                            .find(dir => dir.data.name.toLowerCase() === name.toLowerCase());
                         if (!!foundDir) {
                             res(foundDir.data.id);
                         } else {
