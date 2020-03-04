@@ -19,7 +19,12 @@ export class CrowdinClient {
             organization: organization
         };
         this.crowdin = new Crowdin(credentials, {
-            userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`
+            userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`,
+            retryConfig: {
+                conditions: [],
+                retries: Constants.CLIENT_RETRIES,
+                waitInterval: Constants.CLIENT_RETRY_WAIT_INTERVAL_MS
+            }
         });
     }
 
@@ -87,16 +92,7 @@ export class CrowdinClient {
                 }
             } catch (error) {
                 try {
-                    //there is a possibility to not find branch/directory in response because it's in `creating` state so we will try 5 times to fetch it
-                    for (let i = 0; i < 5; i++) {
-                        branchId = await this.waitAndFindBranch(this.branch);
-                        if (!!branchId) {
-                            break;
-                        }
-                    }
-                    if (!branchId) {
-                        throw new Error(`Could not find branch ${this.branch} in Crowdin response`);
-                    }
+                    branchId = await this.waitAndFindBranch(this.branch);
                 } catch (error) {
                     return Promise.reject(`Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
                 }
@@ -113,25 +109,19 @@ export class CrowdinClient {
                 for (let i = 0; i < folders.length; i++) {
                     const folder = folders[i];
                     try {
-                        const resp = await this.crowdin.sourceFilesApi.createDirectory(this.projectId, {
-                            branchId: branchId,
-                            directoryId: parentId,
-                            name: folder
-                        });
-                        parentId = resp.data.id;
+                        const dir = await this.findDirectory(folder, parentId, branchId);
+                        if (!!dir) {
+                            parentId = dir;
+                        } else {
+                            const resp = await this.crowdin.sourceFilesApi.createDirectory(this.projectId, {
+                                branchId: branchId,
+                                directoryId: parentId,
+                                name: folder
+                            });
+                            parentId = resp.data.id;
+                        }
                     } catch (error) {
-                        //there is a possibility to not find branch/directory in response because it's in `creating` state so we will try 5 times to fetch it
-                        let newParentId: number | undefined;
-                        for (let i = 0; i < 5; i++) {
-                            newParentId = await this.waitAndFindDirectory(folder, parentId, branchId);
-                            if (!!newParentId) {
-                                break;
-                            }
-                        }
-                        parentId = newParentId;
-                        if (!parentId) {
-                            throw new Error(`Could not find directory ${folder} in Crowdin response`);
-                        }
+                        parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
                     }
                 }
             } catch (error) {
@@ -178,44 +168,43 @@ export class CrowdinClient {
     }
 
     private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {
-        return new Promise((res, rej) => {
-            setTimeout(() => {
-                this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, undefined, parentId, 500)
-                    .then(dirs => {
-                        const foundDir = dirs.data
-                            .filter(dir => {
-                                if (!branchId) {
-                                    return !dir.data.branchId;
-                                } else {
-                                    return dir.data.branchId === branchId;
-                                }
-                            })
-                            .find(dir => dir.data.name.toLowerCase() === name.toLowerCase());
-                        if (!!foundDir) {
-                            res(foundDir.data.id);
-                        } else {
-                            res(undefined);
-                        }
-                    })
-                    .catch(e => rej(e));
-            }, 500);
+        return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
+            const foundDir = await this.findDirectory(name, parentId, branchId);
+            if (!!foundDir) {
+                return foundDir;
+            } else {
+                throw new Error(`Could not find directory ${name} in Crowdin response`);
+            }
         });
     }
 
+    private async findDirectory(name: string, parentId?: number, branchId?: number): Promise<number | undefined> {
+        const dirs = await this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, undefined, parentId, 500);
+        const foundDir = dirs.data
+            .filter(dir => {
+                if (!branchId) {
+                    return !dir.data.branchId;
+                } else {
+                    return dir.data.branchId === branchId;
+                }
+            })
+            .find(dir => dir.data.name.toLowerCase() === name.toLowerCase());
+        if (!!foundDir) {
+            return foundDir.data.id;
+        } else {
+            return undefined;
+        }
+    }
+
     private waitAndFindBranch(name: string): Promise<number> {
-        return new Promise((res, rej) => {
-            setTimeout(() => {
-                this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, name, 500)
-                    .then(branches => {
-                        const foundBranch = branches.data.find(branch => branch.data.name.toLowerCase() === name.toLowerCase());
-                        if (!!foundBranch) {
-                            res(foundBranch.data.id);
-                        } else {
-                            res(undefined);
-                        }
-                    })
-                    .catch(e => rej(e));
-            }, 500);
+        return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
+            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, name, 500);
+            const foundBranch = branches.data.find(branch => branch.data.name.toLowerCase() === name.toLowerCase());
+            if (!!foundBranch) {
+                return foundBranch.data.id;
+            } else {
+                throw new Error(`Could not find branch ${name} in Crowdin response`);
+            }
         });
     }
 
