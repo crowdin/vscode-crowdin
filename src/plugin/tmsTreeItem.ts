@@ -35,7 +35,7 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     get client(): CrowdinClient {
-        return new CrowdinClient(this.config.projectId, this.config.apiKey, this.config.branch);
+        return new CrowdinClient(this.config.projectId, this.config.apiKey, this.config.branch, this.config.organization);
     }
 
     async update(): Promise<void> {

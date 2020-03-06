@@ -14,7 +14,7 @@ suite("Plugin tree", function () {
         config = {
             configPath: '',
             apiKey: 'key',
-            projectId: 'id',
+            projectId: 5,
             branch: 'master',
             basePath: 'folder1/folder2',
             files: [{
@@ -50,8 +50,8 @@ suite("Plugin tree", function () {
         assert.equal(1, level2.size);
         assert.equal(1, level3.size);
         testMatrix(level1, 'folder1', undefined, config.files[0].translation, false);
-        testMatrix(level2, 'folder2', 'folder1', config.files[0].translation, false);
-        testMatrix(level3, '3.txt', 'folder2', config.files[0].translation, true);
+        testMatrix(level2, path.join('folder1', 'folder2'), 'folder1', config.files[0].translation, false);
+        testMatrix(level3, path.join('folder1', 'folder2', '3.txt'), path.join('folder1', 'folder2'), config.files[0].translation, true);
     });
 
     test('Build subtree', async () => {

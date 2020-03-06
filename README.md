@@ -11,8 +11,8 @@ Integrate your Visual Studio Code projects with Crowdin to optimize the localiza
 ## Features
 
 New component will be introduced in Activity Bar called *Crowdin Explorer*.
-Plugin will scan each workspace for Crowdin specific configuration file and will build tree with translations.
-In *Crowdin Explorer* you can upload those translations into Crowdin or download them from it.
+Plugin will scan each workspace for Crowdin specific configuration file and will build tree with source files.
+In *Crowdin Explorer* you can upload those files into Crowdin and download translations.
 
 ![Plugin](resources/plugin.png)
 
@@ -23,19 +23,16 @@ To work with plugin in the Visual Studio Code workspace, there should be Crowdin
 Configuration file example:
 
 ```json
-"project_identifier": "projectId"
-"api_key": "apiKey"
+"project_id": "projectId"
+"api_token": "apiToken"
 "base_path": "folder" // optional
 "branch": "master" // optional
+"base_url": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)
 
 "files": [
   {
-    "source": "/locale/en/folder1/[0-2].txt",
-    "translation": "/locale/%two_letters_code%/folder1/%original_file_name%"
-  },
-  {
-    "source": "/locale/en/folder2/[0-2].txt",
-    "translation": "/locale/%two_letters_code%/folder2/%original_file_name%"
+    "source": "/sources/**/*.xml",
+    "translation": "/translations/%two_letters_code%/%original_file_name%"
   }
 ]
 ```
@@ -61,7 +58,7 @@ Properties `project_identifier`, `api_key` can be found in your project settings
 
 This extension contributes the following settings:
 
-* `tms.autoRefresh`: enable/disable auto refresh of translations tree after each change in Crowdin configuration file
+* `tms.autoRefresh`: enable/disable auto refresh of files tree after each change in Crowdin configuration file
 
 ## Known Issues
 

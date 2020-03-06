@@ -1,19 +1,32 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { AxiosResponse } from 'axios';
 import * as AdmZip from 'adm-zip';
-import * as FormData from 'form-data';
+import axios from 'axios';
+import Crowdin, { Credentials } from '@crowdin/crowdin-api-client';
 import { Constants } from '../constants';
-import { AxisProvider } from './axiosProvider';
-
-const axios = new AxisProvider().axios;
 
 export class CrowdinClient {
 
+    private crowdin: Crowdin;
+
     constructor(
-        readonly projectId: string,
+        readonly projectId: number,
         readonly apiKey: string,
-        readonly branch?: string) { }
+        readonly branch?: string,
+        readonly organization?: string) {
+        const credentials: Credentials = {
+            token: apiKey,
+            organization: organization
+        };
+        this.crowdin = new Crowdin(credentials, {
+            userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`,
+            retryConfig: {
+                conditions: [],
+                retries: Constants.CLIENT_RETRIES,
+                waitInterval: Constants.CLIENT_RETRY_WAIT_INTERVAL_MS
+            }
+        });
+    }
 
     /**
      * Downloads zip archive from Crowdin system and unzip it in pre-defined folder
@@ -22,117 +35,176 @@ export class CrowdinClient {
      */
     async download(unzipFolder: string): Promise<any> {
         try {
-            await this.exportTranslations();
-        } catch (error) {
-            return Promise.reject(`Failed to export translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
-        }
-        const response = await this.downloadTranslations();
-        const zip = new AdmZip(response.data);
-        return new Promise((resolve, reject) => {
-            zip.extractAllToAsync(unzipFolder, true, (error) => {
-                if (!!error) {
-                    reject(`Failed to unzip translations for project ${this.projectId}. ${error}`);
-                } else {
-                    resolve();
+            let branchId: number | undefined;
+            if (!!this.branch) {
+                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
+                const foundBranch = branches.data.find(e => e.data.name === this.branch);
+                if (!!foundBranch) {
+                    branchId = foundBranch.data.id;
                 }
+            }
+            const build = await this.crowdin.translationsApi.buildProject(this.projectId, { branchId });
+            let finished = false;
+
+            while (!finished) {
+                const status = await this.crowdin.translationsApi.checkBuildStatus(this.projectId, build.data.id);
+                finished = status.data.status === 'finished';
+            }
+
+            const downloadLink = await this.crowdin.translationsApi.downloadTranslations(this.projectId, build.data.id);
+            const resp = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
+            const zip = new AdmZip(resp.data);
+            return new Promise((resolve, reject) => {
+                zip.extractAllToAsync(unzipFolder, true, (error) => {
+                    if (!!error) {
+                        reject(`Failed to unzip translations for project ${this.projectId}. ${error}`);
+                    } else {
+                        resolve();
+                    }
+                });
             });
-        });
+        } catch (error) {
+            return Promise.reject(`Failed to download translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+        }
     }
 
     /**
      * Uploads file to the Crowdin system. Creates needed folders/branch is they are missing.
      * 
      * @param fsPath full path to file
-     * @param translation file translation
+     * @param exportPattern file export pattern
      * @param file file path in crowdin system
      */
-    async upload(fsPath: string, translation: string, file: string): Promise<any> {
+    async upload(fsPath: string, exportPattern: string, file: string): Promise<any> {
+        let branchId: number | undefined;
+
         if (!!this.branch) {
             try {
-                //create branch if not exists
-                await this.addDirectory(this.branch, true, false);
+                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
+                const foundBranch = branches.data.find(e => e.data.name === this.branch);
+                if (!!foundBranch) {
+                    branchId = foundBranch.data.id;
+                } else {
+                    const res = await this.crowdin.sourceFilesApi.createBranch(this.projectId, {
+                        name: this.branch
+                    });
+                    branchId = res.data.id;
+                }
             } catch (error) {
-                if (!this.objectsExists(error, 50)) {
-                    return Promise.reject(`Failed to create branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                try {
+                    branchId = await this.waitAndFindBranch(this.branch);
+                } catch (error) {
+                    return Promise.reject(`Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
                 }
             }
         }
+
+        let parentId: number | undefined;
         //check if file has parent folders
         if (path.basename(file) !== file) {
-            const folder = this.normalizePath(path.dirname(file));
+            const folders = this.normalizePath(path.dirname(file))
+                .split(Constants.CROWDIN_PATH_SEPARATOR)
+                .filter(f => f !== '');
             try {
-                //create file folders if not exists
-                await this.addDirectory(folder, false, true, this.branch);
-            } catch (error) {
-                if (!this.objectsExists(error, 50)) {
-                    return Promise.reject(`Failed to create folders for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                for (let i = 0; i < folders.length; i++) {
+                    const folder = folders[i];
+                    try {
+                        const dir = await this.findDirectory(folder, parentId, branchId);
+                        if (!!dir) {
+                            parentId = dir;
+                        } else {
+                            const resp = await this.crowdin.sourceFilesApi.createDirectory(this.projectId, {
+                                branchId: branchId,
+                                directoryId: parentId,
+                                name: folder
+                            });
+                            parentId = resp.data.id;
+                        }
+                    } catch (error) {
+                        parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
+                    }
                 }
+            } catch (error) {
+                return Promise.reject(`Failed to create folders for project ${this.projectId}. ${this.getErrorMessage(error)}`);
             }
         }
-        const fileName = this.normalizePath(file);
-        //add or update file
+
+        const fileName = path.basename(file);
+        const fileContent = fs.readFileSync(fsPath, 'utf8');
+
         try {
-            await this.addFile(fsPath, translation, fileName);
-            return Promise.resolve();
-        } catch (error) {
-            if (!this.objectsExists(error, 5)) {
-                return Promise.reject(`Failed to add file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+            const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
+            const storageId = resp.data.id;
+            const files = await this.crowdin.sourceFilesApi.listProjectFiles(this.projectId, undefined, parentId, 500);
+            const foundFile = files.data
+                .filter(f => {
+                    if (!branchId) {
+                        return !f.data.branchId;
+                    } else {
+                        return f.data.branchId === branchId;
+                    }
+                })
+                .find(f => f.data.name === fileName);
+            if (!!foundFile) {
+                await this.crowdin.sourceFilesApi.updateOrRestoreFile(this.projectId, foundFile.data.id, {
+                    storageId: storageId,
+                    exportOptions: {
+                        exportPattern: exportPattern
+                    }
+                });
+            } else {
+                await this.crowdin.sourceFilesApi.createFile(this.projectId, {
+                    directoryId: parentId,
+                    name: fileName,
+                    storageId: storageId,
+                    exportOptions: {
+                        exportPattern: exportPattern
+                    }
+                });
             }
-        }
-        try {
-            await this.updateFile(fsPath, translation, fileName);
         } catch (error) {
-            return Promise.reject(`Failed to update file for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+            return Promise.reject(`Failed to create/update file ${path.basename(file)} for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
     }
 
-    async downloadTranslations(): Promise<AxiosResponse> {
-        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/download/all.zip?key=${this.apiKey}`;
-        if (!!this.branch) {
-            url += `&branch=${this.branch}`;
-        }
-        return axios.get(url, { responseType: 'arraybuffer' });
+    private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {
+        return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
+            const foundDir = await this.findDirectory(name, parentId, branchId);
+            if (!!foundDir) {
+                return foundDir;
+            } else {
+                throw new Error(`Could not find directory ${name} in Crowdin response`);
+            }
+        });
     }
 
-    exportTranslations(): Promise<AxiosResponse> {
-        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/export?key=${this.apiKey}&json=true`;
-        if (!!this.branch) {
-            url += `&branch=${this.branch}`;
+    private async findDirectory(name: string, parentId?: number, branchId?: number): Promise<number | undefined> {
+        const dirs = await this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, undefined, parentId, 500);
+        const foundDir = dirs.data
+            .filter(dir => {
+                if (!branchId) {
+                    return !dir.data.branchId;
+                } else {
+                    return dir.data.branchId === branchId;
+                }
+            })
+            .find(dir => dir.data.name.toLowerCase() === name.toLowerCase());
+        if (!!foundDir) {
+            return foundDir.data.id;
+        } else {
+            return undefined;
         }
-        return axios.get(url);
     }
 
-    addDirectory(name: string, isBranch = false, recursive = false, branch?: string): Promise<AxiosResponse> {
-        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-directory`;
-        url += `?key=${this.apiKey}&json=true&name=${name}&is_branch=${this.convertToNumber(isBranch)}&recursive=${this.convertToNumber(recursive)}`;
-        if (!!branch) {
-            url += `&branch=${branch}`;
-        }
-        return axios.post(url);
-    }
-
-    addFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
-        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/add-file?key=${this.apiKey}&json=true`;
-        if (!!this.branch) {
-            url += `&branch=${this.branch}`;
-        }
-        return this.uploadFile(fsPath, translation, file, url);
-    }
-
-    updateFile(fsPath: string, translation: string, file: string): Promise<AxiosResponse> {
-        let url = `${Constants.CROWDIN_URL}/api/project/${this.projectId}/update-file?key=${this.apiKey}&json=true`;
-        if (!!this.branch) {
-            url += `&branch=${this.branch}`;
-        }
-        return this.uploadFile(fsPath, translation, file, url);
-    }
-
-    private uploadFile(fsPath: string, translation: string, file: string, url: string): Promise<AxiosResponse> {
-        const data = new FormData();
-        data.append(`files[${file}]`, fs.createReadStream(fsPath));
-        data.append(`export_patterns[${file}]`, translation);
-        return axios.post(url, data, {
-            headers: data.getHeaders()
+    private waitAndFindBranch(name: string): Promise<number> {
+        return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
+            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, name, 500);
+            const foundBranch = branches.data.find(branch => branch.data.name.toLowerCase() === name.toLowerCase());
+            if (!!foundBranch) {
+                return foundBranch.data.id;
+            } else {
+                throw new Error(`Could not find branch ${name} in Crowdin response`);
+            }
         });
     }
 
@@ -140,24 +212,13 @@ export class CrowdinClient {
         return fileName.replace(new RegExp('\\' + path.sep, 'g'), Constants.CROWDIN_PATH_SEPARATOR);
     }
 
-    private convertToNumber(flag: boolean): number {
-        return flag ? 1 : 0;
-    }
-
-    private objectsExists(error: any, code: number): boolean {
-        return error.response.data
-            && error.response.data.error
-            && error.response.data.error.code
-            && error.response.data.error.code === code;
-    }
-
     private getErrorMessage(error: any): string {
-        if (error.response.data
-            && error.response.data.error
-            && error.response.data.error.message) {
-            return error.response.data.error.message;
+        if (error.message) {
+            return error.message;
+        } else if (typeof error === 'string' || error instanceof String) {
+            return error as string;
         } else {
-            return '';
+            return JSON.stringify(error);
         }
     }
 }

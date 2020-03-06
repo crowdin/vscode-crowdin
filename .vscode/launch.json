@@ -18,7 +18,7 @@
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
-			"preLaunchTask": "npm: watch"
+			"preLaunchTask": "npm: webpack"
 		},
 		{
 			"name": "Extension Tests",
