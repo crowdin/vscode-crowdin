@@ -7,8 +7,10 @@ trigger:
   branches:
     include:
       - refs/tags/*
-    exclude:
       - refs/heads/*
+
+pool:
+  vmImage: 'ubuntu-latest'
 
 stages:
   - stage: Tests
@@ -31,18 +33,12 @@ stages:
 
           - script: |
               npm install
-            displayName: 'Command `npm install`'
-
-          - script: |
-              sudo npm install -g vsce
+              npm install -g vsce
               vsce package
-            displayName: 'Create VSIX'
+            displayName: 'npm install and build VSIX'
 
           - script: |
               npm run vscode:prepublish
-            displayName: 'Command `npm run vscode:prepublish`'
-
-          - script: |
               cat /home/vsts/.npm/_logs/*.log
             displayName: 'Echo npm error logs on failure'
             condition: failed()
