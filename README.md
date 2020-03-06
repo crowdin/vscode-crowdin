@@ -37,7 +37,9 @@ Configuration file example:
 ]
 ```
 
-Properties `project_identifier`, `api_key` can be found in your project settings page.
+Project ID can be found in your project settings page.
+
+To generate a new API token in Crowdin, go to your Account Settings.
 
 ## Setup
 
