@@ -64,7 +64,7 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-At the moment plugin is not support all possible properties in configuration file (see [Configuration file](https://support.crowdin.com/configuration-file/)). All properties which are supported by this plugin are listed in the example above (see Requirements section).
+At the moment plugin is not support all possible properties in configuration file (see [Configuration file](https://support.crowdin.com/configuration-file-v3/)). All properties which are supported by this plugin are listed in the example above (see Requirements section).
 
 ## Contribution
 We are happy to accept contributions to the Crowdin Visual Studio Code Plugin. To contribute please do the following:
