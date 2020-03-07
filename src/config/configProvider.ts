@@ -71,6 +71,9 @@ export class ConfigProvider {
         if (!config.projectId || config.projectId === 0) {
             throw Error(`Project id is empty in ${this.workspace.name}`);
         }
+        if (!config.basePath) {
+            throw Error(`Base path is empty in ${this.workspace.name}`);
+        }
         config.files.forEach(file => {
             if (this.isEmpty(file.source)) {
                 throw Error(`File source is empty in ${this.workspace.name}`);
@@ -95,6 +98,6 @@ interface PrivateConfigModel {
     base_url?: string;
     api_token: string;
     branch?: string;
-    base_path?: string;
+    base_path: string;
     files: FileModel[];
 }

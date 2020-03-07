@@ -64,7 +64,7 @@ export class CrowdinClient {
                 });
             });
         } catch (error) {
-            return Promise.reject(`Failed to download translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+            throw new Error(`Failed to download translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
     }
 
@@ -92,9 +92,12 @@ export class CrowdinClient {
                 }
             } catch (error) {
                 try {
+                    if (!this.concurrentIssue(error)) {
+                        throw error;
+                    }
                     branchId = await this.waitAndFindBranch(this.branch);
                 } catch (error) {
-                    return Promise.reject(`Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                    throw new Error(`Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`);
                 }
             }
         }
@@ -121,11 +124,14 @@ export class CrowdinClient {
                             parentId = resp.data.id;
                         }
                     } catch (error) {
+                        if (!this.concurrentIssue(error)) {
+                            throw error;
+                        }
                         parentId = await this.waitAndFindDirectory(folder, parentId, branchId);
                     }
                 }
             } catch (error) {
-                return Promise.reject(`Failed to create folders for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+                throw new Error(`Failed to create folders for project ${this.projectId}. ${this.getErrorMessage(error)}`);
             }
         }
 
@@ -163,7 +169,7 @@ export class CrowdinClient {
                 });
             }
         } catch (error) {
-            return Promise.reject(`Failed to create/update file ${path.basename(file)} for project ${this.projectId}. ${this.getErrorMessage(error)}`);
+            throw new Error(`Failed to create/update file ${path.basename(file)} for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
     }
 
@@ -215,10 +221,51 @@ export class CrowdinClient {
     private getErrorMessage(error: any): string {
         if (error.message) {
             return error.message;
+        } else if (error.error && error.error.message) {
+            return error.error.message;
+        } else if (error.errors && Array.isArray(error.errors)) {
+            return error.errors
+                .filter((e: any) => !!e.error)
+                .map((e: any) => e.error)
+                .filter((e: any) => Array.isArray(e.errors))
+                .map((e: any) => {
+                    const key = e.key || '';
+                    return key + ' ' + e.errors
+                        .map((e1: any) => {
+                            if (e1.code && e1.message) {
+                                return e1.code + ' ' + e1.message;
+                            } else {
+                                return JSON.stringify(e1);
+                            }
+                        })
+                        .join(';');
+                })
+                .join(';');
         } else if (typeof error === 'string' || error instanceof String) {
             return error as string;
         } else {
             return JSON.stringify(error);
         }
+    }
+
+    private concurrentIssue(error: any): boolean {
+        return this.codeExists(error, 'notUnique')
+            || this.codeExists(error, 'parallelCreation');
+    }
+
+    private codeExists(e: any, code: string): boolean {
+        if (e.errors && Array.isArray(e.errors)) {
+            return !!e.errors
+                .filter((e: any) => !!e.error)
+                .map((e: any) => e.error)
+                .filter((e: any) => Array.isArray(e.errors))
+                .find((e: any) =>
+                    !!e.errors
+                        .filter((e1: any) => !!e1.code && (typeof e1.code === 'string' || e1.code instanceof String))
+                        .map((e1: any) => e1.code)
+                        .find((c: string) => c.toLowerCase() === code.toLowerCase())
+                );
+        }
+        return false;
     }
 }

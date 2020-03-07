@@ -5,6 +5,7 @@ import { CrowdinClient } from '../client/crowdinClient';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
+import { ErrorHandler } from '../util/ErrorHandler';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
@@ -59,8 +60,8 @@ export class TmsTreeItem extends vscode.TreeItem {
                     location: vscode.ProgressLocation.Notification,
                     title: title
                 },
-                (progress, token) => {
-                    return this._save(arr);
+                (_progress, _token) => {
+                    return this._save(arr).catch(e => ErrorHandler.handleError(e));
                 }
             );
         } else {
