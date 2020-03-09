@@ -37,7 +37,6 @@ suite('Configuration file', function () {
         assert.equal('123', config.projectId);
         assert.equal('456', config.apiKey);
         assert.equal('master', config.branch);
-        assert.equal('/home', config.basePath);
         assert.equal('testOrg', config.organization);
         assert.equal(1, config.files.length);
     });

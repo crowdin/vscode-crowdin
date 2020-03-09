@@ -1,7 +1,6 @@
 "project_id" : "123"
 "api_token" : "456"
 "branch" : "master"
-"base_path" : "/home"
 "base_url" : "https://testOrg.crowdin.com"
 
 "files": [

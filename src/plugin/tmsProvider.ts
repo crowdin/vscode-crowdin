@@ -3,6 +3,7 @@ import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
 import { TmsTreeBuilder } from './tmsTreeBuilder';
+import { ErrorHandler } from '../util/ErrorHandler';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
@@ -25,9 +26,9 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             () => {
                 let promises: Promise<void>[];
                 if (!!folder) {
-                    promises = [folder.update().catch(e => this.handleError(e))];
+                    promises = [folder.update().catch(e => ErrorHandler.handleError(e))];
                 } else {
-                    promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => this.handleError(e)));
+                    promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => ErrorHandler.handleError(e)));
                 }
                 return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire());
             }
@@ -36,7 +37,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
     save(item?: TmsTreeItem): void {
         if (!!item) {
-            item.save(true).catch(e => this.handleError(e));
+            item.save(true).catch(e => ErrorHandler.handleError(e));
             return;
         }
         vscode.window.withProgress(
@@ -45,7 +46,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 title: `Uploading all files...`
             },
             () => {
-                const promises = this.rootTree.map(e => e.save().catch(e => this.handleError(e)));
+                const promises = this.rootTree.map(e => e.save().catch(e => ErrorHandler.handleError(e)));
                 return Promise.all(promises);
             }
         );
@@ -81,7 +82,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                     return rootTreeFolder;
                 }
                 catch (err) {
-                    this.handleError(err);
+                    ErrorHandler.handleError(err);
                 }
                 return null as unknown as TmsTreeItem;
             });
@@ -117,13 +118,5 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             wather.onDidDelete(() => this.update());
             this.configWatchers.set(file, wather);
         });
-    }
-
-    private handleError(e: any) {
-        if (typeof e === 'string') {
-            vscode.window.showErrorMessage(e);
-        } else if (!!e.message) {
-            vscode.window.showErrorMessage(e.message);
-        }
     }
 }
