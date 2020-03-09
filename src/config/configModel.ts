@@ -6,6 +6,6 @@ export interface ConfigModel {
     projectId: number;
     apiKey: string;
     branch?: string;
-    basePath: string;
+    basePath?: string;
     files: FileModel[];
 }

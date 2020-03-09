@@ -71,8 +71,11 @@ export class ConfigProvider {
         if (!config.projectId || config.projectId === 0) {
             throw Error(`Project id is empty in ${this.workspace.name}`);
         }
-        if (!config.basePath) {
-            throw Error(`Base path is empty in ${this.workspace.name}`);
+        if (!!config.basePath) {
+            const basePath = path.join(this.workspace.uri.fsPath, config.basePath);
+            if (!fs.existsSync(basePath)) {
+                throw Error(`Base path ${basePath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`);
+            }
         }
         config.files.forEach(file => {
             if (this.isEmpty(file.source)) {
@@ -98,6 +101,6 @@ interface PrivateConfigModel {
     base_url?: string;
     api_token: string;
     branch?: string;
-    base_path: string;
+    base_path?: string;
     files: FileModel[];
 }

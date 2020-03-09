@@ -25,7 +25,7 @@ Configuration file example:
 ```json
 "project_id": "projectId"
 "api_token": "apiToken"
-"base_path": "folder"
+"base_path": "folder" // optional
 "branch": "master" // optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)
 
