@@ -3,7 +3,7 @@ import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
 import { TmsTreeBuilder } from './tmsTreeBuilder';
-import { ErrorHandler } from '../util/ErrorHandler';
+import { ErrorHandler } from '../util/errorHandler';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 

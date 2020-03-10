@@ -5,7 +5,8 @@ import { CrowdinClient } from '../client/crowdinClient';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
-import { ErrorHandler } from '../util/ErrorHandler';
+import { ErrorHandler } from '../util/errorHandler';
+import { PathUtil } from '../util/pathUtil';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
@@ -20,7 +21,8 @@ export class TmsTreeItem extends vscode.TreeItem {
         readonly fullPath: string,
         readonly isLeaf: boolean = false,
         readonly command?: vscode.Command,
-        readonly translation?: string
+        readonly translation?: string,
+        readonly source?: string
     ) {
         super(label, collapsibleState);
         this.contextValue = contextValue;
@@ -76,7 +78,10 @@ export class TmsTreeItem extends vscode.TreeItem {
                 basePath = path.join(basePath, this.config.basePath);
             }
             const file = path.relative(basePath, this.fullPath);
-            return this.client.upload(this.fullPath, this.translation || '', file);
+            const exportPattern = PathUtil.replaceDoubleAsteriskInTranslation(
+                this.translation || '', this.fullPath, this.source || '', basePath
+            );
+            return this.client.upload(this.fullPath, exportPattern, file);
         } else {
             let promises: Promise<any>[] = [];
             for (const item of arr) {
