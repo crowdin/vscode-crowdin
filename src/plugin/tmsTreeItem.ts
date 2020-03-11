@@ -7,6 +7,7 @@ import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
 import { ErrorHandler } from '../util/errorHandler';
 import { PathUtil } from '../util/pathUtil';
+import { SourceFiles } from '../model/sourceFiles';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
@@ -19,6 +20,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         readonly rootPath: string,
         contextValue: TmsTreeItemContextValue,
         readonly fullPath: string,
+        readonly sourceFilesArr: SourceFiles[] = [],
         readonly isLeaf: boolean = false,
         readonly command?: vscode.Command,
         readonly translation?: string,
@@ -47,7 +49,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         if (!!this.config.basePath) {
             unzipFolder = path.join(unzipFolder, this.config.basePath);
         }
-        return this.client.download(unzipFolder);
+        return this.client.download(unzipFolder, this.sourceFilesArr);
     }
 
     async save(progress: boolean = false): Promise<void> {

@@ -1,9 +1,23 @@
 import * as path from 'path';
+import { LanguagesModel } from '@crowdin/crowdin-api-client';
 
 export class PathUtil {
 
     static PATH_SEPARATOR_REGEX = '\\' === path.sep ? '\\\\' : path.sep;
     static SPECIAL_SYMBOLS = ['*', '?', '[', ']', '.'];
+
+    static PLACEHOLDER_ANDROID_CODE = '%android_code%';
+    static PLACEHOLDER_FILE_EXTENTION = '%file_extension%';
+    static PLACEHOLDER_FILE_NAME = '%file_name%';
+    static PLACEHOLDER_LANGUAGE = '%language%';
+    static PLACEHOLDER_LOCALE = '%locale%';
+    static PLACEHOLDER_LOCALE_WITH_UNDERSCORE = '%locale_with_underscore%';
+    static PLACEHOLDER_THREE_LETTERS_CODE = '%three_letters_code%';
+    static PLACEHOLDER_TWO_LETTERS_CODE = '%two_letters_code%';
+    static PLACEHOLDER_OSX_CODE = '%osx_code%';
+    static PLACEHOLDER_OSX_LOCALE = '%osx_locale%';
+    static PLACEHOLDER_ORIGINAL_FILE_NAME = '%original_file_name%';
+    static PLACEHOLDER_ORIGINAL_PATH = '%original_path%';
 
     /**
      * Replaces ** in translation pattern
@@ -55,6 +69,51 @@ export class PathUtil {
         translation = translation.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
         translation = translation.replace(new RegExp('[\\/]+', 'g'), '/');
         return translation;
+    }
+
+    /**
+     * Replacing file-based placeholders in translation pattern
+     * @param translation translation pattern from configuration file
+     * @param fsPath full path to file
+     * @param source source pattern from configuration file
+     * @param basePath base path from configuration file
+     */
+    static replaceFileDependentPlaceholders(translation: string, fsPath: string, source: string, basePath: string): string {
+        const translationWithoutDoubleAsterisk = PathUtil.replaceDoubleAsteriskInTranslation(
+            translation, fsPath, source, basePath
+        );
+        const relativePath = path.relative(basePath, fsPath);
+        const fileName = path.basename(relativePath);
+        const fileNameWithoutExt = path.parse(fileName).name;
+        const fileExt = path.extname(fileName).split('.').pop() || '';
+        const fileParent = path.dirname(relativePath)
+            .replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX)
+            .replace(new RegExp('[\\\\/]+', 'g'), '/');
+        let result = translationWithoutDoubleAsterisk
+            .replace(PathUtil.PLACEHOLDER_ORIGINAL_FILE_NAME, fileName)
+            .replace(PathUtil.PLACEHOLDER_FILE_NAME, fileNameWithoutExt)
+            .replace(PathUtil.PLACEHOLDER_FILE_EXTENTION, fileExt)
+            .replace(PathUtil.PLACEHOLDER_ORIGINAL_PATH, fileParent)
+            .replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX)
+            .replace(new RegExp('[\\/]+', 'g'), '/');
+        return result;
+    }
+
+    /**
+     * Replacing language-based placeholders in translation pattern
+     * @param translation translation pattern from configuration file
+     * @param language crowdin language object
+     */
+    static replaceLanguageDependentPlaceholders(translation: string, language: LanguagesModel.Language): string {
+        return translation
+            .replace(PathUtil.PLACEHOLDER_LANGUAGE, language.name)
+            .replace(PathUtil.PLACEHOLDER_LOCALE, language.locale)
+            .replace(PathUtil.PLACEHOLDER_LOCALE_WITH_UNDERSCORE, language.locale.replace('-', '_'))
+            .replace(PathUtil.PLACEHOLDER_TWO_LETTERS_CODE, language.twoLettersCode)
+            .replace(PathUtil.PLACEHOLDER_THREE_LETTERS_CODE, language.threeLettersCode)
+            .replace(PathUtil.PLACEHOLDER_ANDROID_CODE, language.androidCode)
+            .replace(PathUtil.PLACEHOLDER_OSX_LOCALE, language.osxLocale)
+            .replace(PathUtil.PLACEHOLDER_OSX_CODE, language.osxCode);
     }
 
     private static replaceBasePath(path1: string, basePath: string): string {
