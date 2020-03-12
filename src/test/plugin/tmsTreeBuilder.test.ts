@@ -68,7 +68,7 @@ suite("Plugin tree", function () {
 
 });
 
-function testMatrix(map: Map<string, [string | undefined, string, string, boolean]>,
+function testMatrix(map: Map<string, [string | undefined, string, string, boolean, string]>,
     key: string, parent: string | undefined, translation: string, isLeaf: boolean) {
     const [parent1, translation1, fullPath1, isLeaf1] = map.get(key) || ['', '', '', '', false];
     assert.equal(parent1, parent);
