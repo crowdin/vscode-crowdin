@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { LanguagesModel } from '@crowdin/crowdin-api-client';
+import { LanguagesModel, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 
 export class PathUtil {
 
@@ -103,17 +103,18 @@ export class PathUtil {
      * Replacing language-based placeholders in translation pattern
      * @param translation translation pattern from configuration file
      * @param language crowdin language object
+     * @param languageMapping custom language mapping
      */
-    static replaceLanguageDependentPlaceholders(translation: string, language: LanguagesModel.Language): string {
+    static replaceLanguageDependentPlaceholders(translation: string, language: LanguagesModel.Language, languageMapping: ProjectsGroupsModel.LanguageMappingEntity): string {
         return translation
-            .replace(PathUtil.PLACEHOLDER_LANGUAGE, language.name)
-            .replace(PathUtil.PLACEHOLDER_LOCALE, language.locale)
-            .replace(PathUtil.PLACEHOLDER_LOCALE_WITH_UNDERSCORE, language.locale.replace('-', '_'))
-            .replace(PathUtil.PLACEHOLDER_TWO_LETTERS_CODE, language.twoLettersCode)
-            .replace(PathUtil.PLACEHOLDER_THREE_LETTERS_CODE, language.threeLettersCode)
-            .replace(PathUtil.PLACEHOLDER_ANDROID_CODE, language.androidCode)
-            .replace(PathUtil.PLACEHOLDER_OSX_LOCALE, language.osxLocale)
-            .replace(PathUtil.PLACEHOLDER_OSX_CODE, language.osxCode);
+            .replace(PathUtil.PLACEHOLDER_LANGUAGE, languageMapping.name || language.name)
+            .replace(PathUtil.PLACEHOLDER_LOCALE, languageMapping.locale || language.locale)
+            .replace(PathUtil.PLACEHOLDER_LOCALE_WITH_UNDERSCORE, languageMapping.locale_with_underscore ? languageMapping.locale_with_underscore : language.locale.replace('-', '_'))
+            .replace(PathUtil.PLACEHOLDER_TWO_LETTERS_CODE, languageMapping.two_letters_code || language.twoLettersCode)
+            .replace(PathUtil.PLACEHOLDER_THREE_LETTERS_CODE, languageMapping.three_letters_code || language.threeLettersCode)
+            .replace(PathUtil.PLACEHOLDER_ANDROID_CODE, languageMapping.android_code || language.androidCode)
+            .replace(PathUtil.PLACEHOLDER_OSX_LOCALE, languageMapping.osx_locale || language.osxLocale)
+            .replace(PathUtil.PLACEHOLDER_OSX_CODE, languageMapping.osx_code || language.osxCode);
     }
 
     private static replaceBasePath(path1: string, basePath: string): string {

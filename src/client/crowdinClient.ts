@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
-import Crowdin, { Credentials } from '@crowdin/crowdin-api-client';
+import Crowdin, { Credentials, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
 import { PathUtil } from '../util/pathUtil';
@@ -80,18 +80,32 @@ export class CrowdinClient {
     private async translationFilesToDownload(basePath: string, sourceFilesArr: SourceFiles[]): Promise<string[]> {
         const languagesResp = await this.crowdin.languagesApi.listSupportedLanguages(500);
         const projectResp = await this.crowdin.projectsGroupsApi.getProject(this.projectId);
-        const languages = languagesResp.data.filter(l => projectResp.data.targetLanguageIds.includes(l.data.id));
+        const languageIds = projectResp.data.targetLanguageIds;
+        let languageMapping: ProjectsGroupsModel.LanguageMapping = {};
+        if (this.isProjectSettings(projectResp.data)) {
+            languageMapping = projectResp.data.languageMapping;
+            if (projectResp.data.inContext) {
+                languageIds.push(projectResp.data.inContextPseudoLanguageId);
+            }
+        }
+        const languages = languagesResp.data.filter(l => languageIds.includes(l.data.id));
         const files: string[] = [];
         sourceFilesArr.forEach(sourceFiles => {
             sourceFiles.files.forEach(file => {
                 languages.forEach(language => {
-                    let translationFile = PathUtil.replaceLanguageDependentPlaceholders(sourceFiles.translationPattern, language.data);
+                    const targetLanguageMapping: ProjectsGroupsModel.LanguageMappingEntity = languageMapping[language.data.id] || {};
+                    let translationFile = PathUtil.replaceLanguageDependentPlaceholders(sourceFiles.translationPattern, language.data, targetLanguageMapping);
                     translationFile = PathUtil.replaceFileDependentPlaceholders(translationFile, file, sourceFiles.sourcePattern, basePath);
                     files.push(translationFile);
                 });
             });
         });
         return files.map(file => path.join(basePath, file));
+    }
+
+    private isProjectSettings(data: any): data is ProjectsGroupsModel.ProjectSettings {
+        const project = (<ProjectsGroupsModel.ProjectSettings>data);
+        return project.languageMapping !== undefined || project.inContext !== undefined;
     }
 
     /**

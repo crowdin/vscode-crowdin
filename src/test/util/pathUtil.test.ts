@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import { PathUtil } from '../../util/pathUtil';
-import { LanguagesModel } from '@crowdin/crowdin-api-client';
+import { LanguagesModel, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 
 suite('PathUtil', function () {
 
@@ -59,7 +59,7 @@ suite('PathUtil', function () {
             'textDirection': LanguagesModel.TextDirection.LTR,
             'dialectOf': 0
         };
-        const newTranslation = PathUtil.replaceLanguageDependentPlaceholders(translation, language);
+        const newTranslation = PathUtil.replaceLanguageDependentPlaceholders(translation, language, {} as ProjectsGroupsModel.LanguageMappingEntity);
         assert.equal(newTranslation, '/%original_path%/%file_name%.es.%file_extension%');
     });
 });
