@@ -2,8 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
-import Crowdin, { Credentials } from '@crowdin/crowdin-api-client';
+import Crowdin, { Credentials, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import { Constants } from '../constants';
+import { SourceFiles } from '../model/sourceFiles';
+import { PathUtil } from '../util/pathUtil';
 
 export class CrowdinClient {
 
@@ -32,8 +34,9 @@ export class CrowdinClient {
      * Downloads zip archive from Crowdin system and unzip it in pre-defined folder
      * 
      * @param unzipFolder folder where to unzip downloaded files
+     * @param sourceFilesArr list of sources and translations from configuration file and found source files
      */
-    async download(unzipFolder: string): Promise<any> {
+    async download(unzipFolder: string, sourceFilesArr: SourceFiles[]): Promise<any> {
         try {
             let branchId: number | undefined;
             if (!!this.branch) {
@@ -54,18 +57,55 @@ export class CrowdinClient {
             const downloadLink = await this.crowdin.translationsApi.downloadTranslations(this.projectId, build.data.id);
             const resp = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
             const zip = new AdmZip(resp.data);
-            return new Promise((resolve, reject) => {
-                zip.extractAllToAsync(unzipFolder, true, (error) => {
-                    if (!!error) {
-                        reject(`Failed to unzip translations for project ${this.projectId}. ${error}`);
-                    } else {
-                        resolve();
-                    }
-                });
+
+            const downloadedTranslationFiles = zip.getEntries().filter(entry => !entry.isDirectory);
+            const translationFilesToDownload = await this.translationFilesToDownload(unzipFolder, sourceFilesArr);
+            const filesToUnzip = downloadedTranslationFiles.filter(file => {
+                return translationFilesToDownload.includes(path.join(unzipFolder, file.entryName));
+            });
+
+            filesToUnzip.forEach(file => {
+                const filePath = path.join(unzipFolder, file.entryName);
+                const directory = path.dirname(filePath);
+                if (!fs.existsSync(directory)) {
+                    fs.mkdirSync(directory, { recursive: true });
+                }
+                fs.writeFileSync(filePath, file.getData());
             });
         } catch (error) {
             throw new Error(`Failed to download translations for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
+    }
+
+    private async translationFilesToDownload(basePath: string, sourceFilesArr: SourceFiles[]): Promise<string[]> {
+        const languagesResp = await this.crowdin.languagesApi.listSupportedLanguages(500);
+        const projectResp = await this.crowdin.projectsGroupsApi.getProject(this.projectId);
+        const languageIds = projectResp.data.targetLanguageIds;
+        let languageMapping: ProjectsGroupsModel.LanguageMapping = {};
+        if (this.isProjectSettings(projectResp.data)) {
+            languageMapping = projectResp.data.languageMapping;
+            if (projectResp.data.inContext) {
+                languageIds.push(projectResp.data.inContextPseudoLanguageId);
+            }
+        }
+        const languages = languagesResp.data.filter(l => languageIds.includes(l.data.id));
+        const files: string[] = [];
+        sourceFilesArr.forEach(sourceFiles => {
+            sourceFiles.files.forEach(file => {
+                languages.forEach(language => {
+                    const targetLanguageMapping: ProjectsGroupsModel.LanguageMappingEntity = languageMapping[language.data.id] || {};
+                    let translationFile = PathUtil.replaceLanguageDependentPlaceholders(sourceFiles.translationPattern, language.data, targetLanguageMapping);
+                    translationFile = PathUtil.replaceFileDependentPlaceholders(translationFile, file, sourceFiles.sourcePattern, basePath);
+                    files.push(translationFile);
+                });
+            });
+        });
+        return files.map(file => path.join(basePath, file));
+    }
+
+    private isProjectSettings(data: any): data is ProjectsGroupsModel.ProjectSettings {
+        const project = (<ProjectsGroupsModel.ProjectSettings>data);
+        return project.languageMapping !== undefined || project.inContext !== undefined;
     }
 
     /**

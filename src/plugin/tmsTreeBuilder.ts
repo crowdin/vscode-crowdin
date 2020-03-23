@@ -6,6 +6,7 @@ import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigModel } from '../config/configModel';
 import { Constants } from '../constants';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
+import { SourceFiles } from '../model/sourceFiles';
 
 const asyncGlob = util.promisify(glob);
 
@@ -70,10 +71,23 @@ export class TmsTreeBuilder {
         return matrix;
     }
 
-    static buildRootFolder(workspace: vscode.WorkspaceFolder, config: ConfigModel, childs: Promise<TmsTreeItem[]>) {
+    static async buildRootFolder(workspace: vscode.WorkspaceFolder, config: ConfigModel, childs: Promise<TmsTreeItem[]>): Promise<TmsTreeItem> {
+        const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
+        const promises = config.files
+            .map(async f => {
+                let foundFiles = await asyncGlob(f.source, { root: root });
+                const sourceFiles: SourceFiles = {
+                    files: foundFiles,
+                    sourcePattern: f.source,
+                    translationPattern: f.translation
+                };
+                return sourceFiles;
+            });
+        const sourceFilesArr = await Promise.all(promises);
         return new TmsTreeItem(
             workspace, workspace.name, vscode.TreeItemCollapsibleState.Collapsed,
-            childs, config, workspace.uri.fsPath, TmsTreeItemContextValue.ROOT, workspace.uri.fsPath
+            childs, config, workspace.uri.fsPath, TmsTreeItemContextValue.ROOT, workspace.uri.fsPath,
+            sourceFilesArr
         );
     }
 
@@ -85,7 +99,7 @@ export class TmsTreeBuilder {
         };
         return new TmsTreeItem(
             workspace, label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]), config,
-            workspace.uri.fsPath, TmsTreeItemContextValue.FILE, filePath, true, command, translation, source
+            workspace.uri.fsPath, TmsTreeItemContextValue.FILE, filePath, [], true, command, translation, source
         );
     }
 

@@ -77,7 +77,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 try {
                     const config = await configProvider.load();
                     configFiles.push(config.configPath);
-                    const rootTreeFolder = TmsTreeBuilder.buildRootFolder(workspace, config, TmsTreeBuilder.buildSubTree(config, workspace));
+                    const rootTreeFolder = await TmsTreeBuilder.buildRootFolder(workspace, config, TmsTreeBuilder.buildSubTree(config, workspace));
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
                 }
