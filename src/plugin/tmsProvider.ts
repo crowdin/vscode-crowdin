@@ -69,7 +69,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         }
     }
 
-    private async buildRootTree(workspaceFolders: vscode.WorkspaceFolder[]): Promise<TmsTreeItem[]> {
+    private async buildRootTree(workspaceFolders: readonly vscode.WorkspaceFolder[]): Promise<TmsTreeItem[]> {
         let configFiles: string[] = [];
         const promises = workspaceFolders
             .map(async workspace => {
