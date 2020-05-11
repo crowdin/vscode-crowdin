@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { TmsTreeItem } from './tmsTreeItem';
 import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
-import { TmsTreeBuilder } from './tmsTreeBuilder';
 import { ErrorHandler } from '../util/errorHandler';
+import { TmsTreeBuilder } from './tmsTreeBuilder';
+import { TmsTreeItem } from './tmsTreeItem';
 
 export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
 
@@ -75,8 +75,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             .map(async workspace => {
                 const configProvider = new ConfigProvider(workspace);
                 try {
+                    const configPath = await configProvider.getFile();
+                    if (!!configPath) {
+                        configFiles.push(configPath);
+                    }
                     const config = await configProvider.load();
-                    configFiles.push(config.configPath);
                     const rootTreeFolder = await TmsTreeBuilder.buildRootFolder(workspace, config, TmsTreeBuilder.buildSubTree(config, workspace));
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
