@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
-import * as yaml from 'yaml';
 import * as vscode from 'vscode';
+import * as yaml from 'yaml';
 import { ConfigModel } from './configModel';
 import { FileModel } from './fileModel';
 
@@ -25,8 +25,14 @@ export class ConfigProvider {
         const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
+        if (!config.project_id) {
+            throw new Error(`Missing "project_id" property in ${this.workspace.name}`);
+        }
         if (isNaN(Number(config.project_id))) {
-            throw new Error(`Invalid project id in ${this.workspace.name}`);
+            throw new Error(`Project id is not a number in ${this.workspace.name}`);
+        }
+        if (!config.api_token) {
+            throw new Error(`Missing "api_token" property in ${this.workspace.name}`);
         }
         let organization: string | undefined;
         if (!!config.base_url) {
@@ -53,7 +59,7 @@ export class ConfigProvider {
         };
     }
 
-    async getFile(): Promise<string> {
+    async getFile(): Promise<string | undefined> {
         for (let i = 0; i < this.fileNames().length; i++) {
             const filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
             const exists = await asyncFileExists(filePath);
