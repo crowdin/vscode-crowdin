@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import Crowdin, { Credentials, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
-import Crowdin, { Credentials, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
 import { PathUtil } from '../util/pathUtil';
@@ -157,7 +157,7 @@ export class CrowdinClient {
                             parentId = dir;
                         } else {
                             const resp = await this.crowdin.sourceFilesApi.createDirectory(this.projectId, {
-                                branchId: branchId,
+                                branchId: (!!parentId ? undefined : branchId),
                                 directoryId: parentId,
                                 name: folder
                             });
@@ -200,6 +200,7 @@ export class CrowdinClient {
                 });
             } else {
                 await this.crowdin.sourceFilesApi.createFile(this.projectId, {
+                    branchId: (!!parentId ? undefined : branchId),
                     directoryId: parentId,
                     name: fileName,
                     storageId: storageId,
