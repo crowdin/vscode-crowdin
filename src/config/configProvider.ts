@@ -25,15 +25,47 @@ export class ConfigProvider {
         const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
-        if (!config.project_id) {
+        return this.validateAndGet(config, filePath);
+    }
+
+    async getFile(): Promise<string | undefined> {
+        for (let i = 0; i < this.fileNames().length; i++) {
+            const filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
+            const exists = await asyncFileExists(filePath);
+            if (exists) {
+                return filePath;
+            }
+        }
+        return undefined as unknown as string;
+    }
+
+    private validateAndGet(config: PrivateConfigModel, filePath: string): ConfigModel {
+        const projectId: string | undefined = this.getOrEnv(config, 'project_id', 'project_id_env');
+        if (!projectId) {
             throw new Error(`Missing "project_id" property in ${this.workspace.name}`);
         }
-        if (isNaN(Number(config.project_id))) {
+        if (isNaN(Number(projectId))) {
             throw new Error(`Project id is not a number in ${this.workspace.name}`);
         }
-        if (!config.api_token) {
+        const apiKey: string | undefined = this.getOrEnv(config, 'api_token', 'api_token_env');
+        if (!apiKey) {
             throw new Error(`Missing "api_token" property in ${this.workspace.name}`);
         }
+        const basePath = this.getOrEnv(config, 'base_path', 'base_path_env');
+        if (!!basePath) {
+            const fullPath = path.join(this.workspace.uri.fsPath, basePath);
+            if (!fs.existsSync(fullPath)) {
+                throw Error(`Base path ${fullPath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`);
+            }
+        }
+        config.files.forEach(file => {
+            if (this.isEmpty(file.source)) {
+                throw Error(`File source is empty in ${this.workspace.name}`);
+            }
+            if (this.isEmpty(file.translation)) {
+                throw Error(`File translation is empty in ${this.workspace.name}`);
+            }
+        });
         let organization: string | undefined;
         if (!!config.base_url) {
             if ((config.base_url.endsWith('.crowdin.com') || config.base_url.endsWith('.crowdin.com/'))
@@ -50,47 +82,13 @@ export class ConfigProvider {
         }
         return {
             configPath: filePath,
-            projectId: parseInt(config.project_id),
-            apiKey: config.api_token,
+            projectId: parseInt(projectId || ''),
+            apiKey: apiKey || '',
             branch: config.branch,
-            basePath: config.base_path,
+            basePath,
             files: config.files,
             organization: organization
         };
-    }
-
-    async getFile(): Promise<string | undefined> {
-        for (let i = 0; i < this.fileNames().length; i++) {
-            const filePath = path.join(this.workspace.uri.fsPath, this.fileNames()[i]);
-            const exists = await asyncFileExists(filePath);
-            if (exists) {
-                return filePath;
-            }
-        }
-        return undefined as unknown as string;
-    }
-
-    validate(config: ConfigModel): void {
-        if (this.isEmpty(config.apiKey)) {
-            throw Error(`Api token is empty in ${this.workspace.name}`);
-        }
-        if (!config.projectId || config.projectId === 0) {
-            throw Error(`Project id is empty in ${this.workspace.name}`);
-        }
-        if (!!config.basePath) {
-            const basePath = path.join(this.workspace.uri.fsPath, config.basePath);
-            if (!fs.existsSync(basePath)) {
-                throw Error(`Base path ${basePath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`);
-            }
-        }
-        config.files.forEach(file => {
-            if (this.isEmpty(file.source)) {
-                throw Error(`File source is empty in ${this.workspace.name}`);
-            }
-            if (this.isEmpty(file.translation)) {
-                throw Error(`File translation is empty in ${this.workspace.name}`);
-            }
-        });
     }
 
     protected fileNames(): string[] {
@@ -100,13 +98,26 @@ export class ConfigProvider {
     private isEmpty(prop: string): boolean {
         return !prop || prop.length === 0;
     }
+
+    private getOrEnv(obj: any, key: string, envKey: string): string | undefined {
+        if (!!obj[key]) {
+            return obj[key];
+        }
+        if (!!obj[envKey]) {
+            return process.env[obj[envKey]];
+        }
+    }
 }
 
 interface PrivateConfigModel {
     project_id: string;
+    project_id_env: string;
     base_url?: string;
+    base_url_env?: string;
     api_token: string;
+    api_token_env: string;
     branch?: string;
     base_path?: string;
+    base_path_env?: string;
     files: FileModel[];
 }

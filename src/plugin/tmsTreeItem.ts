@@ -1,13 +1,12 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
-import { ConfigModel } from '../config/configModel';
+import * as vscode from 'vscode';
 import { CrowdinClient } from '../client/crowdinClient';
-import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
-import { ConfigProvider } from '../config/configProvider';
+import { ConfigModel } from '../config/configModel';
 import { Constants } from '../constants';
+import { SourceFiles } from '../model/sourceFiles';
 import { ErrorHandler } from '../util/errorHandler';
 import { PathUtil } from '../util/pathUtil';
-import { SourceFiles } from '../model/sourceFiles';
+import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 
 export class TmsTreeItem extends vscode.TreeItem {
 
@@ -44,7 +43,6 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     async update(): Promise<void> {
-        new ConfigProvider(this.workspace).validate(this.config);
         let unzipFolder = this.rootPath;
         if (!!this.config.basePath) {
             unzipFolder = path.join(unzipFolder, this.config.basePath);
@@ -53,7 +51,6 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     async save(progress: boolean = false): Promise<void> {
-        new ConfigProvider(this.workspace).validate(this.config);
         const arr = await this.childs;
         if (progress) {
             let title = this.isLeaf
