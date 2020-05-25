@@ -41,10 +41,10 @@ You also can use environment variables in configuration file [Environmet variabl
 
 ```json
 "project_id_env": "CROWDIN_PROJECT_ID"
-"api_token_env": "apiToken"
-"base_path_env": "folder" // optional
+"api_token_env": "CROWDIN_PERSONAL_TOKEN"
+"base_path_env": "CROWDIN_BASE_PATH" // optional
 "branch": "master" // optional
-"base_url_env": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)
+"base_url_env": "CROWDIN_BASE_URL" // optional (not needed for non-enterprise usage)
 
 "files": [
   {
