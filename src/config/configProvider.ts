@@ -67,12 +67,13 @@ export class ConfigProvider {
             }
         });
         let organization: string | undefined;
-        if (!!config.base_url) {
-            if ((config.base_url.endsWith('.crowdin.com') || config.base_url.endsWith('.crowdin.com/'))
-                && config.base_url.startsWith('https://')) {
+        const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
+        if (!!baseUrl) {
+            if ((baseUrl.endsWith('.crowdin.com') || baseUrl.endsWith('.crowdin.com/'))
+                && baseUrl.startsWith('https://')) {
                 //enterprise
-                organization = config.base_url.substring(8).split('.crowdin.com')[0];
-            } else if (config.base_url.startsWith('https://crowdin.com')) {
+                organization = baseUrl.substring(8).split('.crowdin.com')[0];
+            } else if (baseUrl.startsWith('https://crowdin.com')) {
                 //standard
                 organization = undefined;
             } else {
