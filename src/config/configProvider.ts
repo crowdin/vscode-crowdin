@@ -25,38 +25,7 @@ export class ConfigProvider {
         const file = await asyncReadFile(filePath, 'utf8');
         const config = yaml.parse(file) as PrivateConfigModel;
 
-        if (!config.project_id) {
-            throw new Error(`Missing "project_id" property in ${this.workspace.name}`);
-        }
-        if (isNaN(Number(config.project_id))) {
-            throw new Error(`Project id is not a number in ${this.workspace.name}`);
-        }
-        if (!config.api_token) {
-            throw new Error(`Missing "api_token" property in ${this.workspace.name}`);
-        }
-        let organization: string | undefined;
-        if (!!config.base_url) {
-            if ((config.base_url.endsWith('.crowdin.com') || config.base_url.endsWith('.crowdin.com/'))
-                && config.base_url.startsWith('https://')) {
-                //enterprise
-                organization = config.base_url.substring(8).split('.crowdin.com')[0];
-            } else if (config.base_url.startsWith('https://crowdin.com')) {
-                //standard
-                organization = undefined;
-            } else {
-                //unknown url
-                throw new Error(`Invalid base url in ${this.workspace.name}`);
-            }
-        }
-        return {
-            configPath: filePath,
-            projectId: parseInt(config.project_id),
-            apiKey: config.api_token,
-            branch: config.branch,
-            basePath: config.base_path,
-            files: config.files,
-            organization: organization
-        };
+        return this.validateAndGet(config, filePath);
     }
 
     async getFile(): Promise<string | undefined> {
@@ -70,17 +39,23 @@ export class ConfigProvider {
         return undefined as unknown as string;
     }
 
-    validate(config: ConfigModel): void {
-        if (this.isEmpty(config.apiKey)) {
-            throw Error(`Api token is empty in ${this.workspace.name}`);
+    private validateAndGet(config: PrivateConfigModel, filePath: string): ConfigModel {
+        const projectId: string | undefined = this.getOrEnv(config, 'project_id', 'project_id_env');
+        if (!projectId) {
+            throw new Error(`Missing "project_id" property in ${this.workspace.name}`);
         }
-        if (!config.projectId || config.projectId === 0) {
-            throw Error(`Project id is empty in ${this.workspace.name}`);
+        if (isNaN(Number(projectId))) {
+            throw new Error(`Project id is not a number in ${this.workspace.name}`);
         }
-        if (!!config.basePath) {
-            const basePath = path.join(this.workspace.uri.fsPath, config.basePath);
-            if (!fs.existsSync(basePath)) {
-                throw Error(`Base path ${basePath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`);
+        const apiKey: string | undefined = this.getOrEnv(config, 'api_token', 'api_token_env');
+        if (!apiKey) {
+            throw new Error(`Missing "api_token" property in ${this.workspace.name}`);
+        }
+        const basePath = this.getOrEnv(config, 'base_path', 'base_path_env');
+        if (!!basePath) {
+            const fullPath = path.join(this.workspace.uri.fsPath, basePath);
+            if (!fs.existsSync(fullPath)) {
+                throw Error(`Base path ${fullPath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`);
             }
         }
         config.files.forEach(file => {
@@ -91,6 +66,30 @@ export class ConfigProvider {
                 throw Error(`File translation is empty in ${this.workspace.name}`);
             }
         });
+        let organization: string | undefined;
+        const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
+        if (!!baseUrl) {
+            if ((baseUrl.endsWith('.crowdin.com') || baseUrl.endsWith('.crowdin.com/'))
+                && baseUrl.startsWith('https://')) {
+                //enterprise
+                organization = baseUrl.substring(8).split('.crowdin.com')[0];
+            } else if (baseUrl.startsWith('https://crowdin.com')) {
+                //standard
+                organization = undefined;
+            } else {
+                //unknown url
+                throw new Error(`Invalid base url in ${this.workspace.name}`);
+            }
+        }
+        return {
+            configPath: filePath,
+            projectId: parseInt(projectId || ''),
+            apiKey: apiKey || '',
+            branch: config.branch,
+            basePath,
+            files: config.files,
+            organization: organization
+        };
     }
 
     protected fileNames(): string[] {
@@ -100,13 +99,30 @@ export class ConfigProvider {
     private isEmpty(prop: string): boolean {
         return !prop || prop.length === 0;
     }
+
+    private getOrEnv(obj: any, key: string, envKey: string): string | undefined {
+        if (!!obj[key]) {
+            return obj[key];
+        }
+        if (!!obj[envKey]) {
+            const envValue = process.env[obj[envKey]];
+            if (!envValue) {
+                throw new Error(`The environment variable "${obj[envKey]}" is not set`);
+            }
+            return process.env[obj[envKey]];
+        }
+    }
 }
 
 interface PrivateConfigModel {
     project_id: string;
+    project_id_env: string;
     base_url?: string;
+    base_url_env?: string;
     api_token: string;
+    api_token_env: string;
     branch?: string;
     base_path?: string;
+    base_path_env?: string;
     files: FileModel[];
 }

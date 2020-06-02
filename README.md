@@ -37,6 +37,24 @@ Configuration file example:
 ]
 ```
 
+You also can use environment variables in configuration file [Environmet variables](https://support.crowdin.com/configuration-file/#api-credentials-from-environment-variables):
+
+```json
+"project_id_env": "CROWDIN_PROJECT_ID"
+"api_token_env": "CROWDIN_PERSONAL_TOKEN"
+"base_path_env": "CROWDIN_BASE_PATH" // optional
+"branch": "master" // optional
+"base_url_env": "CROWDIN_BASE_URL" // optional (not needed for non-enterprise usage)
+
+"files": [
+  {
+    "source": "/sources/**/*.xml",
+    "translation": "/translations/%two_letters_code%/%original_file_name%"
+  }
+]
+```
+
+
 Project ID can be found in your project settings page.
 
 To generate a new API token in Crowdin, go to your Account Settings.

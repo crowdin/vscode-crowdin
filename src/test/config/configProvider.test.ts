@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { ConfigProvider } from '../../config/configProvider';
 
 suite('Configuration file', function () {
@@ -33,7 +33,6 @@ suite('Configuration file', function () {
         const file = 'valid_crowdin.yaml';
         const provider = new TestConfigProvider(workspace, file);
         const config = await provider.load();
-        provider.validate(config);
         assert.equal('123', config.projectId);
         assert.equal('456', config.apiKey);
         assert.equal('master', config.branch);
@@ -46,7 +45,6 @@ suite('Configuration file', function () {
         const provider = new TestConfigProvider(workspace, file);
         try {
             const config = await provider.load();
-            provider.validate(config);
         } catch (e) {
             return;
         }
