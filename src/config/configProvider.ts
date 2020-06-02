@@ -105,6 +105,10 @@ export class ConfigProvider {
             return obj[key];
         }
         if (!!obj[envKey]) {
+            const envValue = process.env[obj[envKey]];
+            if (!envValue) {
+                throw new Error(`The environment variable "${obj[envKey]}" is not set`);
+            }
             return process.env[obj[envKey]];
         }
     }
