@@ -1,13 +1,17 @@
-# Crowdin Visual Studio Code Plugin
+[<p align="center"><img src="https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png" data-canonical-src="https://support.crowdin.com/assets/logos/crowdin-dark-symbol.png" width="200" height="200" align="center"/></p>](https://crowdin.com)
+
+# Crowdin Visual Studio Code Plugin [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fcrowdin%2Fvscode-crowdin&text=Manage%20and%20synchronize%20your%20localization%20resources%20with%20Crowdin%20project%20instantly%20from%20Visual%20Studio%20Code)
+
+Integrate your Visual Studio Code projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project and downloading translations.
+
+[Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
+
+## Status
 
 [![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/Crowdin.vscode-crowdin?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 [![Visual Studio Marketplace Downloads](https://badgen.net/vs-marketplace/d/Crowdin.vscode-crowdin?cache=1000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 [![Visual Studio Marketplace Rating (Stars)](https://img.shields.io/visual-studio-marketplace/stars/Crowdin.vscode-crowdin?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin&ssr=false#review-details)
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/Crowdin.vscode-crowdin?cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
-
-Integrate your Visual Studio Code projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project and downloading translations.
-
-[Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 
 ## Features
 
@@ -85,25 +89,18 @@ This extension contributes the following settings:
 
 At the moment plugin is not support all possible properties in configuration file (see [Configuration file](https://support.crowdin.com/configuration-file-v3/)). All properties which are supported by this plugin are listed in the example above.
 
-## Contribution
-We are happy to accept contributions to the Crowdin Visual Studio Code Plugin. To contribute please do the following:
-1. Fork the repository on GitHub.
-2. Decide which code you want to submit. Commit your changes and push to the new branch.
-3. Ensure that your code adheres to standard conventions, as used in the rest of the library.
-4. Ensure that there are unit tests for your code.
-5. Submit a pull request with your patch on Github.
-
 ## Seeking Assistance
 
-If you find any problems or would like to suggest a feature, please feel free to file an issue on Github at [Issues Page](https://github.com/crowdin/vscode-crowdin/issues).
+If you find any problems or would like to suggest a feature, please read the [How can I contribute](/CONTRIBUTING.md#how-can-i-contribute) section in our contributing guidelines.
 
-Need help working with Crowdin Visual Studio Code Plugin or have any questions?
-[Contact Customer Success Service](https://crowdin.com/contacts).
+Need help working with Crowdin Visual Studio Code Plugin or have any questions? [Contact](https://crowdin.com/contacts) Customer Success Service.
+
+## Contributing
+
+We are happy to accept contributions to the Crowdin Visual Studio Code Plugin. If you want to contribute please read the [Contributing](/CONTRIBUTING.md) guidelines.
 
 ## License
 <pre>
-Copyright © 2020 Crowdin
-
 The Crowdin Visual Studio Code Plugin is licensed under the MIT License.
 See the LICENSE file distributed with this work for additional
 information regarding copyright ownership.
