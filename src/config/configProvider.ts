@@ -1,3 +1,4 @@
+import { SourceFilesModel } from '@crowdin/crowdin-api-client';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
@@ -65,6 +66,9 @@ export class ConfigProvider {
             if (this.isEmpty(file.translation)) {
                 throw Error(`File translation is empty in ${this.workspace.name}`);
             }
+            if (file.update_option && !this.getFileUpdateOption(file.update_option)) {
+                throw Error(`Invalid file update option value in ${this.workspace.name}`);
+            }
         });
         let organization: string | undefined;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
@@ -87,7 +91,13 @@ export class ConfigProvider {
             apiKey: apiKey || '',
             branch: config.branch,
             basePath,
-            files: config.files,
+            files: config.files.map(f => {
+                return {
+                    source: f.source,
+                    translation: f.translation,
+                    updateOption: this.getFileUpdateOption(f.update_option)
+                } as FileModel;
+            }),
             organization: organization
         };
     }
@@ -112,6 +122,15 @@ export class ConfigProvider {
             return process.env[obj[envKey]];
         }
     }
+
+    private getFileUpdateOption(value?: string): SourceFilesModel.UpdateOption | undefined {
+        switch (value) {
+            case 'update_as_unapproved':
+                return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS;
+            case 'update_without_changes':
+                return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS_AND_APPROVALS;
+        }
+    }
 }
 
 interface PrivateConfigModel {
@@ -124,5 +143,11 @@ interface PrivateConfigModel {
     branch?: string;
     base_path?: string;
     base_path_env?: string;
-    files: FileModel[];
+    files: PrivateFileModel[];
+}
+
+interface PrivateFileModel {
+    source: string;
+    translation: string;
+    update_option?: string;
 }
