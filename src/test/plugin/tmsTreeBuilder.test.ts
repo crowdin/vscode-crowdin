@@ -1,9 +1,10 @@
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { ConfigModel } from '../../config/configModel';
-import { TmsTreeBuilder } from '../../plugin/tmsTreeBuilder';
+import { FileModel } from '../../config/fileModel';
 import { Constants } from '../../constants';
+import { TmsTreeBuilder } from '../../plugin/tmsTreeBuilder';
 
 suite("Plugin tree", function () {
 
@@ -42,13 +43,13 @@ suite("Plugin tree", function () {
 
     test('Build files matrix', async () => {
         const matrix = await TmsTreeBuilder.buildFilesMatrix(config, workspace);
-        assert.equal(3, matrix.length);
+        assert.strictEqual(3, matrix.length);
         const level1 = matrix[0];
         const level2 = matrix[1];
         const level3 = matrix[2];
-        assert.equal(1, level1.size);
-        assert.equal(1, level2.size);
-        assert.equal(1, level3.size);
+        assert.strictEqual(1, level1.size);
+        assert.strictEqual(1, level2.size);
+        assert.strictEqual(1, level3.size);
         testMatrix(level1, 'folder1', undefined, config.files[0].translation, false);
         testMatrix(level2, path.join('folder1', 'folder2'), 'folder1', config.files[0].translation, false);
         testMatrix(level3, path.join('folder1', 'folder2', '3.txt'), path.join('folder1', 'folder2'), config.files[0].translation, true);
@@ -56,24 +57,24 @@ suite("Plugin tree", function () {
 
     test('Build subtree', async () => {
         const tree = await TmsTreeBuilder.buildSubTree(config, workspace);
-        assert.equal(1, tree.length);
+        assert.strictEqual(1, tree.length);
         const subtree1 = await tree[0].childs;
-        assert.equal(1, subtree1.length);
+        assert.strictEqual(1, subtree1.length);
         const subtree2 = subtree1[0];
         const childs = await subtree2.childs;
-        assert.equal(1, childs.length);
+        assert.strictEqual(1, childs.length);
         const leaf = childs[0];
-        assert.equal('3.txt', leaf.label);
+        assert.strictEqual('3.txt', leaf.label);
     });
 
 });
 
-function testMatrix(map: Map<string, [string | undefined, string, string, boolean, string]>,
+function testMatrix(map: Map<string, [string | undefined, string, boolean, FileModel]>,
     key: string, parent: string | undefined, translation: string, isLeaf: boolean) {
-    const [parent1, translation1, fullPath1, isLeaf1] = map.get(key) || ['', '', '', '', false];
-    assert.equal(parent1, parent);
-    assert.equal(translation1, translation);
-    assert.equal(isLeaf1, isLeaf);
+    const [parent1, fullPath1, isLeaf1, file] = map.get(key) || ['', '', false, {} as FileModel];
+    assert.strictEqual(parent1, parent);
+    assert.strictEqual(file.translation, translation);
+    assert.strictEqual(isLeaf1, isLeaf);
 }
 
 class TestContext implements vscode.ExtensionContext {

@@ -1,4 +1,4 @@
-import Crowdin, { Credentials, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
+import Crowdin, { Credentials, ProjectsGroupsModel, SourceFilesModel } from '@crowdin/crowdin-api-client';
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
 import * as fs from 'fs';
@@ -114,8 +114,9 @@ export class CrowdinClient {
      * @param fsPath full path to file
      * @param exportPattern file export pattern
      * @param file file path in crowdin system
+     * @param uploadOption upload option
      */
-    async upload(fsPath: string, exportPattern: string, file: string): Promise<any> {
+    async upload(fsPath: string, exportPattern: string, file: string, uploadOption?: SourceFilesModel.UpdateOption): Promise<any> {
         let branchId: number | undefined;
 
         if (!!this.branch) {
@@ -194,6 +195,7 @@ export class CrowdinClient {
             if (!!foundFile) {
                 await this.crowdin.sourceFilesApi.updateOrRestoreFile(this.projectId, foundFile.data.id, {
                     storageId: storageId,
+                    updateOption: uploadOption,
                     exportOptions: {
                         exportPattern: exportPattern
                     }

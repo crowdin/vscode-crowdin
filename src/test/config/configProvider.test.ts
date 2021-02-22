@@ -1,3 +1,4 @@
+import { SourceFilesModel } from '@crowdin/crowdin-api-client';
 import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -33,11 +34,13 @@ suite('Configuration file', function () {
         const file = 'valid_crowdin.yaml';
         const provider = new TestConfigProvider(workspace, file);
         const config = await provider.load();
-        assert.equal('123', config.projectId);
-        assert.equal('456', config.apiKey);
-        assert.equal('master', config.branch);
-        assert.equal('testOrg', config.organization);
-        assert.equal(1, config.files.length);
+        assert.strictEqual(123, config.projectId);
+        assert.strictEqual('456', config.apiKey);
+        assert.strictEqual('master', config.branch);
+        assert.strictEqual('testOrg', config.organization);
+        assert.strictEqual(2, config.files.length);
+        assert.strictEqual(SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS, config.files[0].updateOption);
+        assert.strictEqual(false, !!config.files[1].updateOption);
     });
 
     test('Load invalid config', async () => {

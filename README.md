@@ -37,7 +37,8 @@ Configuration file example:
 "files": [
   {
     "source": "/sources/**/*.xml",
-    "translation": "/translations/%two_letters_code%/%original_file_name%"
+    "translation": "/translations/%two_letters_code%/%original_file_name%",
+    "update_option": "update_as_unapproved" // optional
   }
 ]
 ```
@@ -54,7 +55,8 @@ You also can use environment variables in configuration file [Environmet variabl
 "files": [
   {
     "source": "/sources/**/*.xml",
-    "translation": "/translations/%two_letters_code%/%original_file_name%"
+    "translation": "/translations/%two_letters_code%/%original_file_name%",
+    "update_option": "update_as_unapproved" // optional
   }
 ]
 ```
