@@ -89,7 +89,7 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-At the moment plugin is not support all possible properties in configuration file (see [Configuration file](https://support.crowdin.com/configuration-file-v3/)). All properties which are supported by this plugin are listed in the example above.
+At the moment, plugin does not support all possible properties in configuration file (see [Configuration file](https://support.crowdin.com/configuration-file-v3/)). All properties which are supported by this plugin are listed in the example above.
 
 ## Seeking Assistance
 
@@ -99,7 +99,7 @@ Need help working with Crowdin Visual Studio Code Plugin or have any questions? 
 
 ## Contributing
 
-We are happy to accept contributions to the Crowdin Visual Studio Code Plugin. If you want to contribute please read the [Contributing](/CONTRIBUTING.md) guidelines.
+We are happy to accept contributions to the Crowdin Visual Studio Code Plugin. If you want to contribute, please read the [Contributing](/CONTRIBUTING.md) guidelines.
 
 ## License
 <pre>
