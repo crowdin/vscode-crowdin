@@ -2,10 +2,10 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as util from 'util';
 import * as vscode from 'vscode';
-import { ConfigModel } from '../config/configModel';
-import { FileModel } from '../config/fileModel';
-import { Constants } from '../constants';
-import { SourceFiles } from '../model/sourceFiles';
+import { ConfigModel } from '../../config/configModel';
+import { FileModel } from '../../config/fileModel';
+import { Constants } from '../../constants';
+import { SourceFiles } from '../../model/sourceFiles';
 import { TmsTreeItem } from './tmsTreeItem';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 

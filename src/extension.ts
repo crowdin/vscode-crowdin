@@ -1,12 +1,24 @@
 import * as vscode from 'vscode';
-import { TmsProvider } from './plugin/tmsProvider';
-import { TmsTreeItem } from './plugin/tmsTreeItem';
 import { Constants } from './constants';
+import { ConfigurationListener, CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
+import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
+import { TmsProvider } from './plugin/tms/tmsProvider';
+import { TmsTreeItem } from './plugin/tms/tmsTreeItem';
 
 export function activate(context: vscode.ExtensionContext) {
 	Constants.initialize(context);
 
-	const tmsProvider = new TmsProvider();
+	const configHolder = new CrowdinConfigHolder();
+	const tmsProvider = new TmsProvider(configHolder);
+	const progressProvider = new ProgressTreeProvider(configHolder);
+	const listener: ConfigurationListener = {
+		configsUpdate: () => {
+			tmsProvider.update();
+			progressProvider.refresh();
+		}
+	}
+	configHolder.addListener(listener);
+	configHolder.load();
 
 	vscode.window.registerTreeDataProvider('tmsFiles', tmsProvider);
 

@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ConfigModel } from '../../config/configModel';
-import { FileModel } from '../../config/fileModel';
-import { Constants } from '../../constants';
-import { TmsTreeBuilder } from '../../plugin/tmsTreeBuilder';
+import { ConfigModel } from '../../../config/configModel';
+import { FileModel } from '../../../config/fileModel';
+import { Constants } from '../../../constants';
+import { TmsTreeBuilder } from '../../../plugin/tms/tmsTreeBuilder';
 
 suite("Plugin tree", function () {
 
