@@ -5,6 +5,7 @@ import { ConfigModel } from '../../config/configModel';
 import { FileModel } from '../../config/fileModel';
 import { Constants } from '../../constants';
 import { SourceFiles } from '../../model/sourceFiles';
+import { CommonUtil } from '../../util/commonUtil';
 import { ErrorHandler } from '../../util/errorHandler';
 import { PathUtil } from '../../util/pathUtil';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
@@ -56,7 +57,7 @@ export class TmsTreeItem extends vscode.TreeItem {
             let title = this.isLeaf
                 ? `Uploading file ${this.label}`
                 : `Uploading files in ${this.label}`;
-            vscode.window.withProgress(
+            const thenable = vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
                     title: title
@@ -65,6 +66,7 @@ export class TmsTreeItem extends vscode.TreeItem {
                     return this._save(arr).catch(e => ErrorHandler.handleError(e));
                 }
             );
+            return CommonUtil.toPromise(thenable);
         } else {
             return this._save(arr);
         }

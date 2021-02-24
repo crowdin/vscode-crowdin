@@ -54,7 +54,7 @@
 					"name": "TMS Files"
 				},
 				{
-					"id": "crowdinProgress",
+					"id": "translationProgress",
 					"name": "Progress"
 				}
 			]
@@ -107,6 +107,14 @@
 					"light": "resources/light/edit.svg",
 					"dark": "resources/dark/edit.svg"
 				}
+			},
+			{
+				"command": "translationProgress.refresh",
+				"title": "Refresh progress",
+				"icon": {
+					"light": "resources/light/update.svg",
+					"dark": "resources/dark/update.svg"
+				}
 			}
 		],
 		"menus": {
@@ -125,6 +133,11 @@
 					"command": "tmsFiles.downloadAll",
 					"when": "view == tmsFiles",
 					"group": "navigation@2"
+				},
+				{
+					"command": "translationProgress.refresh",
+					"when": "view == translationProgress",
+					"group": "navigation@0"
 				}
 			],
 			"view/item/context": [

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { CommonUtil } from '../../util/commonUtil';
 import { ErrorHandler } from '../../util/errorHandler';
 import { CrowdinConfigHolder } from '../crowdinConfigHolder';
 import { TmsTreeBuilder } from './tmsTreeBuilder';
@@ -36,12 +37,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         );
     }
 
-    save(item?: TmsTreeItem): void {
+    save(item?: TmsTreeItem): Promise<any> {
         if (!!item) {
-            item.save(true).catch(e => ErrorHandler.handleError(e));
-            return;
+            return item.save(true).catch(e => ErrorHandler.handleError(e));
         }
-        vscode.window.withProgress(
+        const thenable = vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
                 title: `Uploading all files...`
@@ -51,6 +51,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 return Promise.all(promises);
             }
         );
+        return CommonUtil.toPromise(thenable);
     }
 
     getTreeItem(element: TmsTreeItem): vscode.TreeItem {

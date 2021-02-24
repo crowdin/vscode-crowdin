@@ -30,7 +30,7 @@ suite("Plugin tree", function () {
                 scheme: '',
                 authority: '',
                 fragment: '',
-                fsPath: path.join(__dirname, '..', '..', '..', 'test-resources', 'tree'),
+                fsPath: path.join(__dirname, '..', '..', '..', '..', 'test-resources', 'tree'),
                 path: '',
                 query: '',
                 toJSON: () => { },
