@@ -1,5 +1,7 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { CrowdinClient } from '../../client/crowdinClient';
+import { Constants } from '../../constants';
 import { ErrorHandler } from '../../util/errorHandler';
 import { CrowdinConfigHolder } from '../crowdinConfigHolder';
 import { ProgressTreeItem } from './progressTreeItem';
@@ -23,7 +25,7 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
     getChildren(element?: ProgressTreeItem): Thenable<any[]> {
         if (!element) {
             const promises = Array.from(this.configHolder.configurations)
-                .map(async ([config]) => {
+                .map(async ([config, workspace]) => {
                     try {
                         const client = new CrowdinClient(
                             config.projectId, config.apiKey, config.branch, config.organization
@@ -41,18 +43,20 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
                                     new ProgressTreeItem(
                                         `Translated ${languageProgress.data.translationProgress}%`,
                                         vscode.TreeItemCollapsibleState.None,
-                                        Promise.resolve([])
+                                        Promise.resolve([]),
+                                        Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'common', 'translated.svg'))
                                     ),
                                     new ProgressTreeItem(
                                         `Approved ${languageProgress.data.approvalProgress}%`,
                                         vscode.TreeItemCollapsibleState.None,
-                                        Promise.resolve([])
+                                        Promise.resolve([]),
+                                        Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'common', 'approved.svg'))
                                     )
                                 ])
                             );
                         });
                         return new ProgressTreeItem(
-                            project.data.name,
+                            `${workspace.name} (project ${project.data.name})`,
                             vscode.TreeItemCollapsibleState.Collapsed,
                             Promise.resolve(languagesProgress)
                         );
