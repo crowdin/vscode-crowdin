@@ -20,7 +20,7 @@ Plugin will scan each workspace for Crowdin specific configuration file and will
 In *Crowdin Explorer* you can upload those files into Crowdin and download translations.
 And also track progress of translated and approved strings for each project and target language.
 
-![Plugin](resources/plugin.png)
+[<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="350" height="auto" align="center"/></p>](https://support.crowdin.com/visual-studio-code-plugin/)
 
 ## Configuration
 
