@@ -33,7 +33,7 @@ Configuration file example:
 "api_token": "apiToken"
 "base_path": "folder" // optional
 "branch": "master" // optional
-"base_url": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)
+"base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
 
 "files": [
   {
@@ -51,7 +51,7 @@ You also can use environment variables in configuration file [Environmet variabl
 "api_token_env": "CROWDIN_PERSONAL_TOKEN"
 "base_path_env": "CROWDIN_BASE_PATH" // optional
 "branch": "master" // optional
-"base_url_env": "CROWDIN_BASE_URL" // optional (not needed for non-enterprise usage)
+"base_url_env": "CROWDIN_BASE_URL" // optional (for Crowdin Enterprise only)
 
 "files": [
   {
