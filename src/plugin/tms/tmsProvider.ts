@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { ConfigProvider } from '../config/configProvider';
-import { Constants } from '../constants';
-import { ErrorHandler } from '../util/errorHandler';
+import { CommonUtil } from '../../util/commonUtil';
+import { ErrorHandler } from '../../util/errorHandler';
+import { CrowdinConfigHolder } from '../crowdinConfigHolder';
 import { TmsTreeBuilder } from './tmsTreeBuilder';
 import { TmsTreeItem } from './tmsTreeItem';
 
@@ -11,7 +11,9 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     readonly onDidChangeTreeData: vscode.Event<TmsTreeItem | undefined> = this._onDidChangeTreeData.event;
 
     private rootTree: TmsTreeItem[] = [];
-    private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
+
+    constructor(readonly configHolder: CrowdinConfigHolder) {
+    }
 
     update(download: boolean = false, folder?: TmsTreeItem): void {
         if (!download) {
@@ -35,12 +37,11 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         );
     }
 
-    save(item?: TmsTreeItem): void {
+    save(item?: TmsTreeItem): Promise<any> {
         if (!!item) {
-            item.save(true).catch(e => ErrorHandler.handleError(e));
-            return;
+            return item.save(true).catch(e => ErrorHandler.handleError(e));
         }
-        vscode.window.withProgress(
+        const thenable = vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
                 title: `Uploading all files...`
@@ -50,6 +51,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 return Promise.all(promises);
             }
         );
+        return CommonUtil.toPromise(thenable);
     }
 
     getTreeItem(element: TmsTreeItem): vscode.TreeItem {
@@ -63,63 +65,26 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         }
         if (!element) {
             this.rootTree.length = 0;
-            return this.buildRootTree(vscode.workspace.workspaceFolders);
+            return this.buildRootTree();
         } else {
             return element.childs;
         }
     }
 
-    private async buildRootTree(workspaceFolders: vscode.WorkspaceFolder[]): Promise<TmsTreeItem[]> {
-        let configFiles: string[] = [];
-        const promises = workspaceFolders
-            .map(async workspace => {
-                const configProvider = new ConfigProvider(workspace);
+    private async buildRootTree(): Promise<TmsTreeItem[]> {
+        const configurations = this.configHolder.configurations;
+        const promises = Array.from(configurations)
+            .map(async ([config, workspace]) => {
                 try {
-                    const configPath = await configProvider.getFile();
-                    if (!!configPath) {
-                        configFiles.push(configPath);
-                    }
-                    const config = await configProvider.load();
                     const rootTreeFolder = await TmsTreeBuilder.buildRootFolder(workspace, config, TmsTreeBuilder.buildSubTree(config, workspace));
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
-                }
-                catch (err) {
+                } catch (err) {
                     ErrorHandler.handleError(err);
                 }
                 return null as unknown as TmsTreeItem;
             });
         const arr = await Promise.all(promises);
-        this.updateConfigWatchers(configFiles);
         return arr.filter(e => e !== null);
-    }
-
-    private updateConfigWatchers(configFiles: string[]) {
-        const autoRefresh = vscode.workspace.getConfiguration().get<boolean>(Constants.AUTO_REFRESH_PROPERTY);
-        if (!autoRefresh) {
-            this.configWatchers.forEach((watcher, _file) => watcher.dispose());
-            this.configWatchers.clear();
-            return;
-        }
-        let watchersToRemove: string[] = [];
-        let watchersToAdd = configFiles.filter(file => !this.configWatchers.has(file));
-        this.configWatchers.forEach((_watcher, file) => {
-            if (!configFiles.includes(file)) {
-                watchersToRemove.push(file);
-            }
-        });
-        watchersToRemove.forEach(file => {
-            const watcher = this.configWatchers.get(file);
-            if (!!watcher) {
-                watcher.dispose();
-            }
-            this.configWatchers.delete(file);
-        });
-        watchersToAdd.forEach(file => {
-            const wather = vscode.workspace.createFileSystemWatcher(file);
-            wather.onDidChange(() => this.update());
-            wather.onDidDelete(() => this.update());
-            this.configWatchers.set(file, wather);
-        });
     }
 }

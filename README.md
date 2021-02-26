@@ -18,8 +18,9 @@ Integrate your Visual Studio Code projects with Crowdin to optimize the localiza
 New component will be introduced in Activity Bar called *Crowdin Explorer*.
 Plugin will scan each workspace for Crowdin specific configuration file and will build tree with source files.
 In *Crowdin Explorer* you can upload those files into Crowdin and download translations.
+And also track progress of translated and approved strings for each project and target language.
 
-![Plugin](resources/plugin.png)
+[<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="350" height="auto" align="center"/></p>](https://support.crowdin.com/visual-studio-code-plugin/)
 
 ## Configuration
 
@@ -27,12 +28,12 @@ To work with plugin in the Visual Studio Code workspace, there should be Crowdin
 
 Configuration file example:
 
-```json
+```yaml
 "project_id": "projectId"
 "api_token": "apiToken"
 "base_path": "folder" // optional
 "branch": "master" // optional
-"base_url": "https://{organization-name}.crowdin.com" // optional (not needed for non-enterprise usage)
+"base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
 
 "files": [
   {
@@ -45,12 +46,12 @@ Configuration file example:
 
 You also can use environment variables in configuration file [Environmet variables](https://support.crowdin.com/configuration-file/#api-credentials-from-environment-variables):
 
-```json
+```yaml
 "project_id_env": "CROWDIN_PROJECT_ID"
 "api_token_env": "CROWDIN_PERSONAL_TOKEN"
 "base_path_env": "CROWDIN_BASE_PATH" // optional
 "branch": "master" // optional
-"base_url_env": "CROWDIN_BASE_URL" // optional (not needed for non-enterprise usage)
+"base_url_env": "CROWDIN_BASE_URL" // optional (for Crowdin Enterprise only)
 
 "files": [
   {

@@ -9,7 +9,7 @@ import { PathUtil } from '../util/pathUtil';
 
 export class CrowdinClient {
 
-    private crowdin: Crowdin;
+    readonly crowdin: Crowdin;
 
     constructor(
         readonly projectId: number,
