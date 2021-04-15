@@ -177,7 +177,7 @@ export class CrowdinClient {
         }
 
         const fileName = path.basename(file);
-        const fileContent = fs.readFileSync(fsPath, 'utf8');
+        const fileContent = fs.readFileSync(fsPath);
 
         try {
             const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
