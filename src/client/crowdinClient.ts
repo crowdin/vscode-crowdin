@@ -115,8 +115,9 @@ export class CrowdinClient {
      * @param exportPattern file export pattern
      * @param file file path in crowdin system
      * @param uploadOption upload option
+     * @param excludedTargetLanguages excluded target languages
      */
-    async upload(fsPath: string, exportPattern: string, file: string, uploadOption?: SourceFilesModel.UpdateOption): Promise<any> {
+    async upload(fsPath: string, exportPattern: string, file: string, uploadOption?: SourceFilesModel.UpdateOption, excludedTargetLanguages?: string[]): Promise<any> {
         let branchId: number | undefined;
 
         if (!!this.branch) {
@@ -208,7 +209,8 @@ export class CrowdinClient {
                     storageId: storageId,
                     exportOptions: {
                         exportPattern: exportPattern
-                    }
+                    },
+                    excludedTargetLanguages
                 });
             }
         } catch (error) {

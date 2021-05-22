@@ -4,4 +4,5 @@ export interface FileModel {
     source: string;
     translation: string;
     updateOption?: SourceFilesModel.UpdateOption;
+    excludedTargetLanguages?: string[];
 }
