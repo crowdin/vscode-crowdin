@@ -41,6 +41,7 @@ suite('Configuration file', function () {
         assert.strictEqual(2, config.files.length);
         assert.strictEqual(SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS, config.files[0].updateOption);
         assert.strictEqual(false, !!config.files[1].updateOption);
+        assert.strictEqual(2, config.files[1].excludedTargetLanguages?.length);
     });
 
     test('Load invalid config', async () => {

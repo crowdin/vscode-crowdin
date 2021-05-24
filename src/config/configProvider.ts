@@ -69,6 +69,10 @@ export class ConfigProvider {
             if (file.update_option && !this.getFileUpdateOption(file.update_option)) {
                 throw Error(`Invalid file update option value in ${this.workspace.name}`);
             }
+            if (file.excluded_target_languages
+                && (!Array.isArray(file.excluded_target_languages) || file.excluded_target_languages.some(l => typeof l !== 'string'))) {
+                throw Error(`Invalid value in file excluded_target_languages property in ${this.workspace.name}. It should be an array of language codes`);
+            }
         });
         let organization: string | undefined;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
@@ -95,7 +99,8 @@ export class ConfigProvider {
                 return {
                     source: f.source,
                     translation: f.translation,
-                    updateOption: this.getFileUpdateOption(f.update_option)
+                    updateOption: this.getFileUpdateOption(f.update_option),
+                    excludedTargetLanguages: f.excluded_target_languages
                 } as FileModel;
             }),
             organization: organization
@@ -150,4 +155,5 @@ interface PrivateFileModel {
     source: string;
     translation: string;
     update_option?: string;
+    excluded_target_languages?: string[];
 }
