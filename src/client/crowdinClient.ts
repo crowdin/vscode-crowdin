@@ -117,7 +117,7 @@ export class CrowdinClient {
      * @param uploadOption upload option
      * @param excludedTargetLanguages excluded target languages
      */
-    async upload(fsPath: string, exportPattern: string, file: string, uploadOption?: SourceFilesModel.UpdateOption, excludedTargetLanguages?: string[]): Promise<any> {
+    async upload(fsPath: string, exportPattern: string, file: string, uploadOption?: SourceFilesModel.UpdateOption, excludedTargetLanguages?: string[]): Promise<void> {
         let branchId: number | undefined;
 
         if (!!this.branch) {
@@ -218,7 +218,12 @@ export class CrowdinClient {
         }
     }
 
-    async downloadSource(fsPath: string, file: string): Promise<void> {
+    /**
+     * 
+     * @param fsPath file path in fs
+     * @param file file path in crowdin
+     */
+    async downloadSourceFile(fsPath: string, file: string): Promise<void> {
         let branchId: number | undefined;
         if (!!this.branch) {
             const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
@@ -261,6 +266,18 @@ export class CrowdinClient {
         const downloadLink = await this.crowdin.sourceFilesApi.downloadFile(this.projectId, foundFile.data.id);
         const content = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
         fs.writeFileSync(fsPath, content.data);
+    }
+
+
+    /**
+     * 
+     * @param fsFolderPath folder path in fs
+     * @param folder folder path in crowdin
+     * @param globPatterns patterns for which files should be updated
+     */
+    async downloadSourceFolder(fsFolderPath: string, folder: string, globPatterns: string[]): Promise<void> {
+        console.log(`Updating ${fsFolderPath}...`);
+        //TODO get all files with folders, filter out those which do not math to any of given glob patterns and write them to the fs
     }
 
     private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {

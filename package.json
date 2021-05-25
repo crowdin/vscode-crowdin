@@ -117,7 +117,7 @@
 				}
 			},
 			{
-				"command": "tmsFiles.updateSources",
+				"command": "tmsFiles.updateSourceFolder",
 				"title": "Update source files",
 				"icon": {
 					"light": "resources/light/download.svg",
@@ -125,7 +125,7 @@
 				}
 			},
 			{
-				"command": "tmsFiles.updateSource",
+				"command": "tmsFiles.updateSourceFile",
 				"title": "Update source file",
 				"icon": {
 					"light": "resources/light/download.svg",
@@ -146,7 +146,7 @@
 					"group": "navigation@1"
 				},
 				{
-					"command": "tmsFiles.updateSources",
+					"command": "tmsFiles.updateSourceFolder",
 					"when": "view == tmsFiles",
 					"group": "navigation@2"
 				},
@@ -173,7 +173,7 @@
 					"group": "inline@1"
 				},
 				{
-					"command": "tmsFiles.updateSources",
+					"command": "tmsFiles.updateSourceFolder",
 					"when": "view == tmsFiles && viewItem == tmsRoot",
 					"group": "inline@2"
 				},
@@ -183,7 +183,7 @@
 					"group": "inline@3"
 				},
 				{
-					"command": "tmsFiles.updateSource",
+					"command": "tmsFiles.updateSourceFile",
 					"when": "view == tmsFiles && viewItem == tmsFile",
 					"group": "inline@4"
 				}

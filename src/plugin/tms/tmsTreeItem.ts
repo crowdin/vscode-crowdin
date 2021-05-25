@@ -5,8 +5,6 @@ import { ConfigModel } from '../../config/configModel';
 import { FileModel } from '../../config/fileModel';
 import { Constants } from '../../constants';
 import { SourceFiles } from '../../model/sourceFiles';
-import { CommonUtil } from '../../util/commonUtil';
-import { ErrorHandler } from '../../util/errorHandler';
 import { PathUtil } from '../../util/pathUtil';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 
@@ -51,28 +49,8 @@ export class TmsTreeItem extends vscode.TreeItem {
         return this.client.download(unzipFolder, this.sourceFilesArr);
     }
 
-    async save(progress: boolean = false): Promise<void> {
+    async save(): Promise<any> {
         const arr = await this.childs;
-        if (progress) {
-            let title = this.isLeaf
-                ? `Uploading file ${this.label}`
-                : `Uploading files in ${this.label}`;
-            const thenable = vscode.window.withProgress(
-                {
-                    location: vscode.ProgressLocation.Notification,
-                    title: title
-                },
-                (_progress, _token) => {
-                    return this._save(arr).catch(e => ErrorHandler.handleError(e));
-                }
-            );
-            return CommonUtil.toPromise(thenable);
-        } else {
-            return this._save(arr);
-        }
-    }
-
-    private _save(arr: TmsTreeItem[]): Promise<any> {
         if (this.isLeaf) {
             let basePath = this.rootPath;
             if (!!this.config.basePath) {
@@ -84,7 +62,7 @@ export class TmsTreeItem extends vscode.TreeItem {
             );
             return this.client.upload(this.fullPath, exportPattern, file, this.file?.updateOption, this.file?.excludedTargetLanguages);
         } else {
-            let promises: Promise<any>[] = [];
+            let promises: Promise<void>[] = [];
             for (const item of arr) {
                 promises.push(item.save());
             }
@@ -92,41 +70,22 @@ export class TmsTreeItem extends vscode.TreeItem {
         }
     }
 
-    async updateSource(progress: boolean = false): Promise<void> {
-        const arr = await this.childs;
-        if (progress) {
-            let title = this.isLeaf
-                ? `Updating file ${this.label}`
-                : `Updating files in ${this.label}`;
-            const thenable = vscode.window.withProgress(
-                {
-                    location: vscode.ProgressLocation.Notification,
-                    title: title
-                },
-                (_progress, _token) => {
-                    return this._updateSource(arr).catch(e => ErrorHandler.handleError(e));
-                }
-            );
-            return CommonUtil.toPromise(thenable);
-        } else {
-            return this._updateSource(arr);
+    async updateSourceFile(): Promise<void> {
+        let basePath = this.rootPath;
+        if (!!this.config.basePath) {
+            basePath = path.join(basePath, this.config.basePath);
         }
+        const file = path.relative(basePath, this.fullPath);
+        return this.client.downloadSourceFile(this.fullPath, file);
     }
 
-    private _updateSource(arr: TmsTreeItem[]): Promise<any> {
-        if (this.isLeaf) {
-            let basePath = this.rootPath;
-            if (!!this.config.basePath) {
-                basePath = path.join(basePath, this.config.basePath);
-            }
-            const file = path.relative(basePath, this.fullPath);
-            return this.client.downloadSource(this.fullPath, file);
-        } else {
-            let promises: Promise<any>[] = [];
-            for (const item of arr) {
-                promises.push(item.updateSource());
-            }
-            return Promise.all(promises);
+    async updateSourceFolder(): Promise<void> {
+        const patterns = this.config.files.map(c => c.source);
+        let basePath = this.rootPath;
+        if (!!this.config.basePath) {
+            basePath = path.join(basePath, this.config.basePath);
         }
+        const folder = path.relative(basePath, this.fullPath);
+        return this.client.downloadSourceFolder(this.fullPath, folder, patterns);
     }
 }

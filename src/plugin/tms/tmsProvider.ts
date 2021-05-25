@@ -15,16 +15,15 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     constructor(readonly configHolder: CrowdinConfigHolder) {
     }
 
-    update(download: boolean = false, folder?: TmsTreeItem): void {
+    /**
+     * Download translations or reload files tree
+     */
+    update(download: boolean = false, folder?: TmsTreeItem): Promise<void> {
         if (!download) {
             this._onDidChangeTreeData.fire();
-            return;
+            return Promise.resolve();
         }
-        vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title: `Downloading translations...`
-            },
+        return CommonUtil.withProgress(
             () => {
                 let promises: Promise<void>[];
                 if (!!folder) {
@@ -33,42 +32,52 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                     promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => ErrorHandler.handleError(e)));
                 }
                 return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire());
-            }
+            },
+            `Downloading translations...`
         );
     }
 
+    /**
+     * Send file(s) to Crowdin
+     */
     save(item?: TmsTreeItem): Promise<any> {
         if (!!item) {
-            return item.save(true).catch(e => ErrorHandler.handleError(e));
+            const title = item.isLeaf ? `Uploading file ${item.label}` : `Uploading files in ${item.label}`;
+            return CommonUtil.withProgress(
+                () => item.save().catch(e => ErrorHandler.handleError(e)),
+                title
+            );
         }
-        const thenable = vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title: `Uploading all files...`
-            },
-            () => {
-                const promises = this.rootTree.map(e => e.save().catch(e => ErrorHandler.handleError(e)));
-                return Promise.all(promises);
-            }
+        return CommonUtil.withProgress(
+            () => Promise.all(this.rootTree.map(e => e.save().catch(e => ErrorHandler.handleError(e)))),
+            `Uploading all files...`
         );
-        return CommonUtil.toPromise(thenable);
     }
 
-    updateSource(item?: TmsTreeItem): Promise<any> {
-        if (!!item) {
-            return item.updateSource(true).catch(e => ErrorHandler.handleError(e));
+    /**
+     * Download source files from Crowdin
+     */
+    updateSourceFolder(folder?: TmsTreeItem): Promise<any> {
+        if (!!folder) {
+            return CommonUtil.withProgress(
+                () => folder.updateSourceFolder().catch(e => ErrorHandler.handleError(e)),
+                `Updating files in ${folder.label}`
+            );
         }
-        const thenable = vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title: `Updating source files...`
-            },
-            () => {
-                const promises = this.rootTree.map(e => e.updateSource().catch(e => ErrorHandler.handleError(e)));
-                return Promise.all(promises);
-            }
+        return CommonUtil.withProgress(
+            () => Promise.all(this.rootTree.map(e => e.updateSourceFolder().catch(e => ErrorHandler.handleError(e)))),
+            `Updating source files...`
         );
-        return CommonUtil.toPromise(thenable);
+    }
+
+    /**
+     * Download source file from Crowdin
+     */
+    updateSourceFile(item: TmsTreeItem): Promise<any> {
+        return CommonUtil.withProgress(
+            () => item.updateSourceFile().catch(e => ErrorHandler.handleError(e)),
+            `Updating file ${item.label}`
+        );
     }
 
     getTreeItem(element: TmsTreeItem): vscode.TreeItem {
