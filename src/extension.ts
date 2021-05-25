@@ -36,6 +36,12 @@ export function activate(context: vscode.ExtensionContext) {
 		await tmsProvider.save(item);
 		progressProvider.refresh();
 	});
+	vscode.commands.registerCommand('tmsFiles.updateSources', async () => {
+		await tmsProvider.updateSource();
+	});
+	vscode.commands.registerCommand('tmsFiles.updateSource', async (item: TmsTreeItem) => {
+		await tmsProvider.updateSource(item);
+	});
 	vscode.commands.registerCommand('tmsFiles.download', (item: TmsTreeItem) => tmsProvider.update(true, item));
 	vscode.commands.registerCommand('tmsFiles.edit', (item: TmsTreeItem) => vscode.commands.executeCommand('vscode.open', vscode.Uri.file(item.config.configPath)));
 

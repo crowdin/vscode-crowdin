@@ -183,7 +183,7 @@ export class CrowdinClient {
         try {
             const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
             const storageId = resp.data.id;
-            const files = await this.crowdin.sourceFilesApi.listProjectFiles(this.projectId, undefined, parentId, 500);
+            const files = await this.crowdin.sourceFilesApi.withFetchAll().listProjectFiles(this.projectId, undefined, parentId);
             const foundFile = files.data
                 .filter(f => {
                     if (!branchId) {
@@ -218,6 +218,51 @@ export class CrowdinClient {
         }
     }
 
+    async downloadSource(fsPath: string, file: string): Promise<void> {
+        let branchId: number | undefined;
+        if (!!this.branch) {
+            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
+            const foundBranch = branches.data.find(e => e.data.name === this.branch);
+            if (!!foundBranch) {
+                branchId = foundBranch.data.id;
+            } else {
+                throw new Error(`File ${file} does not exist under branch ${this.branch}`);
+            }
+        }
+        let parentId: number | undefined;
+        if (path.basename(file) !== file) {
+            const folders = this.normalizePath(path.dirname(file))
+                .split(Constants.CROWDIN_PATH_SEPARATOR)
+                .filter(f => f !== '');
+            for (let i = 0; i < folders.length; i++) {
+                const folder = folders[i];
+                const dir = await this.findDirectory(folder, parentId, branchId);
+                if (!!dir) {
+                    parentId = dir;
+                } else {
+                    throw new Error(`File ${file} does not exist under directory ${path.dirname(file)}`);
+                }
+            }
+        }
+        const fileName = path.basename(file);
+        const files = await this.crowdin.sourceFilesApi.withFetchAll().listProjectFiles(this.projectId, undefined, parentId);
+        const foundFile = files.data
+            .filter(f => {
+                if (!branchId) {
+                    return !f.data.branchId;
+                } else {
+                    return f.data.branchId === branchId;
+                }
+            })
+            .find(f => f.data.name === fileName);
+        if (!foundFile) {
+            throw new Error(`File ${file} does not exist`);
+        }
+        const downloadLink = await this.crowdin.sourceFilesApi.downloadFile(this.projectId, foundFile.data.id);
+        const content = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
+        fs.writeFileSync(fsPath, content.data);
+    }
+
     private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {
         return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
             const foundDir = await this.findDirectory(name, parentId, branchId);
@@ -230,7 +275,7 @@ export class CrowdinClient {
     }
 
     private async findDirectory(name: string, parentId?: number, branchId?: number): Promise<number | undefined> {
-        const dirs = await this.crowdin.sourceFilesApi.listProjectDirectories(this.projectId, undefined, parentId, 500);
+        const dirs = await this.crowdin.sourceFilesApi.withFetchAll().listProjectDirectories(this.projectId, undefined, parentId);
         const foundDir = dirs.data
             .filter(dir => {
                 if (!branchId) {
@@ -249,7 +294,7 @@ export class CrowdinClient {
 
     private waitAndFindBranch(name: string): Promise<number> {
         return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
-            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, name, 500);
+            const branches = await this.crowdin.sourceFilesApi.withFetchAll().listProjectBranches(this.projectId, name);
             const foundBranch = branches.data.find(branch => branch.data.name.toLowerCase() === name.toLowerCase());
             if (!!foundBranch) {
                 return foundBranch.data.id;

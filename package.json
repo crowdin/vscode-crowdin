@@ -115,6 +115,22 @@
 					"light": "resources/light/update.svg",
 					"dark": "resources/dark/update.svg"
 				}
+			},
+			{
+				"command": "tmsFiles.updateSources",
+				"title": "Update source files",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.updateSource",
+				"title": "Update source file",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
 			}
 		],
 		"menus": {
@@ -130,9 +146,14 @@
 					"group": "navigation@1"
 				},
 				{
-					"command": "tmsFiles.downloadAll",
+					"command": "tmsFiles.updateSources",
 					"when": "view == tmsFiles",
 					"group": "navigation@2"
+				},
+				{
+					"command": "tmsFiles.downloadAll",
+					"when": "view == tmsFiles",
+					"group": "navigation@3"
 				},
 				{
 					"command": "translationProgress.refresh",
@@ -152,9 +173,19 @@
 					"group": "inline@1"
 				},
 				{
-					"command": "tmsFiles.download",
+					"command": "tmsFiles.updateSources",
 					"when": "view == tmsFiles && viewItem == tmsRoot",
 					"group": "inline@2"
+				},
+				{
+					"command": "tmsFiles.download",
+					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"group": "inline@3"
+				},
+				{
+					"command": "tmsFiles.updateSource",
+					"when": "view == tmsFiles && viewItem == tmsFile",
+					"group": "inline@4"
 				}
 			]
 		}

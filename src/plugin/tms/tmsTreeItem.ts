@@ -91,4 +91,42 @@ export class TmsTreeItem extends vscode.TreeItem {
             return Promise.all(promises);
         }
     }
+
+    async updateSource(progress: boolean = false): Promise<void> {
+        const arr = await this.childs;
+        if (progress) {
+            let title = this.isLeaf
+                ? `Updating file ${this.label}`
+                : `Updating files in ${this.label}`;
+            const thenable = vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: title
+                },
+                (_progress, _token) => {
+                    return this._updateSource(arr).catch(e => ErrorHandler.handleError(e));
+                }
+            );
+            return CommonUtil.toPromise(thenable);
+        } else {
+            return this._updateSource(arr);
+        }
+    }
+
+    private _updateSource(arr: TmsTreeItem[]): Promise<any> {
+        if (this.isLeaf) {
+            let basePath = this.rootPath;
+            if (!!this.config.basePath) {
+                basePath = path.join(basePath, this.config.basePath);
+            }
+            const file = path.relative(basePath, this.fullPath);
+            return this.client.downloadSource(this.fullPath, file);
+        } else {
+            let promises: Promise<any>[] = [];
+            for (const item of arr) {
+                promises.push(item.updateSource());
+            }
+            return Promise.all(promises);
+        }
+    }
 }

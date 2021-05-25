@@ -54,6 +54,23 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
         return CommonUtil.toPromise(thenable);
     }
 
+    updateSource(item?: TmsTreeItem): Promise<any> {
+        if (!!item) {
+            return item.updateSource(true).catch(e => ErrorHandler.handleError(e));
+        }
+        const thenable = vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: `Updating source files...`
+            },
+            () => {
+                const promises = this.rootTree.map(e => e.updateSource().catch(e => ErrorHandler.handleError(e)));
+                return Promise.all(promises);
+            }
+        );
+        return CommonUtil.toPromise(thenable);
+    }
+
     getTreeItem(element: TmsTreeItem): vscode.TreeItem {
         return element;
     }
