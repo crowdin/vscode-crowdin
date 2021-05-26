@@ -2,6 +2,7 @@ import Crowdin, { Credentials, ProjectsGroupsModel, SourceFilesModel } from '@cr
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
 import * as fs from 'fs';
+import * as minimatch from 'minimatch';
 import * as path from 'path';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
@@ -276,8 +277,25 @@ export class CrowdinClient {
      * @param globPatterns patterns for which files should be updated
      */
     async downloadSourceFolder(fsFolderPath: string, folder: string, globPatterns: string[]): Promise<void> {
-        console.log(`Updating ${fsFolderPath}...`);
-        //TODO get all files with folders, filter out those which do not math to any of given glob patterns and write them to the fs
+        const files = await this.crowdin.sourceFilesApi.withFetchAll().listProjectFiles(this.projectId);
+        const filteredFiles = files.data
+            .filter(f => {
+                const filePath = path.normalize(f.data.path);
+                if (filePath.startsWith(`${path.sep}${folder}`)) {
+                    return globPatterns.some(pattern => minimatch(filePath, pattern));
+                }
+                return false;
+            });
+        for (const file of filteredFiles) {
+            const fullFilePath = path.join(fsFolderPath, path.normalize(file.data.path));
+            const fileDirectory = path.dirname(fullFilePath);
+            if (!fs.existsSync(fileDirectory)) {
+                fs.mkdirSync(fileDirectory);
+            }
+            const downloadLink = await this.crowdin.sourceFilesApi.downloadFile(this.projectId, file.data.id);
+            const content = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
+            fs.writeFileSync(fullFilePath, content.data);
+        }
     }
 
     private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {

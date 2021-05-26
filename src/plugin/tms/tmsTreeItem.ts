@@ -81,11 +81,21 @@ export class TmsTreeItem extends vscode.TreeItem {
 
     async updateSourceFolder(): Promise<void> {
         const patterns = this.config.files.map(c => c.source);
-        let basePath = this.rootPath;
-        if (!!this.config.basePath) {
-            basePath = path.join(basePath, this.config.basePath);
+        let folder = '';
+        let fullPath = '';
+        if (this.contextValue !== TmsTreeItemContextValue.ROOT) {
+            let basePath = this.rootPath;
+            if (!!this.config.basePath) {
+                basePath = path.join(basePath, this.config.basePath);
+            }
+            folder = path.relative(basePath, this.fullPath);
+            fullPath = this.fullPath;
+        } else {
+            fullPath = this.rootPath;
+            if (!!this.config.basePath) {
+                fullPath = path.join(fullPath, this.config.basePath);
+            }
         }
-        const folder = path.relative(basePath, this.fullPath);
-        return this.client.downloadSourceFolder(this.fullPath, folder, patterns);
+        return this.client.downloadSourceFolder(fullPath, folder, patterns);
     }
 }
