@@ -16,13 +16,9 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
     }
 
     /**
-     * Download translations or reload files tree
+     * Download translations
      */
-    update(download: boolean = false, folder?: TmsTreeItem): Promise<void> {
-        if (!download) {
-            this._onDidChangeTreeData.fire();
-            return Promise.resolve();
-        }
+    download(folder?: TmsTreeItem): Promise<void> {
         return CommonUtil.withProgress(
             () => {
                 let promises: Promise<void>[];
@@ -35,6 +31,13 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
             },
             `Downloading translations...`
         );
+    }
+
+    /**
+     * Reload files tree
+     */
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
     }
 
     /**

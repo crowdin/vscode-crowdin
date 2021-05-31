@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Constants } from './constants';
-import { ConfigurationListener, CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
+import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
 import { TmsProvider } from './plugin/tms/tmsProvider';
 import { TmsTreeItem } from './plugin/tms/tmsTreeItem';
@@ -11,13 +11,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const configHolder = new CrowdinConfigHolder();
 	const tmsProvider = new TmsProvider(configHolder);
 	const progressProvider = new ProgressTreeProvider(configHolder);
-	const listener: ConfigurationListener = {
-		configsUpdate: () => {
-			tmsProvider.update();
-			progressProvider.refresh();
-		}
-	}
-	configHolder.addListener(listener);
+	configHolder.addListener(() => tmsProvider.refresh());
+	configHolder.addListener(() => progressProvider.refresh());
 	configHolder.load();
 
 	vscode.window.registerTreeDataProvider('tmsFiles', tmsProvider);
@@ -26,8 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(Constants.OPEN_TMS_FILE_COMMAND, fsPath => vscode.commands.executeCommand('vscode.open', vscode.Uri.file(fsPath)));
 
 	vscode.commands.registerCommand('translationProgress.refresh', () => progressProvider.refresh());
-	vscode.commands.registerCommand('tmsFiles.refresh', () => tmsProvider.update());
-	vscode.commands.registerCommand('tmsFiles.downloadAll', () => tmsProvider.update(true));
+	vscode.commands.registerCommand('tmsFiles.refresh', () => tmsProvider.refresh());
+	vscode.commands.registerCommand('tmsFiles.downloadAll', () => tmsProvider.download());
 	vscode.commands.registerCommand('tmsFiles.saveAll', async () => {
 		await tmsProvider.save();
 		progressProvider.refresh();
@@ -38,10 +33,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	vscode.commands.registerCommand('tmsFiles.updateSourceFolder', async (item?: TmsTreeItem) => {
 		await tmsProvider.updateSourceFolder(item);
-		await tmsProvider.update();
+		tmsProvider.refresh();
 	});
 	vscode.commands.registerCommand('tmsFiles.updateSourceFile', (item: TmsTreeItem) => tmsProvider.updateSourceFile(item));
-	vscode.commands.registerCommand('tmsFiles.download', (item: TmsTreeItem) => tmsProvider.update(true, item));
+	vscode.commands.registerCommand('tmsFiles.download', (item: TmsTreeItem) => tmsProvider.download(item));
 	vscode.commands.registerCommand('tmsFiles.edit', (item: TmsTreeItem) => vscode.commands.executeCommand('vscode.open', vscode.Uri.file(item.config.configPath)));
 
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {

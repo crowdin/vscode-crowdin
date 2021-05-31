@@ -7,9 +7,9 @@ import { ErrorHandler } from '../util/errorHandler';
 export class CrowdinConfigHolder {
     private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
     private configurationToWorkspace: Map<ConfigModel, vscode.WorkspaceFolder> = new Map();
-    private listeners: ConfigurationListener[] = [];
+    private listeners: { (): void; }[] = [];
 
-    addListener(listener: ConfigurationListener) {
+    addListener(listener: () => void) {
         this.listeners.push(listener);
     }
 
@@ -66,17 +66,13 @@ export class CrowdinConfigHolder {
             const wather = vscode.workspace.createFileSystemWatcher(file);
             wather.onDidChange(async () => {
                 await this.load();
-                this.listeners.forEach(l => l.configsUpdate());
+                this.listeners.forEach(l => l());
             });
             wather.onDidDelete(async () => {
                 await this.load();
-                this.listeners.forEach(l => l.configsUpdate());
+                this.listeners.forEach(l => l());
             });
             this.configWatchers.set(file, wather);
         });
     }
-}
-
-export interface ConfigurationListener {
-    configsUpdate<T>(): any;
 }
