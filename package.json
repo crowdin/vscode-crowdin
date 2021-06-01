@@ -146,12 +146,12 @@
 					"group": "navigation@1"
 				},
 				{
-					"command": "tmsFiles.updateSourceFolder",
+					"command": "tmsFiles.downloadAll",
 					"when": "view == tmsFiles",
 					"group": "navigation@2"
 				},
 				{
-					"command": "tmsFiles.downloadAll",
+					"command": "tmsFiles.updateSourceFolder",
 					"when": "view == tmsFiles",
 					"group": "navigation@3"
 				},
@@ -173,12 +173,12 @@
 					"group": "inline@1"
 				},
 				{
-					"command": "tmsFiles.updateSourceFolder",
+					"command": "tmsFiles.download",
 					"when": "view == tmsFiles && viewItem == tmsRoot",
 					"group": "inline@2"
 				},
 				{
-					"command": "tmsFiles.download",
+					"command": "tmsFiles.updateSourceFolder",
 					"when": "view == tmsFiles && viewItem == tmsRoot",
 					"group": "inline@3"
 				},
