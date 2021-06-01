@@ -64,8 +64,8 @@
 				"command": "tmsFiles.refresh",
 				"title": "Refresh folders",
 				"icon": {
-					"light": "resources/light/update.svg",
-					"dark": "resources/dark/update.svg"
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
 				}
 			},
 			{
@@ -88,32 +88,48 @@
 				"command": "tmsFiles.saveAll",
 				"title": "Upload source files",
 				"icon": {
-					"light": "resources/light/save.svg",
-					"dark": "resources/dark/save.svg"
+					"light": "resources/light/upload.svg",
+					"dark": "resources/dark/upload.svg"
 				}
 			},
 			{
 				"command": "tmsFiles.save",
 				"title": "Upload source files",
 				"icon": {
-					"light": "resources/light/save.svg",
-					"dark": "resources/dark/save.svg"
+					"light": "resources/light/upload.svg",
+					"dark": "resources/dark/upload.svg"
 				}
 			},
 			{
 				"command": "tmsFiles.edit",
 				"title": "Edit configuration",
 				"icon": {
-					"light": "resources/light/edit.svg",
-					"dark": "resources/dark/edit.svg"
+					"light": "resources/light/settings.svg",
+					"dark": "resources/dark/settings.svg"
 				}
 			},
 			{
 				"command": "translationProgress.refresh",
 				"title": "Refresh progress",
 				"icon": {
-					"light": "resources/light/update.svg",
-					"dark": "resources/dark/update.svg"
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.updateSourceFolder",
+				"title": "Download source files",
+				"icon": {
+					"light": "resources/light/download_source.svg",
+					"dark": "resources/dark/download_source.svg"
+				}
+			},
+			{
+				"command": "tmsFiles.updateSourceFile",
+				"title": "Download source file",
+				"icon": {
+					"light": "resources/light/download_source.svg",
+					"dark": "resources/dark/download_source.svg"
 				}
 			}
 		],
@@ -133,6 +149,11 @@
 					"command": "tmsFiles.downloadAll",
 					"when": "view == tmsFiles",
 					"group": "navigation@2"
+				},
+				{
+					"command": "tmsFiles.updateSourceFolder",
+					"when": "view == tmsFiles",
+					"group": "navigation@3"
 				},
 				{
 					"command": "translationProgress.refresh",
@@ -155,6 +176,16 @@
 					"command": "tmsFiles.download",
 					"when": "view == tmsFiles && viewItem == tmsRoot",
 					"group": "inline@2"
+				},
+				{
+					"command": "tmsFiles.updateSourceFolder",
+					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"group": "inline@3"
+				},
+				{
+					"command": "tmsFiles.updateSourceFile",
+					"when": "view == tmsFiles && viewItem == tmsFile",
+					"group": "inline@4"
 				}
 			]
 		}

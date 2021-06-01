@@ -2,7 +2,7 @@
 
 # Crowdin Visual Studio Code Plugin [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fcrowdin%2Fvscode-crowdin&text=Manage%20and%20synchronize%20your%20localization%20resources%20with%20Crowdin%20project%20instantly%20from%20Visual%20Studio%20Code)
 
-Integrate your Visual Studio Code projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project and downloading translations.
+Integrate your Visual Studio Code projects with Crowdin to optimize the localization process. Plugin allows uploading new source strings instantly to your Crowdin project, updating them back from Crowdin and downloading translations.
 
 [Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 
@@ -17,7 +17,7 @@ Integrate your Visual Studio Code projects with Crowdin to optimize the localiza
 
 New component will be introduced in Activity Bar called *Crowdin Explorer*.
 Plugin will scan each workspace for Crowdin specific configuration file and will build tree with source files.
-In *Crowdin Explorer* you can upload those files into Crowdin and download translations.
+In *Crowdin Explorer* you can upload those files into Crowdin, download them back from Crowdin and download translations.
 And also track progress of translated and approved strings for each project and target language.
 
 [<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="350" height="auto" align="center"/></p>](https://support.crowdin.com/visual-studio-code-plugin/)
