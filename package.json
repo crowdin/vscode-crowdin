@@ -118,7 +118,7 @@
 			},
 			{
 				"command": "tmsFiles.updateSourceFolder",
-				"title": "Update source files",
+				"title": "Download source files",
 				"icon": {
 					"light": "resources/light/download_source.svg",
 					"dark": "resources/dark/download_source.svg"
@@ -126,7 +126,7 @@
 			},
 			{
 				"command": "tmsFiles.updateSourceFile",
-				"title": "Update source file",
+				"title": "Download source file",
 				"icon": {
 					"light": "resources/light/download_source.svg",
 					"dark": "resources/dark/download_source.svg"
