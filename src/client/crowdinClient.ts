@@ -117,8 +117,16 @@ export class CrowdinClient {
      * @param file file path in crowdin system
      * @param uploadOption upload option
      * @param excludedTargetLanguages excluded target languages
+     * @param labels labels
      */
-    async upload(fsPath: string, exportPattern: string, file: string, uploadOption?: SourceFilesModel.UpdateOption, excludedTargetLanguages?: string[]): Promise<void> {
+    async upload(
+        fsPath: string,
+        exportPattern: string,
+        file: string,
+        uploadOption?: SourceFilesModel.UpdateOption,
+        excludedTargetLanguages?: string[],
+        labels?: string[]
+    ): Promise<void> {
         let branchId: number | undefined;
 
         if (!!this.branch) {
@@ -203,6 +211,38 @@ export class CrowdinClient {
                     }
                 });
             } else {
+                let labelIds;
+                if (!!labels) {
+                    labelIds = [];
+                    const labelsFromRemote = await this.crowdin.labelsApi.withFetchAll().listLabels(this.projectId);
+                    for (const label of labels) {
+                        const foundLabel = labelsFromRemote.data.find(l => l.data.title.toLocaleLowerCase() === label.toLocaleLowerCase());
+                        if (foundLabel) {
+                            labelIds.push(foundLabel.data.id);
+                        } else {
+                            try {
+                                const createdLabel = await this.crowdin.labelsApi.addLabel(this.projectId, {
+                                    title: label
+                                });
+                                labelIds.push(createdLabel.data.id);
+                            } catch (error) {
+                                if (!this.concurrentIssue(error)) {
+                                    throw error;
+                                }
+                                const missingLabel = await this.crowdin.labelsApi.retryService.executeAsyncFunc(async () => {
+                                    const allLabels = await this.crowdin.labelsApi.withFetchAll().listLabels(this.projectId);
+                                    const neededLabel = allLabels.data.find(l => l.data.title.toLocaleLowerCase() === label.toLocaleLowerCase());
+                                    if (neededLabel) {
+                                        return neededLabel;
+                                    } else {
+                                        throw new Error(`Could not find label ${label} in Crowdin response`);
+                                    }
+                                });
+                                labelIds.push(missingLabel.data.id);
+                            }
+                        }
+                    }
+                }
                 await this.crowdin.sourceFilesApi.createFile(this.projectId, {
                     branchId: (!!parentId ? undefined : branchId),
                     directoryId: parentId,
@@ -211,7 +251,8 @@ export class CrowdinClient {
                     exportOptions: {
                         exportPattern: exportPattern
                     },
-                    excludedTargetLanguages
+                    excludedTargetLanguages,
+                    attachLabelIds: labelIds
                 });
             }
         } catch (error) {

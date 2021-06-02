@@ -5,4 +5,5 @@ export interface FileModel {
     translation: string;
     updateOption?: SourceFilesModel.UpdateOption;
     excludedTargetLanguages?: string[];
+    labels?: string[];
 }
