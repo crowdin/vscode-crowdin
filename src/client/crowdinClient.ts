@@ -216,13 +216,14 @@ export class CrowdinClient {
                     labelIds = [];
                     const labelsFromRemote = await this.crowdin.labelsApi.withFetchAll().listLabels(this.projectId);
                     for (const label of labels) {
-                        const foundLabel = labelsFromRemote.data.find(l => l.data.title.toLocaleLowerCase() === label.toLocaleLowerCase());
+                        const formattedLabel = label.trim().toLowerCase();
+                        const foundLabel = labelsFromRemote.data.find(l => l.data.title.toLocaleLowerCase() === formattedLabel);
                         if (foundLabel) {
                             labelIds.push(foundLabel.data.id);
                         } else {
                             try {
                                 const createdLabel = await this.crowdin.labelsApi.addLabel(this.projectId, {
-                                    title: label
+                                    title: label.trim()
                                 });
                                 labelIds.push(createdLabel.data.id);
                             } catch (error) {
@@ -231,11 +232,11 @@ export class CrowdinClient {
                                 }
                                 const missingLabel = await this.crowdin.labelsApi.retryService.executeAsyncFunc(async () => {
                                     const allLabels = await this.crowdin.labelsApi.withFetchAll().listLabels(this.projectId);
-                                    const neededLabel = allLabels.data.find(l => l.data.title.toLocaleLowerCase() === label.toLocaleLowerCase());
+                                    const neededLabel = allLabels.data.find(l => l.data.title.toLocaleLowerCase() === formattedLabel);
                                     if (neededLabel) {
                                         return neededLabel;
                                     } else {
-                                        throw new Error(`Could not find label ${label} in Crowdin response`);
+                                        throw new Error(`Could not find label ${label.trim()} in Crowdin response`);
                                     }
                                 });
                                 labelIds.push(missingLabel.data.id);
