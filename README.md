@@ -40,10 +40,8 @@ Configuration file example:
     "source": "/sources/**/*.xml",
     "translation": "/translations/%two_letters_code%/%original_file_name%",
     "update_option": "update_as_unapproved", // optional
-    "excluded_target_languages": [ // optional
-      "uk",
-      "fr"
-    ]
+    "excluded_target_languages": ["uk", "fr"], // optional
+    "labels": ["android", "emails"] // optional
   }
 ]
 ```
@@ -62,10 +60,8 @@ You also can use environment variables in configuration file [Environmet variabl
     "source": "/sources/**/*.xml",
     "translation": "/translations/%two_letters_code%/%original_file_name%",
     "update_option": "update_as_unapproved", // optional
-    "excluded_target_languages": [ // optional
-      "uk",
-      "fr"
-    ]
+    "excluded_target_languages": ["uk", "fr"], // optional
+    "labels": ["android", "emails"] // optional
   }
 ]
 ```

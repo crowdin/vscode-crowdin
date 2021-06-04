@@ -60,7 +60,14 @@ export class TmsTreeItem extends vscode.TreeItem {
             const exportPattern = PathUtil.replaceDoubleAsteriskInTranslation(
                 this.file?.translation || '', this.fullPath, this.file?.source || '', basePath
             );
-            return this.client.upload(this.fullPath, exportPattern, file, this.file?.updateOption, this.file?.excludedTargetLanguages);
+            return this.client.upload(
+                this.fullPath,
+                exportPattern,
+                file,
+                this.file?.updateOption,
+                this.file?.excludedTargetLanguages,
+                this.file?.labels
+            );
         } else {
             let promises: Promise<void>[] = [];
             for (const item of arr) {

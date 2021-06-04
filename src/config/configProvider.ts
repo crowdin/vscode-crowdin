@@ -73,6 +73,9 @@ export class ConfigProvider {
                 && (!Array.isArray(file.excluded_target_languages) || file.excluded_target_languages.some(l => typeof l !== 'string'))) {
                 throw Error(`Invalid value in file excluded_target_languages property in ${this.workspace.name}. It should be an array of language codes`);
             }
+            if (file.labels && (!Array.isArray(file.labels) || file.labels.some(l => typeof l !== 'string'))) {
+                throw Error(`Invalid value in file labels property in ${this.workspace.name}. It should be an array of labels`);
+            }
         });
         let organization: string | undefined;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
@@ -100,7 +103,8 @@ export class ConfigProvider {
                     source: f.source,
                     translation: f.translation,
                     updateOption: this.getFileUpdateOption(f.update_option),
-                    excludedTargetLanguages: f.excluded_target_languages
+                    excludedTargetLanguages: f.excluded_target_languages,
+                    labels: f.labels
                 } as FileModel;
             }),
             organization: organization
@@ -156,4 +160,5 @@ interface PrivateFileModel {
     translation: string;
     update_option?: string;
     excluded_target_languages?: string[];
+    labels?: string[];
 }
