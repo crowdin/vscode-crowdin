@@ -66,7 +66,8 @@ export class TmsTreeItem extends vscode.TreeItem {
                 file,
                 this.file?.updateOption,
                 this.file?.excludedTargetLanguages,
-                this.file?.labels
+                this.file?.labels,
+                this.file?.scheme
             );
         } else {
             let promises: Promise<void>[] = [];

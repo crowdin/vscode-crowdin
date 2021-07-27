@@ -8,7 +8,8 @@
     "source" : "/**/[^0-2].txt",
     "translation" : "/**/%two_letters_code%_%original_file_name%",
     "update_option" : "update_as_unapproved",
-    "labels": ["android"]
+    "labels": ["android"],
+    "scheme": "identifier,source_phrase,context,uk,ru,fr"
   },
   {
     "source" : "/**/[^0-2].txt",

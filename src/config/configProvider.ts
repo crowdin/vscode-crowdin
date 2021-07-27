@@ -5,7 +5,7 @@ import * as util from 'util';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { ConfigModel } from './configModel';
-import { FileModel } from './fileModel';
+import { FileModel, Scheme } from './fileModel';
 
 const asyncFileExists = util.promisify(fs.exists);
 const asyncReadFile = util.promisify(fs.readFile);
@@ -76,6 +76,9 @@ export class ConfigProvider {
             if (file.labels && (!Array.isArray(file.labels) || file.labels.some(l => typeof l !== 'string'))) {
                 throw Error(`Invalid value in file labels property in ${this.workspace.name}. It should be an array of labels`);
             }
+            if (file.scheme && typeof file.scheme !== 'string') {
+                throw Error(`Invalid value in file scheme property ${this.workspace.name}. It should be a string with columns information`);
+            }
         });
         let organization: string | undefined;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
@@ -104,7 +107,8 @@ export class ConfigProvider {
                     translation: f.translation,
                     updateOption: this.getFileUpdateOption(f.update_option),
                     excludedTargetLanguages: f.excluded_target_languages,
-                    labels: f.labels
+                    labels: f.labels,
+                    scheme: this.getFileScheme(f.scheme)
                 } as FileModel;
             }),
             organization: organization
@@ -140,6 +144,18 @@ export class ConfigProvider {
                 return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS_AND_APPROVALS;
         }
     }
+
+    private getFileScheme(value?: string): Scheme | undefined {
+        let scheme: Scheme | undefined;
+        if (value) {
+            scheme = {}
+            const schemeParts = value.split(',');
+            for (let i = 0; i < schemeParts.length; i++) {
+                scheme[schemeParts[i].trim()] = i;
+            }
+        }
+        return scheme;
+    }
 }
 
 interface PrivateConfigModel {
@@ -161,4 +177,5 @@ interface PrivateFileModel {
     update_option?: string;
     excluded_target_languages?: string[];
     labels?: string[];
+    scheme?: string;
 }

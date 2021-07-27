@@ -42,6 +42,11 @@ Configuration file example:
     "update_option": "update_as_unapproved", // optional
     "excluded_target_languages": ["uk", "fr"], // optional
     "labels": ["android", "emails"] // optional
+  },
+  {
+    "source": "multicolumn.csv",
+    "translation": "multicolumn.csv",
+    "scheme": "identifier,source_phrase,context,uk,ru,fr" // optional
   }
 ]
 ```
