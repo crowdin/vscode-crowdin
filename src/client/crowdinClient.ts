@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as minimatch from 'minimatch';
 import * as path from 'path';
+import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
 import { PathUtil } from '../util/pathUtil';
@@ -118,6 +119,7 @@ export class CrowdinClient {
      * @param uploadOption upload option
      * @param excludedTargetLanguages excluded target languages
      * @param labels labels
+     * @param scheme import scheme
      */
     async upload(
         fsPath: string,
@@ -125,7 +127,8 @@ export class CrowdinClient {
         file: string,
         uploadOption?: SourceFilesModel.UpdateOption,
         excludedTargetLanguages?: string[],
-        labels?: string[]
+        labels?: string[],
+        scheme?: Scheme
     ): Promise<void> {
         let branchId: number | undefined;
 
@@ -252,6 +255,9 @@ export class CrowdinClient {
                     exportOptions: {
                         exportPattern: exportPattern
                     },
+                    importOptions: scheme && {
+                        scheme: scheme
+                    } as unknown as SourceFilesModel.SpreadsheetImportOptions,
                     excludedTargetLanguages,
                     attachLabelIds: labelIds
                 });

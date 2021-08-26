@@ -6,4 +6,9 @@ export interface FileModel {
     updateOption?: SourceFilesModel.UpdateOption;
     excludedTargetLanguages?: string[];
     labels?: string[];
+    scheme?: Scheme;
+}
+
+export interface Scheme {
+    [key: string]: number;
 }
