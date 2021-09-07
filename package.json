@@ -220,7 +220,6 @@
 	"dependencies": {
 		"@crowdin/crowdin-api-client": "1.11.7",
 		"adm-zip": "^0.4.14",
-		"axios": "^0.21.1",
 		"glob": "^7.1.4",
 		"original-fs": "^1.1.0",
 		"yaml": "^1.6.0"
