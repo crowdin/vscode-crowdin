@@ -46,6 +46,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         if (!!this.config.basePath) {
             unzipFolder = path.join(unzipFolder, this.config.basePath);
         }
+        //TODO consider dest property for files
         return this.client.download(unzipFolder, this.sourceFilesArr);
     }
 
@@ -56,18 +57,19 @@ export class TmsTreeItem extends vscode.TreeItem {
             if (!!this.config.basePath) {
                 basePath = path.join(basePath, this.config.basePath);
             }
-            const file = path.relative(basePath, this.fullPath);
-            const exportPattern = PathUtil.replaceDoubleAsteriskInTranslation(
+            const exportPattern = PathUtil.replaceDoubleAsterisk(
                 this.file?.translation || '', this.fullPath, this.file?.source || '', basePath
             );
+            const crowdinFilePath = this.getCrowdinFilePath();
             return this.client.upload(
                 this.fullPath,
                 exportPattern,
-                file,
+                crowdinFilePath,
                 this.file?.updateOption,
                 this.file?.excludedTargetLanguages,
                 this.file?.labels,
-                this.file?.scheme
+                this.file?.scheme,
+                this.file?.type
             );
         } else {
             let promises: Promise<void>[] = [];
@@ -79,31 +81,37 @@ export class TmsTreeItem extends vscode.TreeItem {
     }
 
     async updateSourceFile(): Promise<void> {
+        const crowdinFilePath = this.getCrowdinFilePath();
+        return this.client.downloadSourceFile(this.fullPath, crowdinFilePath);
+    }
+
+    async updateSourceFolder(): Promise<any> {
+        const arr = await this.childs;
+        if (this.isLeaf) {
+            return this.updateSourceFile();
+        } else {
+            let promises: Promise<void>[] = [];
+            for (const item of arr) {
+                promises.push(item.updateSourceFile());
+            }
+            return Promise.all(promises);
+        }
+    }
+
+    private getCrowdinFilePath(): string {
         let basePath = this.rootPath;
         if (!!this.config.basePath) {
             basePath = path.join(basePath, this.config.basePath);
         }
-        const file = path.relative(basePath, this.fullPath);
-        return this.client.downloadSourceFile(this.fullPath, file);
-    }
-
-    async updateSourceFolder(): Promise<void> {
-        const patterns = this.config.files.map(c => c.source);
-        let folder = '';
-        let fullPath = '';
-        if (this.contextValue !== TmsTreeItemContextValue.ROOT) {
-            let basePath = this.rootPath;
-            if (!!this.config.basePath) {
-                basePath = path.join(basePath, this.config.basePath);
-            }
-            folder = path.relative(basePath, this.fullPath);
-            fullPath = this.fullPath;
+        if (this.file?.dest) {
+            return PathUtil.replaceFileDependentPlaceholders(
+                this.file?.dest,
+                this.fullPath,
+                this.file?.source,
+                basePath
+            );
         } else {
-            fullPath = this.rootPath;
-            if (!!this.config.basePath) {
-                fullPath = path.join(fullPath, this.config.basePath);
-            }
+            return path.relative(basePath, this.fullPath);
         }
-        return this.client.downloadSourceFolder(fullPath, folder, patterns);
     }
 }

@@ -2,7 +2,6 @@ import Crowdin, { Credentials, ProjectsGroupsModel, SourceFilesModel } from '@cr
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
 import * as fs from 'fs';
-import * as minimatch from 'minimatch';
 import * as path from 'path';
 import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
@@ -120,6 +119,7 @@ export class CrowdinClient {
      * @param excludedTargetLanguages excluded target languages
      * @param labels labels
      * @param scheme import scheme
+     * @param type file type
      */
     async upload(
         fsPath: string,
@@ -128,7 +128,8 @@ export class CrowdinClient {
         uploadOption?: SourceFilesModel.UpdateOption,
         excludedTargetLanguages?: string[],
         labels?: string[],
-        scheme?: Scheme
+        scheme?: Scheme,
+        type?: SourceFilesModel.FileType
     ): Promise<void> {
         let branchId: number | undefined;
 
@@ -259,7 +260,8 @@ export class CrowdinClient {
                         scheme: scheme
                     } as unknown as SourceFilesModel.SpreadsheetImportOptions,
                     excludedTargetLanguages,
-                    attachLabelIds: labelIds
+                    attachLabelIds: labelIds,
+                    type,
                 });
             }
         } catch (error) {
@@ -315,35 +317,6 @@ export class CrowdinClient {
         const downloadLink = await this.crowdin.sourceFilesApi.downloadFile(this.projectId, foundFile.data.id);
         const content = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
         fs.writeFileSync(fsPath, content.data);
-    }
-
-
-    /**
-     * 
-     * @param fsFolderPath folder path in fs
-     * @param folder folder path in crowdin
-     * @param globPatterns patterns for which files should be updated
-     */
-    async downloadSourceFolder(fsFolderPath: string, folder: string, globPatterns: string[]): Promise<void> {
-        const files = await this.crowdin.sourceFilesApi.withFetchAll().listProjectFiles(this.projectId);
-        const filteredFiles = files.data
-            .filter(f => {
-                const filePath = path.normalize(f.data.path);
-                if (filePath.startsWith(`${path.sep}${folder}`)) {
-                    return globPatterns.some(pattern => minimatch(filePath, pattern));
-                }
-                return false;
-            });
-        for (const file of filteredFiles) {
-            const fullFilePath = path.join(fsFolderPath, path.normalize(file.data.path));
-            const fileDirectory = path.dirname(fullFilePath);
-            if (!fs.existsSync(fileDirectory)) {
-                fs.mkdirSync(fileDirectory);
-            }
-            const downloadLink = await this.crowdin.sourceFilesApi.downloadFile(this.projectId, file.data.id);
-            const content = await axios.get(downloadLink.data.url, { responseType: 'arraybuffer' });
-            fs.writeFileSync(fullFilePath, content.data);
-        }
     }
 
     private waitAndFindDirectory(name: string, parentId?: number, branchId?: number): Promise<number> {
