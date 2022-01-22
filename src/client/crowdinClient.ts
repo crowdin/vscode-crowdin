@@ -2,11 +2,14 @@ import Crowdin, { Credentials, ProjectsGroupsModel, SourceFilesModel } from '@cr
 import * as AdmZip from 'adm-zip';
 import axios from 'axios';
 import * as fs from 'fs';
+import * as https from 'https';
 import * as path from 'path';
 import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
 import { PathUtil } from '../util/pathUtil';
+
+https.globalAgent.options.rejectUnauthorized = false;
 
 export class CrowdinClient {
 
