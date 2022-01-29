@@ -99,7 +99,22 @@ export class CrowdinClient {
                 languages.forEach(language => {
                     const targetLanguageMapping: ProjectsGroupsModel.LanguageMappingEntity = languageMapping[language.data.id] || {};
                     let translationFile = PathUtil.replaceLanguageDependentPlaceholders(sourceFiles.translationPattern, language.data, targetLanguageMapping);
-                    translationFile = PathUtil.replaceFileDependentPlaceholders(translationFile, file, sourceFiles.sourcePattern, basePath);
+                    let fsPath = file;
+                    if (sourceFiles.destPattern) {
+                        const dest = PathUtil.replaceFileDependentPlaceholders(
+                            sourceFiles.destPattern,
+                            file,
+                            sourceFiles.sourcePattern,
+                            basePath
+                        );
+                        fsPath = path.join(basePath, dest);
+                    }
+                    translationFile = PathUtil.replaceFileDependentPlaceholders(
+                        translationFile,
+                        fsPath,
+                        sourceFiles.sourcePattern,
+                        basePath
+                    );
                     files.push(translationFile);
                 });
             });
