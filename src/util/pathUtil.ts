@@ -1,5 +1,5 @@
-import * as path from 'path';
 import { LanguagesModel, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
+import * as path from 'path';
 
 export class PathUtil {
 
@@ -22,19 +22,19 @@ export class PathUtil {
     /**
      * Replaces ** in translation pattern
      * 
-     * @param translation translation pattern from configuration file
+     * @param str string with double asterisk
      * @param fsPath full path to file
      * @param source source pattern from configuration file
      * @param basePath base path from configuration file
      */
-    static replaceDoubleAsteriskInTranslation(translation: string, fsPath: string, source: string, basePath: string): string {
-        if (!translation.includes('**')) {
-            return translation;
+    static replaceDoubleAsterisk(str: string, fsPath: string, source: string, basePath: string): string {
+        if (!str.includes('**')) {
+            return str;
         }
         fsPath = PathUtil.replaceBasePath(fsPath, basePath);
         let replacement = '';
         if (!source.includes('**')) {
-            return translation;
+            return str;
         }
         source = source.replace(new RegExp('[\\\\/]+', 'g'), '/');
         fsPath = fsPath.replace(new RegExp('[\\\\/]+', 'g'), '/');
@@ -65,22 +65,22 @@ export class PathUtil {
             }
         }
         replacement = fsPath;
-        translation = translation.replace('**', replacement);
-        translation = translation.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
-        translation = translation.replace(new RegExp('[\\/]+', 'g'), '/');
-        return translation;
+        str = str.replace('**', replacement);
+        str = str.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
+        str = str.replace(new RegExp('[\\/]+', 'g'), '/');
+        return str;
     }
 
     /**
      * Replacing file-based placeholders in translation pattern
-     * @param translation translation pattern from configuration file
+     * @param str string with file placeholders
      * @param fsPath full path to file
      * @param source source pattern from configuration file
      * @param basePath base path from configuration file
      */
-    static replaceFileDependentPlaceholders(translation: string, fsPath: string, source: string, basePath: string): string {
-        const translationWithoutDoubleAsterisk = PathUtil.replaceDoubleAsteriskInTranslation(
-            translation, fsPath, source, basePath
+    static replaceFileDependentPlaceholders(str: string, fsPath: string, source: string, basePath: string): string {
+        const translationWithoutDoubleAsterisk = PathUtil.replaceDoubleAsterisk(
+            str, fsPath, source, basePath
         );
         const relativePath = path.relative(basePath, fsPath);
         const fileName = path.basename(relativePath);
@@ -101,12 +101,12 @@ export class PathUtil {
 
     /**
      * Replacing language-based placeholders in translation pattern
-     * @param translation translation pattern from configuration file
+     * @param str string with language placeholders
      * @param language crowdin language object
      * @param languageMapping custom language mapping
      */
-    static replaceLanguageDependentPlaceholders(translation: string, language: LanguagesModel.Language, languageMapping: ProjectsGroupsModel.LanguageMappingEntity): string {
-        return translation
+    static replaceLanguageDependentPlaceholders(str: string, language: LanguagesModel.Language, languageMapping: ProjectsGroupsModel.LanguageMappingEntity): string {
+        return str
             .replace(PathUtil.PLACEHOLDER_LANGUAGE, languageMapping.name || language.name)
             .replace(PathUtil.PLACEHOLDER_LOCALE, languageMapping.locale || language.locale)
             .replace(PathUtil.PLACEHOLDER_LOCALE_WITH_UNDERSCORE, languageMapping.locale_with_underscore ? languageMapping.locale_with_underscore : language.locale.replace('-', '_'))

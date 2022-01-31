@@ -41,7 +41,9 @@ Configuration file example:
     "translation": "/translations/%two_letters_code%/%original_file_name%",
     "update_option": "update_as_unapproved", // optional
     "excluded_target_languages": ["uk", "fr"], // optional
-    "labels": ["android", "emails"] // optional
+    "labels": ["android", "emails"], // optional
+    "dest": "/app/%file_name%.xml", // optional
+    "type": "android" // optional
   },
   {
     "source": "multicolumn.csv",
@@ -66,7 +68,9 @@ You also can use environment variables in the configuration file [Environmet var
     "translation": "/translations/%two_letters_code%/%original_file_name%",
     "update_option": "update_as_unapproved", // optional
     "excluded_target_languages": ["uk", "fr"], // optional
-    "labels": ["android", "emails"] // optional
+    "labels": ["android", "emails"], // optional
+    "dest": "/app/%file_name%.xml", // optional
+    "type": "android" // optional
   }
 ]
 ```

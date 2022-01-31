@@ -7,6 +7,8 @@ export interface FileModel {
     excludedTargetLanguages?: string[];
     labels?: string[];
     scheme?: Scheme;
+    dest?: string;
+    type?: SourceFilesModel.FileType;
 }
 
 export interface Scheme {

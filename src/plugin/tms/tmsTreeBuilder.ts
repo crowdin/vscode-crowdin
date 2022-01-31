@@ -80,7 +80,8 @@ export class TmsTreeBuilder {
                 const sourceFiles: SourceFiles = {
                     files: foundFiles,
                     sourcePattern: f.source,
-                    translationPattern: f.translation
+                    translationPattern: f.translation,
+                    destPattern: f.dest,
                 };
                 return sourceFiles;
             });

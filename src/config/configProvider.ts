@@ -79,6 +79,12 @@ export class ConfigProvider {
             if (file.scheme && typeof file.scheme !== 'string') {
                 throw Error(`Invalid value in file scheme property ${this.workspace.name}. It should be a string with columns information`);
             }
+            if (file.dest && typeof file.dest !== 'string') {
+                throw Error(`Invalid value in file dest property ${this.workspace.name}. It should be a string`);
+            }
+            if (file.type && typeof file.type !== 'string') {
+                throw Error(`Invalid value in file type property ${this.workspace.name}. It should be a string`);
+            }
         });
         let organization: string | undefined;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
@@ -108,7 +114,9 @@ export class ConfigProvider {
                     updateOption: this.getFileUpdateOption(f.update_option),
                     excludedTargetLanguages: f.excluded_target_languages,
                     labels: f.labels,
-                    scheme: this.getFileScheme(f.scheme)
+                    scheme: this.getFileScheme(f.scheme),
+                    dest: f.dest,
+                    type: f.type
                 } as FileModel;
             }),
             organization: organization
@@ -178,4 +186,6 @@ interface PrivateFileModel {
     excluded_target_languages?: string[];
     labels?: string[];
     scheme?: string;
+    dest?: string;
+    type?: string;
 }
