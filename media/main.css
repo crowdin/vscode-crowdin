@@ -1,0 +1,27 @@
+body {
+    background-color: transparent;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+}
+
+div {
+    padding: 10px;
+}
+
+table, th, td {
+    border: 1px solid var(--vscode-input-placeholderForeground);
+}
+
+.text {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+}

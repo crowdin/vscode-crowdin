@@ -30,10 +30,12 @@ export class TmsTreeItem extends vscode.TreeItem {
         if (isLeaf) {
             this.resourceUri = vscode.Uri.file(fullPath);
         } else {
-            this.iconPath = {
-                light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
-                dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg'))
-            };
+            if (Constants.EXTENSION_CONTEXT) {
+                this.iconPath = {
+                    light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
+                    dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg'))
+                };
+            }
         }
     }
 

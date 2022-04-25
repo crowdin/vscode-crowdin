@@ -15,7 +15,7 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
     }
 
     refresh() {
-        this._onDidChangeTreeData.fire();
+        this._onDidChangeTreeData.fire(undefined);
     }
 
     getTreeItem(element: ProgressTreeItem): vscode.TreeItem {

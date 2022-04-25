@@ -4,6 +4,7 @@ import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
 import { TmsProvider } from './plugin/tms/tmsProvider';
 import { TmsTreeItem } from './plugin/tms/tmsTreeItem';
+import { TranslationsEditor } from './plugin/translations-editor/translationsEditor';
 
 export function activate(context: vscode.ExtensionContext) {
 	Constants.initialize(context);
@@ -44,4 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
 			configHolder.load();
 		}
 	}));
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('translationsEditor.show', () => new TranslationsEditor(context.extensionPath))
+	);
 }
