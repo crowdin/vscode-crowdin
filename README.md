@@ -53,7 +53,7 @@ Configuration file example:
 ]
 ```
 
-You also can use environment variables in the configuration file [Environmet variables](https://support.crowdin.com/configuration-file/#api-credentials-from-environment-variables):
+You also can use environment variables in the configuration file [Environment variables](https://support.crowdin.com/configuration-file/#api-credentials-from-environment-variables):
 
 ```yaml
 "project_id_env": "CROWDIN_PROJECT_ID"
