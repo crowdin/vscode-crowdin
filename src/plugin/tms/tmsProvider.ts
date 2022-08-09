@@ -27,7 +27,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
                 } else {
                     promises = this.rootTree.map(rootFolder => rootFolder.update().catch(e => ErrorHandler.handleError(e)));
                 }
-                return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire());
+                return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire(undefined));
             },
             `Downloading translations...`
         );
@@ -37,7 +37,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem>  {
      * Reload files tree
      */
     refresh(): void {
-        this._onDidChangeTreeData.fire();
+        this._onDidChangeTreeData.fire(undefined);
     }
 
     /**

@@ -34,6 +34,12 @@
 						"default": "true",
 						"description": "Enables or disables auto refresh after each change in Crowdin configuration file.",
 						"scope": "window"
+					},
+					"tms.stringsCompletion": {
+						"type": "boolean",
+						"default": "true",
+						"description": "Enables or disables auto completion of strings keys.",
+						"scope": "window"
 					}
 				}
 			}
