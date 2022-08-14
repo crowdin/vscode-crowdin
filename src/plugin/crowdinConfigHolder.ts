@@ -1,5 +1,6 @@
+import * as crowdin from '@crowdin/crowdin-api-client';
 import * as vscode from 'vscode';
-import { ConfigModel } from '../config/configModel';
+import { buildClient, ConfigModel } from '../config/configModel';
 import { ConfigProvider } from '../config/configProvider';
 import { Constants } from '../constants';
 import { ErrorHandler } from '../util/errorHandler';
@@ -7,6 +8,7 @@ import { ErrorHandler } from '../util/errorHandler';
 export class CrowdinConfigHolder {
     private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
     private configurationToWorkspace: Map<ConfigModel, vscode.WorkspaceFolder> = new Map();
+    private sourceStrings: Map<vscode.WorkspaceFolder, crowdin.SourceStringsModel.String[]> = new Map();
     private listeners: { (): void; }[] = [];
 
     addListener(listener: () => void) {
@@ -15,6 +17,10 @@ export class CrowdinConfigHolder {
 
     get configurations(): Map<ConfigModel, vscode.WorkspaceFolder> {
         return this.configurationToWorkspace;
+    }
+
+    getCrowdinStrings(workspace: vscode.WorkspaceFolder): crowdin.SourceStringsModel.String[] | undefined {
+        return this.sourceStrings.get(workspace);
     }
 
     async load() {
@@ -31,6 +37,8 @@ export class CrowdinConfigHolder {
                     }
                     const config = await configProvider.load();
                     this.configurationToWorkspace.set(config, workspace);
+                    //let's not block and invoke this without await
+                    this.loadStrings(config, workspace);
                     return config;
                 }
                 catch (err) {
@@ -74,5 +82,16 @@ export class CrowdinConfigHolder {
             });
             this.configWatchers.set(file, wather);
         });
+    }
+
+    private async loadStrings(config: ConfigModel, workspace: vscode.WorkspaceFolder) {
+        try {
+            const client = buildClient(config);
+            const strings = await client.getStrings();
+            console.log(`Loaded ${strings.length} strings`);
+            this.sourceStrings.set(workspace, strings);
+        } catch (e) {
+            ErrorHandler.handleError(e);
+        }
     }
 }

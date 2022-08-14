@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CrowdinClient } from '../../client/crowdinClient';
-import { ConfigModel } from '../../config/configModel';
+import { buildClient, ConfigModel } from '../../config/configModel';
 import { FileModel } from '../../config/fileModel';
 import { Constants } from '../../constants';
 import { SourceFiles } from '../../model/sourceFiles';
@@ -9,6 +9,8 @@ import { PathUtil } from '../../util/pathUtil';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 
 export class TmsTreeItem extends vscode.TreeItem {
+
+    private client: CrowdinClient;
 
     constructor(
         readonly workspace: vscode.WorkspaceFolder,
@@ -35,10 +37,7 @@ export class TmsTreeItem extends vscode.TreeItem {
                 dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg'))
             };
         }
-    }
-
-    get client(): CrowdinClient {
-        return new CrowdinClient(this.config.projectId, this.config.apiKey, this.config.branch, this.config.organization);
+        this.client = buildClient(this.config);
     }
 
     async update(): Promise<void> {

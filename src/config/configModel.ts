@@ -1,3 +1,4 @@
+import { CrowdinClient } from '../client/crowdinClient';
 import { FileModel } from './fileModel';
 
 export interface ConfigModel {
@@ -8,4 +9,8 @@ export interface ConfigModel {
     branch?: string;
     basePath?: string;
     files: FileModel[];
+}
+
+export function buildClient(config: ConfigModel) {
+    return new CrowdinClient(config.projectId, config.apiKey, config.branch, config.organization);
 }
