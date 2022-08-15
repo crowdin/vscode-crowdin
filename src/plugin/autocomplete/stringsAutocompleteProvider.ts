@@ -12,7 +12,7 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         position: vscode.Position,
         token: vscode.CancellationToken,
         context: vscode.CompletionContext
-    ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
+    ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
         const enabled = vscode.workspace.getConfiguration().get<boolean>(Constants.STRINGS_COMPLETION_PROPERTY);
         const fileExtensions = vscode.workspace.getConfiguration().get<string>(Constants.STRINGS_COMPLETION_FILES_FILTER_PROPERTY);
         if (!enabled) {

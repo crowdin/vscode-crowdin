@@ -78,17 +78,9 @@ function testMatrix(map: Map<string, [string | undefined, string, boolean, FileM
 }
 
 class TestContext implements vscode.ExtensionContext {
-    secrets: vscode.SecretStorage = new TestSecretStorage();
-    extensionUri: vscode.Uri = vscode.Uri.from({ scheme: '' });
-    environmentVariableCollection: vscode.EnvironmentVariableCollection = new TestEnvironmentVariableCollection();
-    storageUri: vscode.Uri | undefined;
-    globalStorageUri: vscode.Uri = vscode.Uri.from({ scheme: '' });
-    logUri: vscode.Uri = vscode.Uri.from({ scheme: '' });;
-    extensionMode: vscode.ExtensionMode = vscode.ExtensionMode.Development;
-    extension: vscode.Extension<any> = new TestExtension<any>({});;
     subscriptions: { dispose(): any; }[] = [];
     workspaceState: vscode.Memento = new TestMemento();
-    globalState = new TestMemento();
+    globalState: vscode.Memento = new TestMemento();
     extensionPath: string = '';
     asAbsolutePath(relativePath: string): string {
         return '';
@@ -99,9 +91,6 @@ class TestContext implements vscode.ExtensionContext {
 }
 
 class TestMemento implements vscode.Memento {
-    keys(): readonly string[] {
-        throw new Error('Method not implemented.');
-    }
     get<T>(key: string): T | undefined;
     get<T>(key: string, defaultValue: T): T;
     get(key: any, defaultValue?: any) {
@@ -111,65 +100,5 @@ class TestMemento implements vscode.Memento {
         throw new Error('Method not implemented.');
     }
 
-    setKeysForSync(keys: readonly string[]) {
-        throw new Error('Method not implemented.');
-    }
-
-}
-
-class TestSecretStorage implements vscode.SecretStorage {
-    get(key: string): Thenable<string | undefined> {
-        throw new Error('Method not implemented.');
-    }
-    store(key: string, value: string): Thenable<void> {
-        throw new Error('Method not implemented.');
-    }
-    delete(key: string): Thenable<void> {
-        throw new Error('Method not implemented.');
-    }
-    onDidChange: vscode.Event<vscode.SecretStorageChangeEvent> = (l) => (new vscode.Disposable(() => { }));
-
-}
-
-class TestEnvironmentVariableCollection implements vscode.EnvironmentVariableCollection {
-    persistent: boolean = false;
-    replace(variable: string, value: string): void {
-        throw new Error('Method not implemented.');
-    }
-    append(variable: string, value: string): void {
-        throw new Error('Method not implemented.');
-    }
-    prepend(variable: string, value: string): void {
-        throw new Error('Method not implemented.');
-    }
-    get(variable: string): vscode.EnvironmentVariableMutator | undefined {
-        throw new Error('Method not implemented.');
-    }
-    forEach(callback: (variable: string, mutator: vscode.EnvironmentVariableMutator, collection: vscode.EnvironmentVariableCollection) => any, thisArg?: any): void {
-        throw new Error('Method not implemented.');
-    }
-    delete(variable: string): void {
-        throw new Error('Method not implemented.');
-    }
-    clear(): void {
-        throw new Error('Method not implemented.');
-    }
-
-}
-
-class TestExtension<T> implements vscode.Extension<T> {
-    exports: T;
-    constructor(value: T) {
-        this.exports = value;
-    }
-    id: string = '';
-    extensionUri: vscode.Uri = vscode.Uri.from({ scheme: '' });;
-    extensionPath: string = '';
-    isActive: boolean = false;
-    packageJSON: any;
-    extensionKind: vscode.ExtensionKind = vscode.ExtensionKind.Workspace;
-    activate(): Thenable<T> {
-        throw new Error('Method not implemented.');
-    }
 
 }
