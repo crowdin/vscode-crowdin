@@ -88,7 +88,6 @@ export class CrowdinConfigHolder {
         try {
             const client = buildClient(config);
             const strings = await client.getStrings();
-            console.log(`Loaded ${strings.length} strings`);
             this.sourceStrings.set(workspace, strings);
         } catch (e) {
             ErrorHandler.handleError(e);

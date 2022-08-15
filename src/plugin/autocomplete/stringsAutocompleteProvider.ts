@@ -14,11 +14,18 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         context: vscode.CompletionContext
     ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
         const enabled = vscode.workspace.getConfiguration().get<boolean>(Constants.STRINGS_COMPLETION_PROPERTY);
+        const fileExtensions = vscode.workspace.getConfiguration().get<string>(Constants.STRINGS_COMPLETION_FILES_FILTER_PROPERTY);
         if (!enabled) {
             return [];
         }
 
-        //TODO add configuration to filter out files and not suggest strings everywhere
+        if (fileExtensions && fileExtensions !== '*') {
+            const extensions = fileExtensions.split(',');
+            const extension = document.uri.path.split('.').pop();
+            if (extensions.every(e => e !== extension)) {
+                return [];
+            }
+        }
 
         const workspace = vscode.workspace.workspaceFolders?.find(workspace => document.uri.path.includes(workspace.uri.path));
 

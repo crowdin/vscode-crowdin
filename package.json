@@ -40,6 +40,12 @@
 						"default": "true",
 						"description": "Enables or disables auto completion of strings keys.",
 						"scope": "window"
+					},
+					"tms.stringsCompletionFileExtensions": {
+						"type": "string",
+						"default": "*",
+						"description": "Comma-separated list of file extensions for which autocomplete should be active. By default strings autocomplete will be active in all files.",
+						"scope": "window"
 					}
 				}
 			}
