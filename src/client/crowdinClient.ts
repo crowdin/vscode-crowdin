@@ -34,6 +34,11 @@ export class CrowdinClient {
         });
     }
 
+    async getStrings() {
+        const strings = await this.crowdin.sourceStringsApi.withFetchAll().listProjectStrings(this.projectId);
+        return strings.data.map(str => str.data);
+    }
+
     /**
      * Downloads zip archive from Crowdin system and unzip it in pre-defined folder
      * 

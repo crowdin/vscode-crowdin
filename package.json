@@ -21,7 +21,7 @@
 		"Multi-language"
 	],
 	"activationEvents": [
-		"onView:tmsFiles"
+		"*"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -33,6 +33,18 @@
 						"type": "boolean",
 						"default": "true",
 						"description": "Enables or disables auto refresh after each change in Crowdin configuration file.",
+						"scope": "window"
+					},
+					"tms.stringsCompletion": {
+						"type": "boolean",
+						"default": "true",
+						"description": "Enables or disables auto completion of strings keys.",
+						"scope": "window"
+					},
+					"tms.stringsCompletionFileExtensions": {
+						"type": "string",
+						"default": "*",
+						"description": "Comma-separated list of file extensions for which autocomplete should be active. By default strings autocomplete will be active in all files.",
 						"scope": "window"
 					}
 				}

@@ -4,6 +4,8 @@ export class Constants {
     static EXTENSION_CONTEXT: vscode.ExtensionContext;
     static readonly OPEN_TMS_FILE_COMMAND = 'extension.openTmsFile';
     static readonly AUTO_REFRESH_PROPERTY = 'tms.autoRefresh';
+    static readonly STRINGS_COMPLETION_PROPERTY = 'tms.stringsCompletion';
+    static readonly STRINGS_COMPLETION_FILES_FILTER_PROPERTY = 'tms.stringsCompletionFileExtensions';
     static readonly CROWDIN_PATH_SEPARATOR = '/';
     static readonly PLUGIN_VERSION = '1.3.0';
     static readonly CLIENT_RETRIES = 5;

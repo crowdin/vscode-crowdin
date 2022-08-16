@@ -3,12 +3,14 @@ import * as vscode from 'vscode';
 export class ErrorHandler {
 
     static handleError(e: any): void {
+        let message;
         if (typeof e === 'string') {
-            vscode.window.showErrorMessage(e);
+            message = e;
         } else if (!!e.message) {
-            vscode.window.showErrorMessage(e.message);
+            message = e.message;
         } else {
-            vscode.window.showErrorMessage(`Got an error from server ${JSON.stringify(e)}`);
+            message = JSON.stringify(e);
         }
+        vscode.window.showErrorMessage(`Crowdin: ${message}`);
     }
 }

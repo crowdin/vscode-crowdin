@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Constants } from './constants';
+import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
 import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
 import { TmsProvider } from './plugin/tms/tmsProvider';
@@ -44,4 +45,6 @@ export function activate(context: vscode.ExtensionContext) {
 			configHolder.load();
 		}
 	}));
+
+	vscode.languages.registerCompletionItemProvider({ pattern: '**' }, new StringsAutocompleteProvider(configHolder));
 }
