@@ -42,8 +42,13 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         return strings
             .filter(str => !!str.identifier)
             .map(str => {
-                const snippetCompletion = new vscode.CompletionItem(str.identifier);
-                snippetCompletion.detail = str.text as string;
+                const snippetCompletion = new vscode.CompletionItem(str.identifier.substring(0, 10));
+                const text = str.text;
+                if (typeof text === 'string') {
+                    snippetCompletion.detail = text;
+                } else {
+                    snippetCompletion.detail = text.one || text.zero || text.two || text.few || text.many || text.other;
+                }
                 snippetCompletion.kind = vscode.CompletionItemKind.Text;
                 snippetCompletion.documentation = `Context:\n ${str.context}`;
                 return snippetCompletion;
