@@ -42,7 +42,7 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         return strings
             .filter(str => !!str.identifier)
             .map(str => {
-                const snippetCompletion = new vscode.CompletionItem(str.identifier.substring(0, 10));
+                const snippetCompletion = new vscode.CompletionItem(str.identifier);
                 const text = str.text;
                 if (typeof text === 'string') {
                     snippetCompletion.detail = text;
