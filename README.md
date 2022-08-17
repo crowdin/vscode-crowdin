@@ -19,8 +19,12 @@ Integrate your Visual Studio Code projects with Crowdin to optimize the localiza
 
 A new component will be introduced in the Activity Bar called the *Crowdin Explorer*.
 The plugin will scan each workspace for a Crowdin-specific configuration file and will build a tree with source files.
-In the *Crowdin Explorer* you can upload those files to Crowdin, download them back from Crowdin and download translations.
-And also track progress of translated and approved strings for each project and target language.
+
+With this plugin you can:
+- Upload files for translation to Crowdin.
+- Download sources and translations from Crowdin.
+- Track progress of translated and approved strings for each project and target language.
+- Use string keys in your code fetched from Crowdin and available in autocomplete suggestions.
 
 [<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="350" height="auto" align="center"/></p>](https://support.crowdin.com/visual-studio-code-plugin/)
 
