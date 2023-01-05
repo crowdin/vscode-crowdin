@@ -20,13 +20,26 @@ Integrate your Visual Studio Code projects with Crowdin to optimize the localiza
 A new component will be introduced in the Activity Bar called the *Crowdin Explorer*.
 The plugin will scan each workspace for a Crowdin-specific configuration file and will build a tree with source files.
 
+### Sources and translations sync, tracking project progress
+
 With this plugin you can:
 - Upload files for translation to Crowdin.
 - Download sources and translations from Crowdin.
 - Track progress of translated and approved strings for each project and target language.
-- Use string keys in your code fetched from Crowdin and available in autocomplete suggestions.
 
-[<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="350" height="auto" align="center"/></p>](https://support.crowdin.com/visual-studio-code-plugin/)
+[<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="300" height="auto" align="center"/></p>](https://support.crowdin.com/visual-studio-code-plugin/)
+
+### String keys autocompletion
+
+Use string keys in your code fetched from Crowdin and available in autocomplete suggestions. Whenever a user types something, the VSCode autocompletion will suggest available string keys from Crowdin.
+
+There is a possibility to configure file extensions, where the string keys autocompletion will appear. By default, autocompletion is turned on and available in all files.
+
+Strings for autocompletion are loaded during the bootstrap of VSCode and are also updated whenever there was a change in the `crowdin.yml` configuration file.
+
+[<p align="center"><img src="https://raw.githubusercontent.com/crowdin/vscode-crowdin/docs/autocompletion-demo.gif" data-canonical-src="https://raw.githubusercontent.com/crowdin/vscode-crowdin/docs/autocompletion-demo.gif" width="700" height="auto" align="center"/></p>](https://github.com/crowdin/vscode-crowdin/releases/tag/1.4.0/)
+
+This gif illustrates the autocompletion of string keys in a React project that uses the [LinguiJS](https://lingui.js.org/tools/crowdin.html) library.
 
 ## Configuration
 
@@ -81,7 +94,7 @@ You also can use environment variables in the configuration file [Environment va
 ]
 ```
 
-The project ID can be found on your project settings page.
+The project ID can be found in Tools > API on your Crowdin project page.
 
 To generate a new API token in Crowdin, go to your Account Settings.
 
@@ -97,6 +110,7 @@ To generate a new API token in Crowdin, go to your Account Settings.
         ```
         ext install Crowdin.vscode-crowdin
         ```
+
 3. The *Crowdin* plugin scans each Visual Studio Code workspace to find a Crowdin configuration file (*crowdin.yml* or *crowdin.yaml*). It automatically builds the tree with source files in the *Crowdin Explorer* component available in your Activity Bar.
 4. Use upward and downward arrows in the *Crowdin Explorer* component to upload source files to Crowdin and download translations correspondingly.
 
@@ -105,6 +119,10 @@ To generate a new API token in Crowdin, go to your Account Settings.
 This extension contributes the following settings:
 
 * `tms.autoRefresh`: enable/disable auto refresh of the file tree after each change in the Crowdin configuration file
+
+* `tms.stringsCompletion`: enable/disable autocompletion of strings keys
+
+* `tms.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files.
 
 ## Known Issues
 
