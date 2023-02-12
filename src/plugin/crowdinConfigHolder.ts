@@ -23,6 +23,10 @@ export class CrowdinConfigHolder {
         return this.sourceStrings.get(workspace);
     }
 
+    reloadStrings() {
+        this.configurationToWorkspace.forEach((workspace, config) => this.loadStrings(config, workspace));
+    }
+
     async load() {
         const workspaceFolders = vscode.workspace.workspaceFolders || [];
         let configFiles: string[] = [];
