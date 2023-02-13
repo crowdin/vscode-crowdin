@@ -91,7 +91,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         } else {
             let promises: Promise<void>[] = [];
             for (const item of arr) {
-                promises.push(item.updateSourceFile());
+                promises.push(item.updateSourceFolder());
             }
             return Promise.all(promises);
         }
