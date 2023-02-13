@@ -74,7 +74,7 @@
 		"commands": [
 			{
 				"command": "tmsFiles.refresh",
-				"title": "Refresh folders",
+				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"

@@ -22,7 +22,10 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(Constants.OPEN_TMS_FILE_COMMAND, fsPath => vscode.commands.executeCommand('vscode.open', vscode.Uri.file(fsPath)));
 
 	vscode.commands.registerCommand('translationProgress.refresh', () => progressProvider.refresh());
-	vscode.commands.registerCommand('tmsFiles.refresh', () => tmsProvider.refresh());
+	vscode.commands.registerCommand('tmsFiles.refresh', () => {
+		configHolder.reloadStrings();
+		tmsProvider.refresh();
+	});
 	vscode.commands.registerCommand('tmsFiles.downloadAll', () => tmsProvider.download());
 	vscode.commands.registerCommand('tmsFiles.saveAll', async () => {
 		await tmsProvider.save();
