@@ -12,7 +12,6 @@ import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 const asyncGlob = util.promisify(glob);
 
 export class TmsTreeBuilder {
-
     static async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<TmsTreeItem[]> {
         let matrix = await this.buildFilesMatrix(config, workspace);
         let subtree: TmsTreeItem[] = [];
@@ -27,7 +26,13 @@ export class TmsTreeBuilder {
                 if (isLeaf) {
                     item = TmsTreeBuilder.buildLeaf(workspace, labelToDisplay, fullPath, config, file);
                 } else {
-                    item = TmsTreeBuilder.buildFolder(workspace, labelToDisplay, (temp.get(label) || []).sort(TmsTreeBuilder.compare), config, fullPath);
+                    item = TmsTreeBuilder.buildFolder(
+                        workspace,
+                        labelToDisplay,
+                        (temp.get(label) || []).sort(TmsTreeBuilder.compare),
+                        config,
+                        fullPath
+                    );
                 }
                 if (!!parent) {
                     let childElements = childs.get(parent) || [];
@@ -41,14 +46,17 @@ export class TmsTreeBuilder {
         return subtree.sort(TmsTreeBuilder.compare);
     }
 
-    static async buildFilesMatrix(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<Array<Map<string, [string | undefined, string, boolean, FileModel]>>> {
+    static async buildFilesMatrix(
+        config: ConfigModel,
+        workspace: vscode.WorkspaceFolder
+    ): Promise<Array<Map<string, [string | undefined, string, boolean, FileModel]>>> {
         let matrix: Array<Map<string, [string | undefined, string, boolean, FileModel]>> = [];
         const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
-        const promises = config.files.map(async f => {
+        const promises = config.files.map(async (f) => {
             let foundFiles = await asyncGlob(f.source, { root: root });
             foundFiles
-                .map(e => path.relative(workspace.uri.fsPath, e))
-                .forEach(filePath => {
+                .map((e) => path.relative(workspace.uri.fsPath, e))
+                .forEach((filePath) => {
                     const fileParts = filePath.split(path.sep);
                     let parentPart: string | undefined;
                     for (let i = 0; i < fileParts.length; i++) {
@@ -72,50 +80,91 @@ export class TmsTreeBuilder {
         return matrix;
     }
 
-    static async buildRootFolder(workspace: vscode.WorkspaceFolder, config: ConfigModel, childs: Promise<TmsTreeItem[]>): Promise<TmsTreeItem> {
+    static async buildRootFolder(
+        workspace: vscode.WorkspaceFolder,
+        config: ConfigModel,
+        childs: Promise<TmsTreeItem[]>
+    ): Promise<TmsTreeItem> {
         const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
-        const promises = config.files
-            .map(async f => {
-                let foundFiles = await asyncGlob(f.source, { root: root });
-                const sourceFiles: SourceFiles = {
-                    files: foundFiles,
-                    sourcePattern: f.source,
-                    translationPattern: f.translation,
-                    destPattern: f.dest,
-                };
-                return sourceFiles;
-            });
+        const promises = config.files.map(async (f) => {
+            let foundFiles = await asyncGlob(f.source, { root: root });
+            const sourceFiles: SourceFiles = {
+                files: foundFiles,
+                sourcePattern: f.source,
+                translationPattern: f.translation,
+                destPattern: f.dest,
+            };
+            return sourceFiles;
+        });
         const sourceFilesArr = await Promise.all(promises);
         return new TmsTreeItem(
-            workspace, workspace.name, vscode.TreeItemCollapsibleState.Collapsed,
-            childs, config, workspace.uri.fsPath, TmsTreeItemContextValue.ROOT, workspace.uri.fsPath,
+            workspace,
+            workspace.name,
+            vscode.TreeItemCollapsibleState.Collapsed,
+            childs,
+            config,
+            workspace.uri.fsPath,
+            TmsTreeItemContextValue.ROOT,
+            workspace.uri.fsPath,
             sourceFilesArr
         );
     }
 
-    static buildLeaf(workspace: vscode.WorkspaceFolder, label: string, filePath: string, config: ConfigModel, file: FileModel): TmsTreeItem {
+    static buildLeaf(
+        workspace: vscode.WorkspaceFolder,
+        label: string,
+        filePath: string,
+        config: ConfigModel,
+        file: FileModel
+    ): TmsTreeItem {
         const command: vscode.Command = {
             command: Constants.OPEN_TMS_FILE_COMMAND,
             title: '',
             arguments: [filePath],
         };
         return new TmsTreeItem(
-            workspace, label, vscode.TreeItemCollapsibleState.None, Promise.resolve([]), config,
-            workspace.uri.fsPath, TmsTreeItemContextValue.FILE, filePath, [], true, command, file
+            workspace,
+            label,
+            vscode.TreeItemCollapsibleState.None,
+            Promise.resolve([]),
+            config,
+            workspace.uri.fsPath,
+            TmsTreeItemContextValue.FILE,
+            filePath,
+            [],
+            true,
+            command,
+            file
         );
     }
 
-    static buildFolder(workspace: vscode.WorkspaceFolder, label: string, childs: TmsTreeItem[], config: ConfigModel, path: string) {
+    static buildFolder(
+        workspace: vscode.WorkspaceFolder,
+        label: string,
+        childs: TmsTreeItem[],
+        config: ConfigModel,
+        path: string
+    ) {
         return new TmsTreeItem(
-            workspace, label, vscode.TreeItemCollapsibleState.Collapsed, Promise.resolve(childs),
-            config, workspace.uri.fsPath, TmsTreeItemContextValue.FOLDER, path
+            workspace,
+            label,
+            vscode.TreeItemCollapsibleState.Collapsed,
+            Promise.resolve(childs),
+            config,
+            workspace.uri.fsPath,
+            TmsTreeItemContextValue.FOLDER,
+            path
         );
     }
 
     static compare(e1: TmsTreeItem, e2: TmsTreeItem): number {
         if (e1.collapsibleState === e2.collapsibleState) {
-            if (e1.label < e2.label) { return -1; }
-            if (e1.label > e2.label) { return 1; }
+            if (e1.label < e2.label) {
+                return -1;
+            }
+            if (e1.label > e2.label) {
+                return 1;
+            }
             return 0;
         }
         return e1.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed ? -1 : 1;

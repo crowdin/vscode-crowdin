@@ -3,9 +3,7 @@ import { Constants } from '../../constants';
 import { CrowdinConfigHolder } from '../crowdinConfigHolder';
 
 export class StringsAutocompleteProvider implements vscode.CompletionItemProvider {
-
-    constructor(readonly configHolder: CrowdinConfigHolder) {
-    }
+    constructor(readonly configHolder: CrowdinConfigHolder) {}
 
     provideCompletionItems(
         document: vscode.TextDocument,
@@ -14,7 +12,9 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         context: vscode.CompletionContext
     ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
         const enabled = vscode.workspace.getConfiguration().get<boolean>(Constants.STRINGS_COMPLETION_PROPERTY);
-        const fileExtensions = vscode.workspace.getConfiguration().get<string>(Constants.STRINGS_COMPLETION_FILES_FILTER_PROPERTY);
+        const fileExtensions = vscode.workspace
+            .getConfiguration()
+            .get<string>(Constants.STRINGS_COMPLETION_FILES_FILTER_PROPERTY);
         if (!enabled) {
             return [];
         }
@@ -22,12 +22,14 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         if (fileExtensions && fileExtensions !== '*') {
             const extensions = fileExtensions.split(',');
             const extension = document.uri.path.split('.').pop();
-            if (extensions.every(e => e !== extension)) {
+            if (extensions.every((e) => e !== extension)) {
                 return [];
             }
         }
 
-        const workspace = vscode.workspace.workspaceFolders?.find(workspace => document.uri.path.includes(workspace.uri.path));
+        const workspace = vscode.workspace.workspaceFolders?.find((workspace) =>
+            document.uri.path.includes(workspace.uri.path)
+        );
 
         if (!workspace) {
             return [];
@@ -40,8 +42,8 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
         }
 
         return strings
-            .filter(str => !!str.identifier)
-            .map(str => {
+            .filter((str) => !!str.identifier)
+            .map((str) => {
                 const snippetCompletion = new vscode.CompletionItem(str.identifier);
                 const text = str.text;
                 if (typeof text === 'string') {
@@ -54,5 +56,4 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
                 return snippetCompletion;
             });
     }
-
 }

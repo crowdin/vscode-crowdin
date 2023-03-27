@@ -2,7 +2,6 @@ import { LanguagesModel, ProjectsGroupsModel } from '@crowdin/crowdin-api-client
 import * as path from 'path';
 
 export class PathUtil {
-
     static PATH_SEPARATOR_REGEX = '\\' === path.sep ? '\\\\' : path.sep;
     static SPECIAL_SYMBOLS = ['*', '?', '[', ']', '.'];
 
@@ -21,7 +20,7 @@ export class PathUtil {
 
     /**
      * Replaces ** in translation pattern
-     * 
+     *
      * @param str string with double asterisk
      * @param fsPath full path to file
      * @param source source pattern from configuration file
@@ -46,12 +45,12 @@ export class PathUtil {
             } else if (sourceNodes.length - 1 === i) {
                 if (sourceNodes[i].includes('/')) {
                     const sourceNodesTmp = sourceNodes[i].split('/');
-                    sourceNodesTmp.forEach(sourceNode => {
+                    sourceNodesTmp.forEach((sourceNode) => {
                         let s = '/' + sourceNode + '/';
                         s = s.replace(new RegExp('/+', 'g'), '/');
                         if (fsPath.includes(s)) {
                             fsPath = fsPath.replace(s, '/');
-                        } else if (PathUtil.SPECIAL_SYMBOLS.some(symbol => s.includes(symbol))) {
+                        } else if (PathUtil.SPECIAL_SYMBOLS.some((symbol) => s.includes(symbol))) {
                             if (fsPath.lastIndexOf('/') > 0) {
                                 fsPath = fsPath.substring(0, fsPath.lastIndexOf('/'));
                             } else {
@@ -79,14 +78,13 @@ export class PathUtil {
      * @param basePath base path from configuration file
      */
     static replaceFileDependentPlaceholders(str: string, fsPath: string, source: string, basePath: string): string {
-        const translationWithoutDoubleAsterisk = PathUtil.replaceDoubleAsterisk(
-            str, fsPath, source, basePath
-        );
+        const translationWithoutDoubleAsterisk = PathUtil.replaceDoubleAsterisk(str, fsPath, source, basePath);
         const relativePath = path.relative(basePath, fsPath);
         const fileName = path.basename(relativePath);
         const fileNameWithoutExt = path.parse(fileName).name;
         const fileExt = path.extname(fileName).split('.').pop() || '';
-        const fileParent = path.dirname(relativePath)
+        const fileParent = path
+            .dirname(relativePath)
             .replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX)
             .replace(new RegExp('[\\\\/]+', 'g'), '/');
         let result = translationWithoutDoubleAsterisk
@@ -105,13 +103,25 @@ export class PathUtil {
      * @param language crowdin language object
      * @param languageMapping custom language mapping
      */
-    static replaceLanguageDependentPlaceholders(str: string, language: LanguagesModel.Language, languageMapping: ProjectsGroupsModel.LanguageMappingEntity): string {
+    static replaceLanguageDependentPlaceholders(
+        str: string,
+        language: LanguagesModel.Language,
+        languageMapping: ProjectsGroupsModel.LanguageMappingEntity
+    ): string {
         return str
             .replace(PathUtil.PLACEHOLDER_LANGUAGE, languageMapping.name || language.name)
             .replace(PathUtil.PLACEHOLDER_LOCALE, languageMapping.locale || language.locale)
-            .replace(PathUtil.PLACEHOLDER_LOCALE_WITH_UNDERSCORE, languageMapping.locale_with_underscore ? languageMapping.locale_with_underscore : language.locale.replace('-', '_'))
+            .replace(
+                PathUtil.PLACEHOLDER_LOCALE_WITH_UNDERSCORE,
+                languageMapping.locale_with_underscore
+                    ? languageMapping.locale_with_underscore
+                    : language.locale.replace('-', '_')
+            )
             .replace(PathUtil.PLACEHOLDER_TWO_LETTERS_CODE, languageMapping.two_letters_code || language.twoLettersCode)
-            .replace(PathUtil.PLACEHOLDER_THREE_LETTERS_CODE, languageMapping.three_letters_code || language.threeLettersCode)
+            .replace(
+                PathUtil.PLACEHOLDER_THREE_LETTERS_CODE,
+                languageMapping.three_letters_code || language.threeLettersCode
+            )
             .replace(PathUtil.PLACEHOLDER_ANDROID_CODE, languageMapping.android_code || language.androidCode)
             .replace(PathUtil.PLACEHOLDER_OSX_LOCALE, languageMapping.osx_locale || language.osxLocale)
             .replace(PathUtil.PLACEHOLDER_OSX_CODE, languageMapping.osx_code || language.osxCode);
@@ -123,7 +133,10 @@ export class PathUtil {
         }
         let result;
         path1 = path1.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
-        basePath = basePath.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
+        basePath = basePath.replace(
+            new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'),
+            PathUtil.PATH_SEPARATOR_REGEX
+        );
         result = path1.replace(basePath, path.sep);
         result = result.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
         return result;

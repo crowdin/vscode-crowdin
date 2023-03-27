@@ -6,8 +6,7 @@ import { FileModel } from '../../../config/fileModel';
 import { Constants } from '../../../constants';
 import { TmsTreeBuilder } from '../../../plugin/tms/tmsTreeBuilder';
 
-suite("Plugin tree", function () {
-
+suite('Plugin tree', function () {
     let config: ConfigModel;
     let workspace: vscode.WorkspaceFolder;
 
@@ -18,10 +17,12 @@ suite("Plugin tree", function () {
             projectId: 5,
             branch: 'master',
             basePath: 'folder1/folder2',
-            files: [{
-                source: '/**/[^0-2].txt',
-                translation: '/**/%two_letters_code%_%original_file_name%'
-            }]
+            files: [
+                {
+                    source: '/**/[^0-2].txt',
+                    translation: '/**/%two_letters_code%_%original_file_name%',
+                },
+            ],
         };
         workspace = {
             index: 0,
@@ -33,12 +34,12 @@ suite("Plugin tree", function () {
                 fsPath: path.join(__dirname, '..', '..', '..', '..', 'test-resources', 'tree'),
                 path: '',
                 query: '',
-                toJSON: () => { },
+                toJSON: () => {},
                 toString: () => '',
-                with: () => null as unknown as vscode.Uri
-            }
+                with: () => null as unknown as vscode.Uri,
+            },
         };
-        Constants.initialize((new TestContext()) as vscode.ExtensionContext);
+        Constants.initialize(new TestContext() as vscode.ExtensionContext);
     });
 
     test('Build files matrix', async () => {
@@ -52,7 +53,13 @@ suite("Plugin tree", function () {
         assert.strictEqual(1, level3.size);
         testMatrix(level1, 'folder1', undefined, config.files[0].translation, false);
         testMatrix(level2, path.join('folder1', 'folder2'), 'folder1', config.files[0].translation, false);
-        testMatrix(level3, path.join('folder1', 'folder2', '3.txt'), path.join('folder1', 'folder2'), config.files[0].translation, true);
+        testMatrix(
+            level3,
+            path.join('folder1', 'folder2', '3.txt'),
+            path.join('folder1', 'folder2'),
+            config.files[0].translation,
+            true
+        );
     });
 
     test('Build subtree', async () => {
@@ -66,11 +73,15 @@ suite("Plugin tree", function () {
         const leaf = childs[0];
         assert.strictEqual('3.txt', leaf.label);
     });
-
 });
 
-function testMatrix(map: Map<string, [string | undefined, string, boolean, FileModel]>,
-    key: string, parent: string | undefined, translation: string, isLeaf: boolean) {
+function testMatrix(
+    map: Map<string, [string | undefined, string, boolean, FileModel]>,
+    key: string,
+    parent: string | undefined,
+    translation: string,
+    isLeaf: boolean
+) {
     const [parent1, fullPath1, isLeaf1, file] = map.get(key) || ['', '', false, {} as FileModel];
     assert.strictEqual(parent1, parent);
     assert.strictEqual(file.translation, translation);
@@ -78,7 +89,7 @@ function testMatrix(map: Map<string, [string | undefined, string, boolean, FileM
 }
 
 class TestContext implements vscode.ExtensionContext {
-    subscriptions: { dispose(): any; }[] = [];
+    subscriptions: { dispose(): any }[] = [];
     workspaceState: vscode.Memento = new TestMemento();
     // @ts-ignore
     globalState: vscode.Memento = new TestMemento();
