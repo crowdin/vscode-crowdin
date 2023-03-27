@@ -147,9 +147,9 @@ export class ConfigProvider {
     private getFileUpdateOption(value?: string): SourceFilesModel.UpdateOption | undefined {
         switch (value) {
             case 'update_as_unapproved':
-                return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS;
+                return 'keep_translations';
             case 'update_without_changes':
-                return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS_AND_APPROVALS;
+                return 'keep_translations_and_approvals';
         }
     }
 

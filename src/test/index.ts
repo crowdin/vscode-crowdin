@@ -7,7 +7,7 @@ export function run(testsRoot: string, cb: (error: any, failures?: number) => vo
     const mocha = new Mocha({
         ui: 'tdd'
     });
-    mocha.useColors(true);
+    mocha.options.color = true;
 
     glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
         if (err) {

@@ -56,8 +56,8 @@ suite('PathUtil', function () {
             'pluralCategoryNames': [],
             'pluralRules': '(n != 1)',
             'pluralExamples': [],
-            'textDirection': LanguagesModel.TextDirection.LTR,
-            'dialectOf': 0
+            'textDirection': 'ltr',
+            'dialectOf': ''
         };
         const newTranslation = PathUtil.replaceLanguageDependentPlaceholders(translation, language, {} as ProjectsGroupsModel.LanguageMappingEntity);
         assert.strictEqual(newTranslation, '/%original_path%/%file_name%.es.%file_extension%');

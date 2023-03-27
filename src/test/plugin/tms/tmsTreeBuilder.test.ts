@@ -38,7 +38,7 @@ suite("Plugin tree", function () {
                 with: () => null as unknown as vscode.Uri
             }
         };
-        Constants.initialize(new TestContext());
+        Constants.initialize((new TestContext()) as vscode.ExtensionContext);
     });
 
     test('Build files matrix', async () => {
@@ -80,6 +80,7 @@ function testMatrix(map: Map<string, [string | undefined, string, boolean, FileM
 class TestContext implements vscode.ExtensionContext {
     subscriptions: { dispose(): any; }[] = [];
     workspaceState: vscode.Memento = new TestMemento();
+    // @ts-ignore
     globalState: vscode.Memento = new TestMemento();
     extensionPath: string = '';
     asAbsolutePath(relativePath: string): string {
@@ -100,5 +101,7 @@ class TestMemento implements vscode.Memento {
         throw new Error('Method not implemented.');
     }
 
-
+    keys(): readonly string[] {
+        return [];
+    }
 }
