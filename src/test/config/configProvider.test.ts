@@ -1,11 +1,9 @@
-import { SourceFilesModel } from '@crowdin/crowdin-api-client';
 import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigProvider } from '../../config/configProvider';
 
 suite('Configuration file', function () {
-
     let workspaceName;
     let uri: vscode.Uri;
     let workspace: vscode.WorkspaceFolder;
@@ -19,14 +17,14 @@ suite('Configuration file', function () {
             fsPath: path.join(__dirname, '..', '..', '..', 'test-resources'),
             path: '',
             query: '',
-            toJSON: () => { },
+            toJSON: () => {},
             toString: () => '',
-            with: () => null as unknown as vscode.Uri
+            with: () => null as unknown as vscode.Uri,
         };
         workspace = {
             index: 0,
             name: workspaceName,
-            uri: uri
+            uri: uri,
         };
     });
 
@@ -39,7 +37,7 @@ suite('Configuration file', function () {
         assert.strictEqual('master', config.branch);
         assert.strictEqual('testOrg', config.organization);
         assert.strictEqual(2, config.files.length);
-        assert.strictEqual(SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS, config.files[0].updateOption);
+        assert.strictEqual('keep_translations', config.files[0].updateOption);
         assert.strictEqual(false, !!config.files[1].updateOption);
         assert.strictEqual(2, config.files[1].excludedTargetLanguages?.length);
         assert.strictEqual(0, config.files[0].scheme?.identifier);
@@ -60,7 +58,6 @@ suite('Configuration file', function () {
 });
 
 class TestConfigProvider extends ConfigProvider {
-
     constructor(public readonly workspace: vscode.WorkspaceFolder, private readonly file: string) {
         super(workspace);
     }

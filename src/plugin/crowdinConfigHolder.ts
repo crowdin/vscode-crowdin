@@ -9,7 +9,7 @@ export class CrowdinConfigHolder {
     private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
     private configurationToWorkspace: Map<ConfigModel, vscode.WorkspaceFolder> = new Map();
     private sourceStrings: Map<vscode.WorkspaceFolder, crowdin.SourceStringsModel.String[]> = new Map();
-    private listeners: { (): void; }[] = [];
+    private listeners: { (): void }[] = [];
 
     addListener(listener: () => void) {
         this.listeners.push(listener);
@@ -31,24 +31,22 @@ export class CrowdinConfigHolder {
         const workspaceFolders = vscode.workspace.workspaceFolders || [];
         let configFiles: string[] = [];
         this.configurationToWorkspace.clear();
-        const promises = workspaceFolders
-            .map(async workspace => {
-                const configProvider = new ConfigProvider(workspace);
-                try {
-                    const configPath = await configProvider.getFile();
-                    if (!!configPath) {
-                        configFiles.push(configPath);
-                    }
-                    const config = await configProvider.load();
-                    this.configurationToWorkspace.set(config, workspace);
-                    //let's not block and invoke this without await
-                    this.loadStrings(config, workspace);
-                    return config;
+        const promises = workspaceFolders.map(async (workspace) => {
+            const configProvider = new ConfigProvider(workspace);
+            try {
+                const configPath = await configProvider.getFile();
+                if (!!configPath) {
+                    configFiles.push(configPath);
                 }
-                catch (err) {
-                    ErrorHandler.handleError(err);
-                }
-            });
+                const config = await configProvider.load();
+                this.configurationToWorkspace.set(config, workspace);
+                //let's not block and invoke this without await
+                this.loadStrings(config, workspace);
+                return config;
+            } catch (err) {
+                ErrorHandler.handleError(err);
+            }
+        });
         await Promise.all(promises);
         this.updateConfigWatchers(configFiles);
     }
@@ -61,28 +59,28 @@ export class CrowdinConfigHolder {
             return;
         }
         let watchersToRemove: string[] = [];
-        let watchersToAdd = configFiles.filter(file => !this.configWatchers.has(file));
+        let watchersToAdd = configFiles.filter((file) => !this.configWatchers.has(file));
         this.configWatchers.forEach((_watcher, file) => {
             if (!configFiles.includes(file)) {
                 watchersToRemove.push(file);
             }
         });
-        watchersToRemove.forEach(file => {
+        watchersToRemove.forEach((file) => {
             const watcher = this.configWatchers.get(file);
             if (!!watcher) {
                 watcher.dispose();
             }
             this.configWatchers.delete(file);
         });
-        watchersToAdd.forEach(file => {
+        watchersToAdd.forEach((file) => {
             const wather = vscode.workspace.createFileSystemWatcher(file);
             wather.onDidChange(async () => {
                 await this.load();
-                this.listeners.forEach(l => l());
+                this.listeners.forEach((l) => l());
             });
             wather.onDidDelete(async () => {
                 await this.load();
-                this.listeners.forEach(l => l());
+                this.listeners.forEach((l) => l());
             });
             this.configWatchers.set(file, wather);
         });

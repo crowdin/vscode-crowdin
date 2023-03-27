@@ -11,10 +11,9 @@ const asyncFileExists = util.promisify(fs.exists);
 const asyncReadFile = util.promisify(fs.readFile);
 
 export class ConfigProvider {
-
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
 
-    constructor(public readonly workspace: vscode.WorkspaceFolder) { }
+    constructor(public readonly workspace: vscode.WorkspaceFolder) {}
 
     async load(): Promise<ConfigModel> {
         let filePath = await this.getFile();
@@ -56,10 +55,12 @@ export class ConfigProvider {
         if (!!basePath) {
             const fullPath = path.join(this.workspace.uri.fsPath, basePath);
             if (!fs.existsSync(fullPath)) {
-                throw Error(`Base path ${fullPath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`);
+                throw Error(
+                    `Base path ${fullPath} was not found. Check your 'base_path' for potential typos and/or capitalization mismatches`
+                );
             }
         }
-        config.files.forEach(file => {
+        config.files.forEach((file) => {
             if (this.isEmpty(file.source)) {
                 throw Error(`File source is empty in ${this.workspace.name}`);
             }
@@ -69,15 +70,24 @@ export class ConfigProvider {
             if (file.update_option && !this.getFileUpdateOption(file.update_option)) {
                 throw Error(`Invalid file update option value in ${this.workspace.name}`);
             }
-            if (file.excluded_target_languages
-                && (!Array.isArray(file.excluded_target_languages) || file.excluded_target_languages.some(l => typeof l !== 'string'))) {
-                throw Error(`Invalid value in file excluded_target_languages property in ${this.workspace.name}. It should be an array of language codes`);
+            if (
+                file.excluded_target_languages &&
+                (!Array.isArray(file.excluded_target_languages) ||
+                    file.excluded_target_languages.some((l) => typeof l !== 'string'))
+            ) {
+                throw Error(
+                    `Invalid value in file excluded_target_languages property in ${this.workspace.name}. It should be an array of language codes`
+                );
             }
-            if (file.labels && (!Array.isArray(file.labels) || file.labels.some(l => typeof l !== 'string'))) {
-                throw Error(`Invalid value in file labels property in ${this.workspace.name}. It should be an array of labels`);
+            if (file.labels && (!Array.isArray(file.labels) || file.labels.some((l) => typeof l !== 'string'))) {
+                throw Error(
+                    `Invalid value in file labels property in ${this.workspace.name}. It should be an array of labels`
+                );
             }
             if (file.scheme && typeof file.scheme !== 'string') {
-                throw Error(`Invalid value in file scheme property ${this.workspace.name}. It should be a string with columns information`);
+                throw Error(
+                    `Invalid value in file scheme property ${this.workspace.name}. It should be a string with columns information`
+                );
             }
             if (file.dest && typeof file.dest !== 'string') {
                 throw Error(`Invalid value in file dest property ${this.workspace.name}. It should be a string`);
@@ -89,8 +99,10 @@ export class ConfigProvider {
         let organization: string | undefined;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
         if (!!baseUrl) {
-            if ((baseUrl.endsWith('.crowdin.com') || baseUrl.endsWith('.crowdin.com/'))
-                && baseUrl.startsWith('https://')) {
+            if (
+                (baseUrl.endsWith('.crowdin.com') || baseUrl.endsWith('.crowdin.com/')) &&
+                baseUrl.startsWith('https://')
+            ) {
                 //enterprise
                 organization = baseUrl.substring(8).split('.crowdin.com')[0];
             } else if (baseUrl.startsWith('https://crowdin.com')) {
@@ -107,7 +119,7 @@ export class ConfigProvider {
             apiKey: apiKey || '',
             branch: config.branch,
             basePath,
-            files: config.files.map(f => {
+            files: config.files.map((f) => {
                 return {
                     source: f.source,
                     translation: f.translation,
@@ -116,10 +128,10 @@ export class ConfigProvider {
                     labels: f.labels,
                     scheme: this.getFileScheme(f.scheme),
                     dest: f.dest,
-                    type: f.type
+                    type: f.type,
                 } as FileModel;
             }),
-            organization: organization
+            organization: organization,
         };
     }
 
@@ -147,16 +159,16 @@ export class ConfigProvider {
     private getFileUpdateOption(value?: string): SourceFilesModel.UpdateOption | undefined {
         switch (value) {
             case 'update_as_unapproved':
-                return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS;
+                return 'keep_translations';
             case 'update_without_changes':
-                return SourceFilesModel.UpdateOption.KEEP_TRANSLATIONS_AND_APPROVALS;
+                return 'keep_translations_and_approvals';
         }
     }
 
     private getFileScheme(value?: string): Scheme | undefined {
         let scheme: Scheme | undefined;
         if (value) {
-            scheme = {}
+            scheme = {};
             const schemeParts = value.split(',');
             for (let i = 0; i < schemeParts.length; i++) {
                 scheme[schemeParts[i].trim()] = i;

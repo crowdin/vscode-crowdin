@@ -5,9 +5,9 @@ import * as glob from 'glob';
 export function run(testsRoot: string, cb: (error: any, failures?: number) => void): void {
     // Create the mocha test
     const mocha = new Mocha({
-        ui: 'tdd'
+        ui: 'tdd',
     });
-    mocha.useColors(true);
+    mocha.options.color = true;
 
     glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
         if (err) {
@@ -15,11 +15,11 @@ export function run(testsRoot: string, cb: (error: any, failures?: number) => vo
         }
 
         // Add files to the test suite
-        files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+        files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
 
         try {
             // Run the mocha test
-            mocha.run(failures => {
+            mocha.run((failures) => {
                 cb(null, failures);
             });
         } catch (err) {

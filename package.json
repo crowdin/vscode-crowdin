@@ -206,7 +206,10 @@
 		"vscode:prepublish": "webpack --mode production",
 		"webpack": "webpack --mode development",
 		"webpack-dev": "webpack --mode development --watch",
-		"test-compile": "tsc -p ./"
+		"test-compile": "tsc -p ./",
+		"lint": "eslint './src/**/*.{ts,js}'",
+		"prettier": "prettier --write './src/**/*.{ts,js}'",
+		"prettier:check": "prettier --check './src/**/*.{ts,js}'"
 	},
 	"icon": "icon.png",
 	"repository": {
@@ -214,26 +217,27 @@
 		"url": "https://github.com/crowdin/vscode-crowdin.git"
 	},
 	"devDependencies": {
-		"@types/adm-zip": "^0.4.32",
-		"@types/glob": "^7.1.1",
-		"@types/mocha": "^5.2.6",
-		"@types/node": "^10.14.10",
-		"@types/yaml": "^1.0.2",
-		"glob": "^7.1.1",
-		"mocha": "^10.2.0",
-		"ts-loader": "8.1.0",
-		"tslint": "^5.12.1",
-		"typescript": "^3.5.2",
-		"vscode-test": "1.3.0",
+		"@types/adm-zip": "^0.5.0",
+		"@types/glob": "^8.1.0",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "^18.15.10",
 		"@types/vscode": "1.35.0",
-		"webpack": "5.76.0",
-		"webpack-cli": "4.6.0"
+		"@types/yaml": "^1.9.6",
+		"@typescript-eslint/eslint-plugin": "^5.56.0",
+		"@typescript-eslint/parser": "^5.56.0",
+		"mocha": "^10.2.0",
+		"prettier": "2.8.7",
+		"ts-loader": "9.4.2",
+		"typescript": "^5.0.2",
+		"vscode-test": "1.3.0",
+		"webpack": "5.76.3",
+		"webpack-cli": "5.0.1"
 	},
 	"dependencies": {
-		"@crowdin/crowdin-api-client": "1.11.7",
-		"adm-zip": "^0.4.14",
+		"@crowdin/crowdin-api-client": "1.22.1",
+		"adm-zip": "^0.5.10",
 		"glob": "^7.1.4",
-		"original-fs": "^1.1.0",
-		"yaml": "^1.6.0"
+		"original-fs": "^1.2.0",
+		"yaml": "^2.2.1"
 	}
 }

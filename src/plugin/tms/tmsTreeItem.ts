@@ -9,7 +9,6 @@ import { PathUtil } from '../../util/pathUtil';
 import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
 
 export class TmsTreeItem extends vscode.TreeItem {
-
     private client: CrowdinClient;
 
     constructor(
@@ -34,7 +33,7 @@ export class TmsTreeItem extends vscode.TreeItem {
         } else {
             this.iconPath = {
                 light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
-                dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg'))
+                dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
             };
         }
         this.client = buildClient(this.config);
@@ -57,7 +56,10 @@ export class TmsTreeItem extends vscode.TreeItem {
                 basePath = path.join(basePath, this.config.basePath);
             }
             const exportPattern = PathUtil.replaceDoubleAsterisk(
-                this.file?.translation || '', this.fullPath, this.file?.source || '', basePath
+                this.file?.translation || '',
+                this.fullPath,
+                this.file?.source || '',
+                basePath
             );
             const crowdinFilePath = this.getCrowdinFilePath();
             return this.client.upload(

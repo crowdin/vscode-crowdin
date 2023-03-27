@@ -1,0 +1,32 @@
+name: Basic CI
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+
+      - name: npm install and build VSIX
+        run: |
+          npm install
+          npm install -g vsce
+          vsce package
+
+      - name: Test Compile
+        run: npm run test-compile
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check Prettier
+        run: npm run prettier:check

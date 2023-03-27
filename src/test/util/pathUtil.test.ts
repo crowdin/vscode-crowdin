@@ -4,7 +4,6 @@ import * as path from 'path';
 import { PathUtil } from '../../util/pathUtil';
 
 suite('PathUtil', function () {
-
     test('Replace double asterisk 1', async () => {
         const source = '/**/values/strings.xml';
         const translation = '/**/values-%two_letters_code%/%original_file_name%';
@@ -44,22 +43,26 @@ suite('PathUtil', function () {
     test('Replace language dependent placeholders', async () => {
         const translation = '/%original_path%/%file_name%.%two_letters_code%.%file_extension%';
         const language: LanguagesModel.Language = {
-            'id': 'es',
-            'name': 'Spanish',
-            'editorCode': 'es',
-            'twoLettersCode': 'es',
-            'threeLettersCode': 'spa',
-            'locale': 'es-ES',
-            'androidCode': 'es-rES',
-            'osxCode': 'es.lproj',
-            'osxLocale': 'es',
-            'pluralCategoryNames': [],
-            'pluralRules': '(n != 1)',
-            'pluralExamples': [],
-            'textDirection': LanguagesModel.TextDirection.LTR,
-            'dialectOf': 0
+            id: 'es',
+            name: 'Spanish',
+            editorCode: 'es',
+            twoLettersCode: 'es',
+            threeLettersCode: 'spa',
+            locale: 'es-ES',
+            androidCode: 'es-rES',
+            osxCode: 'es.lproj',
+            osxLocale: 'es',
+            pluralCategoryNames: [],
+            pluralRules: '(n != 1)',
+            pluralExamples: [],
+            textDirection: 'ltr',
+            dialectOf: '',
         };
-        const newTranslation = PathUtil.replaceLanguageDependentPlaceholders(translation, language, {} as ProjectsGroupsModel.LanguageMappingEntity);
+        const newTranslation = PathUtil.replaceLanguageDependentPlaceholders(
+            translation,
+            language,
+            {} as ProjectsGroupsModel.LanguageMappingEntity
+        );
         assert.strictEqual(newTranslation, '/%original_path%/%file_name%.es.%file_extension%');
     });
 });
