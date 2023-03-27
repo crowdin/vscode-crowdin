@@ -22,6 +22,9 @@ jobs:
           npm install -g vsce
           vsce package
 
+      - name: Test Compile
+        run: npm run test-compile
+
       - name: Lint
         run: npm run lint
 
