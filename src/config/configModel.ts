@@ -27,5 +27,3 @@ function getGitBranch(docUri: vscode.Uri): string | undefined {
         return repository?.state?.HEAD?.name;
     }
 }
-
-

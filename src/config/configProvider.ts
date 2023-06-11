@@ -13,7 +13,7 @@ const asyncReadFile = util.promisify(fs.readFile);
 export class ConfigProvider {
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
 
-    constructor(public readonly workspace: vscode.WorkspaceFolder) { }
+    constructor(public readonly workspace: vscode.WorkspaceFolder) {}
 
     async load(): Promise<ConfigModel> {
         let filePath = await this.getFile();
