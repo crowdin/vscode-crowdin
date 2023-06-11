@@ -13,7 +13,7 @@ const asyncReadFile = util.promisify(fs.readFile);
 export class ConfigProvider {
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
 
-    constructor(public readonly workspace: vscode.WorkspaceFolder) {}
+    constructor(public readonly workspace: vscode.WorkspaceFolder) { }
 
     async load(): Promise<ConfigModel> {
         let filePath = await this.getFile();
@@ -131,7 +131,8 @@ export class ConfigProvider {
                     type: f.type,
                 } as FileModel;
             }),
-            organization: organization,
+            organization,
+            useGitBranch: config.use_git_branch,
         };
     }
 
@@ -188,6 +189,7 @@ interface PrivateConfigModel {
     branch?: string;
     base_path?: string;
     base_path_env?: string;
+    use_git_branch?: boolean;
     files: PrivateFileModel[];
 }
 
