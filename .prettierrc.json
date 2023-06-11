@@ -2,6 +2,5 @@
   "semi": true,
   "tabWidth": 4,
   "printWidth": 120,
-  "singleQuote": true,
-  "endOfLine": "crlf"
+  "singleQuote": true
 }
