@@ -36,7 +36,7 @@ export class TmsTreeItem extends vscode.TreeItem {
                 dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
             };
         }
-        this.client = buildClient(this.config);
+        this.client = buildClient(workspace.uri, this.config);
     }
 
     async update(): Promise<void> {

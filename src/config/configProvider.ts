@@ -131,7 +131,7 @@ export class ConfigProvider {
                     type: f.type,
                 } as FileModel;
             }),
-            organization: organization,
+            organization,
         };
     }
 

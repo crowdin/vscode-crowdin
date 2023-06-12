@@ -88,7 +88,7 @@ export class CrowdinConfigHolder {
 
     private async loadStrings(config: ConfigModel, workspace: vscode.WorkspaceFolder) {
         try {
-            const client = buildClient(config);
+            const client = buildClient(workspace.uri, config);
             const strings = await client.getStrings();
             this.sourceStrings.set(workspace, strings);
         } catch (e) {

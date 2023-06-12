@@ -122,7 +122,9 @@ This extension contributes the following settings:
 
 * `tms.stringsCompletion`: enable/disable autocompletion of strings keys
 
-* `tms.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files.
+* `tms.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files
+
+* `tms.useGitBranch`: enable/disable use of Git branch as Crowdin branch.
 
 ## Known Issues
 
