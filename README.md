@@ -52,7 +52,6 @@ Configuration file example:
 "api_token": "apiToken"
 "base_path": "folder" // optional
 "branch": "master" // optional
-"use_git_branch": true //optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
 
 "files": [
@@ -80,7 +79,6 @@ You also can use environment variables in the configuration file [Environment va
 "api_token_env": "CROWDIN_PERSONAL_TOKEN"
 "base_path_env": "CROWDIN_BASE_PATH" // optional
 "branch": "master" // optional
-"use_git_branch": true // optional
 "base_url_env": "CROWDIN_BASE_URL" // optional (for Crowdin Enterprise only)
 
 "files": [
@@ -124,7 +122,9 @@ This extension contributes the following settings:
 
 * `tms.stringsCompletion`: enable/disable autocompletion of strings keys
 
-* `tms.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files.
+* `tms.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files
+
+* `tms.useGitBranch`: enable/disable use of Git branch as Crowdin branch.
 
 ## Known Issues
 

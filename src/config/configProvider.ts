@@ -132,7 +132,6 @@ export class ConfigProvider {
                 } as FileModel;
             }),
             organization,
-            useGitBranch: config.use_git_branch,
         };
     }
 
@@ -189,7 +188,6 @@ interface PrivateConfigModel {
     branch?: string;
     base_path?: string;
     base_path_env?: string;
-    use_git_branch?: boolean;
     files: PrivateFileModel[];
 }
 

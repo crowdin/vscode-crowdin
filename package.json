@@ -46,6 +46,12 @@
 						"default": "*",
 						"description": "Comma-separated list of file extensions for which autocomplete should be active. By default strings autocomplete will be active in all files.",
 						"scope": "window"
+					},
+					"tms.useGitBranch": {
+						"type": "boolean",
+						"default": "false",
+						"description": "Use of Git branch as Crowdin branch",
+						"scope": "window"
 					}
 				}
 			}

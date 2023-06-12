@@ -6,6 +6,7 @@ export class Constants {
     static readonly AUTO_REFRESH_PROPERTY = 'tms.autoRefresh';
     static readonly STRINGS_COMPLETION_PROPERTY = 'tms.stringsCompletion';
     static readonly STRINGS_COMPLETION_FILES_FILTER_PROPERTY = 'tms.stringsCompletionFileExtensions';
+    static readonly USE_GIT_BRANCH_PROPERTY = 'tms.useGitBranch';
     static readonly CROWDIN_PATH_SEPARATOR = '/';
     static readonly PLUGIN_VERSION = '1.4.1';
     static readonly CLIENT_RETRIES = 5;

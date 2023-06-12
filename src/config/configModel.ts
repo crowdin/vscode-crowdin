@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CrowdinClient } from '../client/crowdinClient';
+import { Constants } from '../constants';
 import { FileModel } from './fileModel';
 
 export interface ConfigModel {
@@ -9,12 +10,12 @@ export interface ConfigModel {
     apiKey: string;
     branch?: string;
     basePath?: string;
-    useGitBranch?: boolean;
     files: FileModel[];
 }
 
 export function buildClient(docUri: vscode.Uri, config: ConfigModel) {
-    const branch = config.useGitBranch ? getGitBranch(docUri) : config.branch;
+    const useGitBranch = vscode.workspace.getConfiguration().get<boolean>(Constants.USE_GIT_BRANCH_PROPERTY);
+    const branch = useGitBranch ? getGitBranch(docUri) : config.branch;
     return new CrowdinClient(config.projectId, config.apiKey, branch, config.organization);
 }
 
