@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as https from 'https';
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
@@ -17,6 +18,7 @@ export class CrowdinClient {
     constructor(
         readonly projectId: number,
         readonly apiKey: string,
+        readonly docUri: vscode.Uri,
         readonly branch?: string,
         readonly organization?: string
     ) {
@@ -34,6 +36,22 @@ export class CrowdinClient {
         });
     }
 
+    get crowdinBranch(): string | undefined {
+        const useGitBranch = vscode.workspace.getConfiguration().get<boolean>(Constants.USE_GIT_BRANCH_PROPERTY);
+
+        if (!useGitBranch) {
+            return this.branch;
+        }
+
+        const extension = vscode.extensions.getExtension('vscode.git');
+
+        if (extension && extension.isActive) {
+            const git = extension.exports.getAPI(1);
+            const repository = git.getRepository(this.docUri);
+            return repository?.state?.HEAD?.name;
+        }
+    }
+
     async getStrings() {
         const strings = await this.crowdin.sourceStringsApi.withFetchAll().listProjectStrings(this.projectId);
         return strings.data.map((str) => str.data);
@@ -47,10 +65,13 @@ export class CrowdinClient {
      */
     async download(unzipFolder: string, sourceFilesArr: SourceFiles[]): Promise<any> {
         try {
+            const branch = this.crowdinBranch;
             let branchId: number | undefined;
-            if (!!this.branch) {
-                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
-                const foundBranch = branches.data.find((e) => e.data.name === this.branch);
+            if (!!branch) {
+                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
+                    name: branch,
+                });
+                const foundBranch = branches.data.find((e) => e.data.name === branch);
                 if (!!foundBranch) {
                     branchId = foundBranch.data.id;
                 }
@@ -91,7 +112,7 @@ export class CrowdinClient {
     }
 
     private async translationFilesToDownload(basePath: string, sourceFilesArr: SourceFiles[]): Promise<string[]> {
-        const languagesResp = await this.crowdin.languagesApi.listSupportedLanguages(500);
+        const languagesResp = await this.crowdin.languagesApi.listSupportedLanguages({ limit: 500 });
         const projectResp = await this.crowdin.projectsGroupsApi.getProject(this.projectId);
         const languageIds = projectResp.data.targetLanguageIds;
         let languageMapping: ProjectsGroupsModel.LanguageMapping = {};
@@ -164,16 +185,19 @@ export class CrowdinClient {
         type?: SourceFilesModel.FileType
     ): Promise<void> {
         let branchId: number | undefined;
+        const branch = this.crowdinBranch;
 
-        if (!!this.branch) {
+        if (!!branch) {
             try {
-                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
-                const foundBranch = branches.data.find((e) => e.data.name === this.branch);
+                const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
+                    name: branch,
+                });
+                const foundBranch = branches.data.find((e) => e.data.name === branch);
                 if (!!foundBranch) {
                     branchId = foundBranch.data.id;
                 } else {
                     const res = await this.crowdin.sourceFilesApi.createBranch(this.projectId, {
-                        name: this.branch,
+                        name: branch,
                     });
                     branchId = res.data.id;
                 }
@@ -182,7 +206,7 @@ export class CrowdinClient {
                     if (!this.concurrentIssue(error)) {
                         throw error;
                     }
-                    branchId = await this.waitAndFindBranch(this.branch);
+                    branchId = await this.waitAndFindBranch(branch);
                 } catch (error) {
                     throw new Error(
                         `Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`
@@ -234,7 +258,7 @@ export class CrowdinClient {
             const storageId = resp.data.id;
             const files = await this.crowdin.sourceFilesApi
                 .withFetchAll()
-                .listProjectFiles(this.projectId, undefined, parentId);
+                .listProjectFiles(this.projectId, { directoryId: parentId });
             const foundFile = files.data
                 .filter((f) => {
                     if (!branchId) {
@@ -328,13 +352,15 @@ export class CrowdinClient {
      */
     async downloadSourceFile(fsPath: string, file: string): Promise<void> {
         let branchId: number | undefined;
-        if (!!this.branch) {
-            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, this.branch);
-            const foundBranch = branches.data.find((e) => e.data.name === this.branch);
+        const branch = this.crowdinBranch;
+
+        if (!!branch) {
+            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, { name: branch });
+            const foundBranch = branches.data.find((e) => e.data.name === branch);
             if (!!foundBranch) {
                 branchId = foundBranch.data.id;
             } else {
-                throw new Error(`File ${file} does not exist under branch ${this.branch}`);
+                throw new Error(`File ${file} does not exist under branch ${branch}`);
             }
         }
         let parentId: number | undefined;
@@ -408,7 +434,9 @@ export class CrowdinClient {
 
     private waitAndFindBranch(name: string): Promise<number> {
         return this.crowdin.sourceFilesApi.retryService.executeAsyncFunc(async () => {
-            const branches = await this.crowdin.sourceFilesApi.withFetchAll().listProjectBranches(this.projectId, name);
+            const branches = await this.crowdin.sourceFilesApi
+                .withFetchAll()
+                .listProjectBranches(this.projectId, { name });
             const foundBranch = branches.data.find((branch) => branch.data.name.toLowerCase() === name.toLowerCase());
             if (!!foundBranch) {
                 return foundBranch.data.id;
