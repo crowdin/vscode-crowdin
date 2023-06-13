@@ -50,7 +50,7 @@
 					"tms.useGitBranch": {
 						"type": "boolean",
 						"default": "false",
-						"description": "Use of Git branch as Crowdin branch",
+						"description": "Use a Git branch as a Crowdin branch",
 						"scope": "window"
 					}
 				}
