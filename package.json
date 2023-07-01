@@ -240,7 +240,7 @@
 		"webpack-cli": "5.1.1"
 	},
 	"dependencies": {
-		"@crowdin/crowdin-api-client": "1.22.1",
+		"@crowdin/crowdin-api-client": "1.23.3",
 		"adm-zip": "^0.5.10",
 		"glob": "^7.1.4",
 		"original-fs": "^1.2.0",
