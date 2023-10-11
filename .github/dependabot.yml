@@ -13,3 +13,6 @@ updates:
     ignore:
       - dependency-name: "*" # Ignore all major updates
         update-types: [ "version-update:semver-major" ]
+    groups:
+      development-dependencies:
+        dependency-type: "development"
