@@ -6,6 +6,7 @@ import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { FilesProvider } from './plugin/files/filesProvider';
 import { FilesTreeItem } from './plugin/files/filesTreeItem';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
+import { CommonUtil } from './util/commonUtil';
 
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
@@ -21,16 +22,32 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerTreeDataProvider(Constants.PROGRESS, progressProvider);
 
     vscode.commands.registerCommand(Constants.CREATE_CONFIG_COMMAND, async () => {
-        const workspaceFolders = vscode.workspace.workspaceFolders || [];
-        const workspace = workspaceFolders[0];
-        if (workspace) {
-            const configProvider = new ConfigProvider(workspace);
-            const { file, isNew } = await configProvider.create();
-            vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
-            if (isNew) {
-                await configHolder.load();
-            }
+        const workspace = CommonUtil.getWorkspace();
+        if (!workspace) {
+            vscode.window.showWarningMessage('Project workspace is empty');
+            return;
         }
+        const configProvider = new ConfigProvider(workspace);
+        const { file, isNew } = await configProvider.create();
+        vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
+        if (isNew) {
+            await configHolder.load();
+        }
+    });
+
+    vscode.commands.registerCommand(Constants.OPEN_CONFIG_COMMAND, async () => {
+        const workspace = CommonUtil.getWorkspace();
+        if (!workspace) {
+            vscode.window.showWarningMessage('Project workspace is empty');
+            return;
+        }
+        const configProvider = new ConfigProvider(workspace);
+        const file = await configProvider.getFile();
+        if (!file) {
+            vscode.window.showWarningMessage(`Could not find configuration file in ${workspace.name}`);
+            return;
+        }
+        vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
     });
 
     vscode.commands.registerCommand(Constants.OPEN_FILE_COMMAND, (fsPath) =>

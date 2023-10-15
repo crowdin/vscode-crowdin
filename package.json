@@ -80,7 +80,13 @@
 		"commands": [
 			{
 				"command": "config.create",
-				"title": "Create Crowdin configuration"
+				"title": "Create configuration",
+				"category": "Crowdin"
+			},
+			{
+				"command": "config.open",
+				"title": "Open configuration",
+				"category": "Crowdin"
 			},
 			{
 				"command": "files.refresh",

@@ -8,6 +8,7 @@ export class Constants {
     //commands
     static readonly VSCODE_OPEN_FILE = 'vscode.open';
     static readonly CREATE_CONFIG_COMMAND = 'config.create';
+    static readonly OPEN_CONFIG_COMMAND = 'config.open';
     static readonly OPEN_FILE_COMMAND = 'extension.openFile';
     static readonly REFRESH_PROGRESS_COMMAND = 'translationProgress.refresh';
     static readonly DOWNLOAD_ALL_COMMAND = 'files.downloadAll';

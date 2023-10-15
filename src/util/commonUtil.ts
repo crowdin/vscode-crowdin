@@ -14,4 +14,9 @@ export class CommonUtil {
             );
         });
     }
+
+    static getWorkspace(): vscode.WorkspaceFolder | undefined {
+        const workspaceFolders = vscode.workspace.workspaceFolders || [];
+        return workspaceFolders[0];
+    }
 }
