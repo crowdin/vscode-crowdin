@@ -22,13 +22,12 @@ const DEFAULT_CONFIG = `"project_id_env": "CROWDIN_PROJECT_ID"
 ]
 `;
 
-
 export class ConfigProvider {
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
 
-    constructor(public readonly workspace: vscode.WorkspaceFolder) { }
+    constructor(public readonly workspace: vscode.WorkspaceFolder) {}
 
-    async create(): Promise<{ file: string, isNew: boolean }> {
+    async create(): Promise<{ file: string; isNew: boolean }> {
         let filePath = await this.getFile();
 
         if (filePath) {
