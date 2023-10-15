@@ -8,12 +8,40 @@ import { ConfigModel } from './configModel';
 import { FileModel, Scheme } from './fileModel';
 
 const asyncFileExists = util.promisify(fs.exists);
+const asyncWriteFile = util.promisify(fs.writeFile);
 const asyncReadFile = util.promisify(fs.readFile);
+
+const DEFAULT_CONFIG = `"project_id_env": "CROWDIN_PROJECT_ID"
+"api_token_env": "CROWDIN_PERSONAL_TOKEN"
+
+"files": [
+  {
+    "source": "",
+    "translation": ""
+  }
+]
+`;
+
 
 export class ConfigProvider {
     private static readonly crowdinFileNames = ['crowdin.yml', 'crowdin.yaml'];
 
-    constructor(public readonly workspace: vscode.WorkspaceFolder) {}
+    constructor(public readonly workspace: vscode.WorkspaceFolder) { }
+
+    async create(): Promise<{ file: string, isNew: boolean }> {
+        let filePath = await this.getFile();
+
+        if (filePath) {
+            return { file: filePath, isNew: false };
+        }
+
+        const fileName = this.fileNames()[0];
+        const file = path.join(this.workspace.uri.fsPath, fileName);
+
+        await asyncWriteFile(file, DEFAULT_CONFIG);
+
+        return { file, isNew: true };
+    }
 
     async load(): Promise<ConfigModel> {
         let filePath = await this.getFile();

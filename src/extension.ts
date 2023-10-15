@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { ConfigProvider } from './config/configProvider';
 import { Constants } from './constants';
 import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
 import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
@@ -19,8 +20,21 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerTreeDataProvider(Constants.FILES, filesProvider);
     vscode.window.registerTreeDataProvider(Constants.PROGRESS, progressProvider);
 
+    vscode.commands.registerCommand(Constants.CREATE_CONFIG_COMMAND, async () => {
+        const workspaceFolders = vscode.workspace.workspaceFolders || [];
+        const workspace = workspaceFolders[0];
+        if (workspace) {
+            const configProvider = new ConfigProvider(workspace);
+            const { file, isNew } = await configProvider.create();
+            vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
+            if (isNew) {
+                await configHolder.load();
+            }
+        }
+    });
+
     vscode.commands.registerCommand(Constants.OPEN_FILE_COMMAND, (fsPath) =>
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.file(fsPath))
+        vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(fsPath))
     );
 
     vscode.commands.registerCommand(Constants.REFRESH_PROGRESS_COMMAND, () => progressProvider.refresh());
@@ -50,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
     vscode.commands.registerCommand(Constants.DOWNLOAD_COMMAND, (item: FilesTreeItem) => filesProvider.download(item));
     vscode.commands.registerCommand(Constants.EDIT_COMMAND, (item: FilesTreeItem) =>
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.file(item.config.configPath))
+        vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(item.config.configPath))
     );
 
     context.subscriptions.push(

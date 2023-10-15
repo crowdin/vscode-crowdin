@@ -27,7 +27,7 @@
 	"contributes": {
 		"configuration": [
 			{
-				"title": "Crowdin Explorer",
+				"title": "Crowdin",
 				"properties": {
 					"crowdin.autoRefresh": {
 						"type": "boolean",
@@ -78,6 +78,10 @@
 			]
 		},
 		"commands": [
+			{
+				"command": "config.create",
+				"title": "Create Crowdin configuration"
+			},
 			{
 				"command": "files.refresh",
 				"title": "Refresh",
