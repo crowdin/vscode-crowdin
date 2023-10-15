@@ -6,10 +6,7 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
     constructor(readonly configHolder: CrowdinConfigHolder) {}
 
     provideCompletionItems(
-        document: vscode.TextDocument,
-        position: vscode.Position,
-        token: vscode.CancellationToken,
-        context: vscode.CompletionContext
+        document: vscode.TextDocument
     ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
         const enabled = vscode.workspace.getConfiguration().get<boolean>(Constants.STRINGS_COMPLETION_PROPERTY);
         const fileExtensions = vscode.workspace

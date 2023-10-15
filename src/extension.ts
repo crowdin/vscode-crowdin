@@ -2,50 +2,54 @@ import * as vscode from 'vscode';
 import { Constants } from './constants';
 import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
 import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
+import { FilesProvider } from './plugin/files/filesProvider';
+import { FilesTreeItem } from './plugin/files/filesTreeItem';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
-import { TmsProvider } from './plugin/tms/tmsProvider';
-import { TmsTreeItem } from './plugin/tms/tmsTreeItem';
 
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
 
     const configHolder = new CrowdinConfigHolder();
-    const tmsProvider = new TmsProvider(configHolder);
+    const filesProvider = new FilesProvider(configHolder);
     const progressProvider = new ProgressTreeProvider(configHolder);
-    configHolder.addListener(() => tmsProvider.refresh());
+    configHolder.addListener(() => filesProvider.refresh());
     configHolder.addListener(() => progressProvider.refresh());
     configHolder.load();
 
-    vscode.window.registerTreeDataProvider('tmsFiles', tmsProvider);
-    vscode.window.registerTreeDataProvider('translationProgress', progressProvider);
+    vscode.window.registerTreeDataProvider(Constants.FILES, filesProvider);
+    vscode.window.registerTreeDataProvider(Constants.PROGRESS, progressProvider);
 
-    vscode.commands.registerCommand(Constants.OPEN_TMS_FILE_COMMAND, (fsPath) =>
+    vscode.commands.registerCommand(Constants.OPEN_FILE_COMMAND, (fsPath) =>
         vscode.commands.executeCommand('vscode.open', vscode.Uri.file(fsPath))
     );
 
-    vscode.commands.registerCommand('translationProgress.refresh', () => progressProvider.refresh());
-    vscode.commands.registerCommand('tmsFiles.refresh', () => {
+    vscode.commands.registerCommand(Constants.REFRESH_PROGRESS_COMMAND, () => progressProvider.refresh());
+    vscode.commands.registerCommand(Constants.REFRESH_COMMAND, () => {
         configHolder.reloadStrings();
-        tmsProvider.refresh();
+        filesProvider.refresh();
     });
-    vscode.commands.registerCommand('tmsFiles.downloadAll', () => tmsProvider.download());
-    vscode.commands.registerCommand('tmsFiles.saveAll', async () => {
-        await tmsProvider.save();
+    vscode.commands.registerCommand(Constants.DOWNLOAD_ALL_COMMAND, () => filesProvider.download());
+    vscode.commands.registerCommand(Constants.SAVE_ALL_COMMAND, async () => {
+        await filesProvider.save();
         progressProvider.refresh();
     });
-    vscode.commands.registerCommand('tmsFiles.save', async (item: TmsTreeItem) => {
-        await tmsProvider.save(item);
+    vscode.commands.registerCommand(Constants.SAVE_FOLDER_COMMAND, async (item: FilesTreeItem) => {
+        await filesProvider.save(item);
         progressProvider.refresh();
     });
-    vscode.commands.registerCommand('tmsFiles.updateSourceFolder', async (item?: TmsTreeItem) => {
-        await tmsProvider.updateSourceFolder(item);
-        tmsProvider.refresh();
+    vscode.commands.registerCommand(Constants.SAVE_FILE_COMMAND, async (item: FilesTreeItem) => {
+        await filesProvider.save(item);
+        progressProvider.refresh();
     });
-    vscode.commands.registerCommand('tmsFiles.updateSourceFile', (item: TmsTreeItem) =>
-        tmsProvider.updateSourceFile(item)
+    vscode.commands.registerCommand(Constants.UPDATE_SOURCE_FOLDER_COMMAND, async (item?: FilesTreeItem) => {
+        await filesProvider.updateSourceFolder(item);
+        filesProvider.refresh();
+    });
+    vscode.commands.registerCommand(Constants.UPDATE_SOURCE_FILE_COMMAND, (item: FilesTreeItem) =>
+        filesProvider.updateSourceFile(item)
     );
-    vscode.commands.registerCommand('tmsFiles.download', (item: TmsTreeItem) => tmsProvider.download(item));
-    vscode.commands.registerCommand('tmsFiles.edit', (item: TmsTreeItem) =>
+    vscode.commands.registerCommand(Constants.DOWNLOAD_COMMAND, (item: FilesTreeItem) => filesProvider.download(item));
+    vscode.commands.registerCommand(Constants.EDIT_COMMAND, (item: FilesTreeItem) =>
         vscode.commands.executeCommand('vscode.open', vscode.Uri.file(item.config.configPath))
     );
 
