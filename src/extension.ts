@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ConfigProvider } from './config/configProvider';
 import { Constants } from './constants';
+import * as OAuth from './oauth';
 import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
 import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { FilesProvider } from './plugin/files/filesProvider';
@@ -10,6 +11,7 @@ import { CommonUtil } from './util/commonUtil';
 
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
+    OAuth.initialize(context);
 
     const configHolder = new CrowdinConfigHolder();
     const filesProvider = new FilesProvider(configHolder);

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export class CommonUtil {
     static withProgress<R>(
-        task: () => Promise<any>,
+        task: () => Promise<R>,
         title: string,
         location: vscode.ProgressLocation = vscode.ProgressLocation.Notification
     ): Promise<R> {
