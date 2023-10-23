@@ -33,3 +33,8 @@ jobs:
 
       - name: Check Prettier
         run: npm run prettier:check
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: vscode-crowdin-*.vsix
