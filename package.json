@@ -27,27 +27,27 @@
 	"contributes": {
 		"configuration": [
 			{
-				"title": "Crowdin Explorer",
+				"title": "Crowdin",
 				"properties": {
-					"tms.autoRefresh": {
+					"crowdin.autoRefresh": {
 						"type": "boolean",
 						"default": "true",
 						"description": "Enables or disables auto refresh after each change in Crowdin configuration file.",
 						"scope": "window"
 					},
-					"tms.stringsCompletion": {
+					"crowdin.stringsCompletion": {
 						"type": "boolean",
 						"default": "true",
 						"description": "Enables or disables auto completion of strings keys.",
 						"scope": "window"
 					},
-					"tms.stringsCompletionFileExtensions": {
+					"crowdin.stringsCompletionFileExtensions": {
 						"type": "string",
 						"default": "*",
 						"description": "Comma-separated list of file extensions for which autocomplete should be active. By default strings autocomplete will be active in all files.",
 						"scope": "window"
 					},
-					"tms.useGitBranch": {
+					"crowdin.useGitBranch": {
 						"type": "boolean",
 						"default": "false",
 						"description": "Use a Git branch as a Crowdin branch",
@@ -59,17 +59,17 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "crowdin-explorer",
-					"title": "Crowdin Explorer",
+					"id": "crowdin",
+					"title": "Crowdin",
 					"icon": "resources/icon.svg"
 				}
 			]
 		},
 		"views": {
-			"crowdin-explorer": [
+			"crowdin": [
 				{
-					"id": "tmsFiles",
-					"name": "TMS Files"
+					"id": "files",
+					"name": "Files"
 				},
 				{
 					"id": "translationProgress",
@@ -79,7 +79,17 @@
 		},
 		"commands": [
 			{
-				"command": "tmsFiles.refresh",
+				"command": "config.create",
+				"title": "Create configuration",
+				"category": "Crowdin"
+			},
+			{
+				"command": "config.open",
+				"title": "Open configuration",
+				"category": "Crowdin"
+			},
+			{
+				"command": "files.refresh",
 				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.svg",
@@ -87,39 +97,47 @@
 				}
 			},
 			{
-				"command": "tmsFiles.downloadAll",
-				"title": "Download translations",
+				"command": "files.downloadAll",
+				"title": "Download all translations",
 				"icon": {
 					"light": "resources/light/download.svg",
 					"dark": "resources/dark/download.svg"
 				}
 			},
 			{
-				"command": "tmsFiles.download",
-				"title": "Download translations",
+				"command": "files.download",
+				"title": "Download project translations",
 				"icon": {
 					"light": "resources/light/download.svg",
 					"dark": "resources/dark/download.svg"
 				}
 			},
 			{
-				"command": "tmsFiles.saveAll",
-				"title": "Upload source files",
+				"command": "files.saveAll",
+				"title": "Upload all source files",
 				"icon": {
 					"light": "resources/light/upload.svg",
 					"dark": "resources/dark/upload.svg"
 				}
 			},
 			{
-				"command": "tmsFiles.save",
-				"title": "Upload source files",
+				"command": "files.saveFolder",
+				"title": "Upload source folder",
 				"icon": {
 					"light": "resources/light/upload.svg",
 					"dark": "resources/dark/upload.svg"
 				}
 			},
 			{
-				"command": "tmsFiles.edit",
+				"command": "files.saveFile",
+				"title": "Upload source file",
+				"icon": {
+					"light": "resources/light/upload.svg",
+					"dark": "resources/dark/upload.svg"
+				}
+			},
+			{
+				"command": "files.edit",
 				"title": "Edit configuration",
 				"icon": {
 					"light": "resources/light/settings.svg",
@@ -135,7 +153,7 @@
 				}
 			},
 			{
-				"command": "tmsFiles.updateSourceFolder",
+				"command": "files.updateSourceFolder",
 				"title": "Download source files",
 				"icon": {
 					"light": "resources/light/download_source.svg",
@@ -143,7 +161,7 @@
 				}
 			},
 			{
-				"command": "tmsFiles.updateSourceFile",
+				"command": "files.updateSourceFile",
 				"title": "Download source file",
 				"icon": {
 					"light": "resources/light/download_source.svg",
@@ -154,23 +172,23 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "tmsFiles.refresh",
-					"when": "view == tmsFiles",
+					"command": "files.refresh",
+					"when": "view == files",
 					"group": "navigation@0"
 				},
 				{
-					"command": "tmsFiles.saveAll",
-					"when": "view == tmsFiles",
+					"command": "files.saveAll",
+					"when": "view == files",
 					"group": "navigation@1"
 				},
 				{
-					"command": "tmsFiles.downloadAll",
-					"when": "view == tmsFiles",
+					"command": "files.downloadAll",
+					"when": "view == files",
 					"group": "navigation@2"
 				},
 				{
-					"command": "tmsFiles.updateSourceFolder",
-					"when": "view == tmsFiles",
+					"command": "files.updateSourceFolder",
+					"when": "view == files",
 					"group": "navigation@3"
 				},
 				{
@@ -181,28 +199,33 @@
 			],
 			"view/item/context": [
 				{
-					"command": "tmsFiles.edit",
-					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"command": "files.edit",
+					"when": "view == files && viewItem == root",
 					"group": "inline@0"
 				},
 				{
-					"command": "tmsFiles.save",
-					"when": "view == tmsFiles",
+					"command": "files.saveFolder",
+					"when": "view == files && viewItem == folder",
 					"group": "inline@1"
 				},
 				{
-					"command": "tmsFiles.download",
-					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"command": "files.saveFile",
+					"when": "view == files && viewItem == file",
+					"group": "inline@1"
+				},
+				{
+					"command": "files.download",
+					"when": "view == files && viewItem == root",
 					"group": "inline@2"
 				},
 				{
-					"command": "tmsFiles.updateSourceFolder",
-					"when": "view == tmsFiles && viewItem == tmsRoot",
+					"command": "files.updateSourceFolder",
+					"when": "view == files && viewItem == root",
 					"group": "inline@3"
 				},
 				{
-					"command": "tmsFiles.updateSourceFile",
-					"when": "view == tmsFiles && viewItem == tmsFile",
+					"command": "files.updateSourceFile",
+					"when": "view == files && viewItem == file",
 					"group": "inline@4"
 				}
 			]

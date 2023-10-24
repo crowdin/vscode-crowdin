@@ -124,13 +124,13 @@ To generate a new API token in Crowdin, go to your Account Settings.
 
 This extension contributes the following settings:
 
-* `tms.autoRefresh`: enable/disable auto refresh of the file tree after each change in the Crowdin configuration file
+* `crowdin.autoRefresh`: enable/disable auto refresh of the file tree after each change in the Crowdin configuration file
 
-* `tms.stringsCompletion`: enable/disable autocompletion of strings keys
+* `crowdin.stringsCompletion`: enable/disable autocompletion of strings keys
 
-* `tms.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files
+* `crowdin.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files
 
-* `tms.useGitBranch`: enable/disable the use of a Git branch as a Crowdin branch.
+* `crowdin.useGitBranch`: enable/disable the use of a Git branch as a Crowdin branch.
 
 ## Known Issues
 

@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { ConfigModel } from '../../../config/configModel';
 import { FileModel } from '../../../config/fileModel';
 import { Constants } from '../../../constants';
-import { TmsTreeBuilder } from '../../../plugin/tms/tmsTreeBuilder';
+import { FilesTreeBuilder } from '../../../plugin/files/filesTreeBuilder';
 
 suite('Plugin tree', function () {
     let config: ConfigModel;
@@ -43,7 +43,7 @@ suite('Plugin tree', function () {
     });
 
     test('Build files matrix', async () => {
-        const matrix = await TmsTreeBuilder.buildFilesMatrix(config, workspace);
+        const matrix = await FilesTreeBuilder.buildFilesMatrix(config, workspace);
         assert.strictEqual(3, matrix.length);
         const level1 = matrix[0];
         const level2 = matrix[1];
@@ -63,7 +63,7 @@ suite('Plugin tree', function () {
     });
 
     test('Build subtree', async () => {
-        const tree = await TmsTreeBuilder.buildSubTree(config, workspace);
+        const tree = await FilesTreeBuilder.buildSubTree(config, workspace);
         assert.strictEqual(1, tree.length);
         const subtree1 = await tree[0].childs;
         assert.strictEqual(1, subtree1.length);

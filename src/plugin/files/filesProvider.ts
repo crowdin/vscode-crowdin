@@ -2,23 +2,23 @@ import * as vscode from 'vscode';
 import { CommonUtil } from '../../util/commonUtil';
 import { ErrorHandler } from '../../util/errorHandler';
 import { CrowdinConfigHolder } from '../crowdinConfigHolder';
-import { TmsTreeBuilder } from './tmsTreeBuilder';
-import { TmsTreeItem } from './tmsTreeItem';
+import { FilesTreeBuilder } from './filesTreeBuilder';
+import { FilesTreeItem } from './filesTreeItem';
 
-export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<TmsTreeItem | undefined> = new vscode.EventEmitter<
-        TmsTreeItem | undefined
+export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
+    private _onDidChangeTreeData: vscode.EventEmitter<FilesTreeItem | undefined> = new vscode.EventEmitter<
+        FilesTreeItem | undefined
     >();
-    readonly onDidChangeTreeData: vscode.Event<TmsTreeItem | undefined> = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData: vscode.Event<FilesTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-    private rootTree: TmsTreeItem[] = [];
+    private rootTree: FilesTreeItem[] = [];
 
     constructor(readonly configHolder: CrowdinConfigHolder) {}
 
     /**
      * Download translations
      */
-    download(folder?: TmsTreeItem): Promise<void> {
+    download(folder?: FilesTreeItem): Promise<void> {
         return CommonUtil.withProgress(() => {
             let promises: Promise<void>[];
             if (!!folder) {
@@ -42,7 +42,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem> {
     /**
      * Send file(s) to Crowdin
      */
-    save(item?: TmsTreeItem): Promise<any> {
+    save(item?: FilesTreeItem): Promise<any> {
         if (!!item) {
             const title = item.isLeaf ? `Uploading file ${item.label}` : `Uploading files in ${item.label}`;
             return CommonUtil.withProgress(() => item.save().catch((e) => ErrorHandler.handleError(e)), title);
@@ -56,7 +56,7 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem> {
     /**
      * Download source files from Crowdin
      */
-    updateSourceFolder(folder?: TmsTreeItem): Promise<any> {
+    updateSourceFolder(folder?: FilesTreeItem): Promise<any> {
         if (!!folder) {
             return CommonUtil.withProgress(
                 () => folder.updateSourceFolder().catch((e) => ErrorHandler.handleError(e)),
@@ -73,18 +73,18 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem> {
     /**
      * Download source file from Crowdin
      */
-    updateSourceFile(item: TmsTreeItem): Promise<any> {
+    updateSourceFile(item: FilesTreeItem): Promise<any> {
         return CommonUtil.withProgress(
             () => item.updateSourceFile().catch((e) => ErrorHandler.handleError(e)),
             `Updating file ${item.label}`
         );
     }
 
-    getTreeItem(element: TmsTreeItem): vscode.TreeItem {
+    getTreeItem(element: FilesTreeItem): vscode.TreeItem {
         return element;
     }
 
-    getChildren(element?: TmsTreeItem): Thenable<TmsTreeItem[]> {
+    getChildren(element?: FilesTreeItem): Thenable<FilesTreeItem[]> {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showWarningMessage('Project workspace is empty');
             return Promise.resolve([]);
@@ -97,21 +97,21 @@ export class TmsProvider implements vscode.TreeDataProvider<TmsTreeItem> {
         }
     }
 
-    private async buildRootTree(): Promise<TmsTreeItem[]> {
+    private async buildRootTree(): Promise<FilesTreeItem[]> {
         const configurations = this.configHolder.configurations;
         const promises = Array.from(configurations).map(async ([config, workspace]) => {
             try {
-                const rootTreeFolder = await TmsTreeBuilder.buildRootFolder(
+                const rootTreeFolder = await FilesTreeBuilder.buildRootFolder(
                     workspace,
                     config,
-                    TmsTreeBuilder.buildSubTree(config, workspace)
+                    FilesTreeBuilder.buildSubTree(config, workspace)
                 );
                 this.rootTree.push(rootTreeFolder);
                 return rootTreeFolder;
             } catch (err) {
                 ErrorHandler.handleError(err);
             }
-            return null as unknown as TmsTreeItem;
+            return null as unknown as FilesTreeItem;
         });
         const arr = await Promise.all(promises);
         return arr.filter((e) => e !== null);

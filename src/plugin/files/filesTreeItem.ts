@@ -6,29 +6,59 @@ import { FileModel } from '../../config/fileModel';
 import { Constants } from '../../constants';
 import { SourceFiles } from '../../model/sourceFiles';
 import { PathUtil } from '../../util/pathUtil';
-import { TmsTreeItemContextValue } from './tmsTreeItemContextValue';
+import { FilesTreeItemContextValue } from './filesTreeItemContextValue';
 
-export class TmsTreeItem extends vscode.TreeItem {
+export class FilesTreeItem extends vscode.TreeItem {
     private client: CrowdinClient;
 
-    constructor(
-        readonly workspace: vscode.WorkspaceFolder,
-        readonly label: string,
-        readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        readonly childs: Promise<TmsTreeItem[]>,
-        readonly config: ConfigModel,
-        readonly rootPath: string,
-        contextValue: TmsTreeItemContextValue,
-        readonly fullPath: string,
-        readonly sourceFilesArr: SourceFiles[] = [],
-        readonly isLeaf: boolean = false,
-        readonly command?: vscode.Command,
-        readonly file?: FileModel
-    ) {
+    readonly childs: Promise<FilesTreeItem[]>;
+    readonly config: ConfigModel;
+    readonly rootPath: string;
+    readonly sourceFilesArr: SourceFiles[];
+    readonly isLeaf: boolean;
+    readonly file: FileModel | undefined;
+    readonly fullPath: string;
+    readonly label: string;
+
+    constructor({
+        workspace,
+        label,
+        collapsibleState,
+        config,
+        rootPath,
+        contextValue,
+        fullPath,
+        childs = Promise.resolve([]),
+        sourceFilesArr = [],
+        command,
+        file,
+    }: {
+        workspace: vscode.WorkspaceFolder;
+        label: string;
+        collapsibleState: vscode.TreeItemCollapsibleState;
+        config: ConfigModel;
+        rootPath: string;
+        contextValue: FilesTreeItemContextValue;
+        fullPath: string;
+        childs?: Promise<FilesTreeItem[]>;
+        sourceFilesArr?: SourceFiles[];
+        command?: vscode.Command;
+        file?: FileModel;
+    }) {
         super(label, collapsibleState);
+        this.childs = childs;
+        this.config = config;
+        this.rootPath = rootPath;
+        this.sourceFilesArr = sourceFilesArr;
+        this.isLeaf = contextValue === FilesTreeItemContextValue.FILE;
+        this.file = file;
+        this.fullPath = fullPath;
+        this.label = label;
         this.contextValue = contextValue;
+        this.command = command;
+        this.tooltip = '';
         this.id = fullPath;
-        if (isLeaf) {
+        if (this.isLeaf) {
             this.resourceUri = vscode.Uri.file(fullPath);
         } else {
             this.iconPath = {
