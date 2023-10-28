@@ -4,6 +4,8 @@ import * as path from 'path';
 import * as util from 'util';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
+import { getClientCredentials } from '../oauth/crowdin';
+import { getProject } from '../oauth/selectProject';
 import { ConfigModel } from './configModel';
 import { FileModel, Scheme } from './fileModel';
 
@@ -11,9 +13,7 @@ const asyncFileExists = util.promisify(fs.exists);
 const asyncWriteFile = util.promisify(fs.writeFile);
 const asyncReadFile = util.promisify(fs.readFile);
 
-const DEFAULT_CONFIG = `"project_id_env": "CROWDIN_PROJECT_ID"
-"api_token_env": "CROWDIN_PERSONAL_TOKEN"
-
+const DEFAULT_CONFIG = `
 "files": [
   {
     "source": "",
@@ -66,18 +66,27 @@ export class ConfigProvider {
         return undefined as unknown as string;
     }
 
-    private validateAndGet(config: PrivateConfigModel, filePath: string): ConfigModel {
-        const projectId: string | undefined = this.getOrEnv(config, 'project_id', 'project_id_env');
+    private async validateAndGet(config: PrivateConfigModel, filePath: string): Promise<ConfigModel> {
+        const selectedProject = await getProject();
+        const projectId: number | string | undefined =
+            selectedProject || this.getOrEnv(config, 'project_id', 'project_id_env');
         if (!projectId) {
-            throw new Error(`Missing "project_id" property in ${this.workspace.name}`);
+            throw new Error(`Project not selected and missing "project_id" property in ${this.workspace.name}`);
         }
         if (isNaN(Number(projectId))) {
             throw new Error(`Project id is not a number in ${this.workspace.name}`);
         }
-        const apiKey: string | undefined = this.getOrEnv(config, 'api_token', 'api_token_env');
+
+        const oauthCreds = await getClientCredentials();
+
+        const apiKey: string | undefined =
+            oauthCreds?.accessToken || this.getOrEnv(config, 'api_token', 'api_token_env');
         if (!apiKey) {
-            throw new Error(`Missing "api_token" property in ${this.workspace.name}`);
+            throw new Error(
+                `Missing "api_token" property in ${this.workspace.name}. Please Sign in or provide api token`
+            );
         }
+
         const basePath = this.getOrEnv(config, 'base_path', 'base_path_env');
         if (!!basePath) {
             const fullPath = path.join(this.workspace.uri.fsPath, basePath);
@@ -87,6 +96,7 @@ export class ConfigProvider {
                 );
             }
         }
+
         config.files.forEach((file) => {
             if (this.isEmpty(file.source)) {
                 throw Error(`File source is empty in ${this.workspace.name}`);
@@ -123,7 +133,8 @@ export class ConfigProvider {
                 throw Error(`Invalid value in file type property ${this.workspace.name}. It should be a string`);
             }
         });
-        let organization: string | undefined;
+
+        let organization: string | undefined = oauthCreds?.organization;
         const baseUrl: string | undefined = this.getOrEnv(config, 'base_url', 'base_url_env');
         if (!!baseUrl) {
             if (
@@ -142,8 +153,8 @@ export class ConfigProvider {
         }
         return {
             configPath: filePath,
-            projectId: parseInt(projectId || ''),
-            apiKey: apiKey || '',
+            projectId: Number(projectId),
+            apiKey,
             branch: config.branch,
             basePath,
             files: config.files.map((f) => {

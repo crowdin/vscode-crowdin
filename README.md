@@ -54,8 +54,8 @@ To work with the plugin in the Visual Studio Code workspace, there should be a C
 Configuration file example:
 
 ```yaml
-"project_id": "projectId"
-"api_token": "apiToken"
+"project_id": "projectId" //optional
+"api_token": "apiToken" //optional
 "base_path": "folder" // optional
 "branch": "master" // optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
@@ -105,6 +105,25 @@ The project ID can be found in Tools > API on your Crowdin project page.
 To generate a new API token in Crowdin, go to your Account Settings.
 
 ## Setup
+
+### OAuth
+
+1. Install the *Crowdin* plugin using one of the following methods:
+    * open VS Code Extensions (**Ctrl+Shift+X**), search for *Crowdin* and click **Install**
+
+      or
+
+    * launch VS Code Quick Open (**Ctrl+P**), paste the below command, and press **Enter**
+        ```
+        ext install Crowdin.vscode-crowdin
+        ```
+2. Run the following [commands](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) to prepare workspace:
+    * `Crowdin: Sign In` to login into your Crowdin profile
+    * `Crowdin: Select Project` to select Crowdin project
+    * `Crowdin: Create configuration` to generate Crowdin configuration file
+      * Edit `files` according to your project needs
+
+### Manual
 
 1. Prepare a `crowdin.yml` or `crowdin.yaml` configuration file and add it to the needed workspace in Visual Studio Code.
 2. Install the *Crowdin* plugin using one of the following methods:

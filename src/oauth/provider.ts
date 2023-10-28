@@ -54,6 +54,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
             const sessions = JSON.parse(allSessions) as vscode.AuthenticationSession[];
             return sessions.filter((session) => {
                 if (isExpired(session)) {
+                    vscode.window.showWarningMessage('Crowdin session expired. Please Sign In again.');
                     this.removeSession(session.id);
                     return false;
                 }

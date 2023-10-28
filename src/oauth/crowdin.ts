@@ -8,21 +8,30 @@ export interface CrowdinToken {
     organization?: string;
 }
 
-export async function getClient(token?: CrowdinToken): Promise<Crowdin | undefined> {
-    if (token) {
-        return new Crowdin({ token: token.accessToken, organization: token.organization });
-    }
-
+export async function getClientCredentials(): Promise<CrowdinToken | undefined> {
     const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
 
     if (!session) {
         return;
     }
 
-    const creds = JSON.parse(session.accessToken) as CrowdinToken;
+    if (isExpired(session)) {
+        vscode.window.showWarningMessage('Crowdin session expired. Please Sign In again.');
+        return;
+    }
 
-    //3 min buffer
-    if (creds.expireAt - 3 * 60 * 1000 < Date.now()) {
+    const creds = JSON.parse(session.accessToken) as CrowdinToken;
+    return creds;
+}
+
+export async function getClient(token?: CrowdinToken): Promise<Crowdin | undefined> {
+    if (token) {
+        return new Crowdin({ token: token.accessToken, organization: token.organization });
+    }
+
+    const creds = await getClientCredentials();
+
+    if (!creds) {
         return;
     }
 
