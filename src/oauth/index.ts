@@ -10,13 +10,10 @@ export function initialize(context: vscode.ExtensionContext) {
     const provider = new CrowdinAuthenticationProvider(context);
 
     subscriptions.push(
-        vscode.commands.registerCommand(
-            Constants.SIGN_IN_COMMAND,
-            async () => {
-                await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: true });
-                await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', true);
-            }
-        )
+        vscode.commands.registerCommand(Constants.SIGN_IN_COMMAND, async () => {
+            await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: true });
+            await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', true);
+        })
     );
 
     subscriptions.push(

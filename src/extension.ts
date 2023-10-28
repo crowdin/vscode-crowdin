@@ -104,12 +104,12 @@ export function activate(context: vscode.ExtensionContext) {
 function setConfigExists() {
     const workspace = CommonUtil.getWorkspace();
     if (workspace) {
-        new ConfigProvider(workspace).getFile().then(file => {
+        new ConfigProvider(workspace).getFile().then((file) => {
             if (file) {
                 vscode.commands.executeCommand('setContext', 'crowdinConfigExists', true);
             } else {
                 vscode.commands.executeCommand('setContext', 'crowdinConfigExists', false);
             }
-        })
+        });
     }
 }
