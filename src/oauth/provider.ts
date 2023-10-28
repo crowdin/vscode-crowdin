@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import * as vscode from 'vscode';
 import { AUTH_TYPE, CLIENT_ID, SCOPES } from './constants';
-import { CrowdinToken, getClient, isExpired } from './crowdin';
+import { CrowdinToken, buildToken, getClient, isExpired } from './crowdin';
 import { clearProject } from './selectProject';
 import { PromiseAdapter, promiseFromEvent } from './util';
 
@@ -190,7 +190,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
         const params = new URLSearchParams(query);
         const state = params.get('state');
         const accessToken = params.get('access_token');
-        const expiresIn = params.get('expires_in');
+        const expiresIn = Number(params.get('expires_in') || 0);
 
         if (!accessToken || !expiresIn) {
             reject(new Error('Access token not found'));
@@ -203,9 +203,6 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
             return;
         }
 
-        resolve({
-            accessToken,
-            expireAt: Date.now() + Number(expiresIn) * 1000,
-        });
+        resolve(buildToken({ accessToken, expiresIn }));
     };
 }

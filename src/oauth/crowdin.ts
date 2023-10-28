@@ -5,11 +5,12 @@ import { AUTH_TYPE, SCOPES } from './constants';
 export interface CrowdinToken {
     accessToken: string;
     expireAt: number;
+    organization?: string;
 }
 
 export async function getClient(token?: CrowdinToken): Promise<Crowdin | undefined> {
     if (token) {
-        return new Crowdin({ token: token.accessToken, organization: getOrganization(token.accessToken) });
+        return new Crowdin({ token: token.accessToken, organization: token.organization });
     }
 
     const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
@@ -25,12 +26,20 @@ export async function getClient(token?: CrowdinToken): Promise<Crowdin | undefin
         return;
     }
 
-    return new Crowdin({ token: creds.accessToken, organization: getOrganization(creds.accessToken) });
+    return new Crowdin({ token: creds.accessToken, organization: creds.organization });
 }
 
 export function isExpired(session: vscode.AuthenticationSession) {
     const creds = JSON.parse(session.accessToken) as CrowdinToken;
     return creds.expireAt - 3 * 60 * 1000 < Date.now();
+}
+
+export function buildToken({ accessToken, expiresIn }: { accessToken: string; expiresIn: number }): CrowdinToken {
+    return {
+        accessToken,
+        expireAt: Date.now() + Number(expiresIn) * 1000,
+        organization: getOrganization(accessToken),
+    };
 }
 
 function getOrganization(token: string): string | undefined {
