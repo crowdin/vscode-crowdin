@@ -13,8 +13,7 @@ const asyncFileExists = util.promisify(fs.exists);
 const asyncWriteFile = util.promisify(fs.writeFile);
 const asyncReadFile = util.promisify(fs.readFile);
 
-const DEFAULT_CONFIG = `
-"files": [
+const DEFAULT_CONFIG = `"files": [
   {
     "source": "",
     "translation": ""

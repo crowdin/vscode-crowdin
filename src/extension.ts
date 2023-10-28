@@ -18,7 +18,10 @@ export function activate(context: vscode.ExtensionContext) {
     const progressProvider = new ProgressTreeProvider(configHolder);
     configHolder.addListener(() => filesProvider.refresh());
     configHolder.addListener(() => progressProvider.refresh());
+    configHolder.addListener(setConfigExists);
     configHolder.load();
+
+    setConfigExists();
 
     vscode.window.registerTreeDataProvider(Constants.FILES, filesProvider);
     vscode.window.registerTreeDataProvider(Constants.PROGRESS, progressProvider);
@@ -31,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const configProvider = new ConfigProvider(workspace);
         const { file, isNew } = await configProvider.create();
+        vscode.commands.executeCommand('setContext', 'crowdinConfigExists', true);
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
         if (isNew) {
             await configHolder.load();
@@ -95,4 +99,17 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     vscode.languages.registerCompletionItemProvider({ pattern: '**' }, new StringsAutocompleteProvider(configHolder));
+}
+
+function setConfigExists() {
+    const workspace = CommonUtil.getWorkspace();
+    if (workspace) {
+        new ConfigProvider(workspace).getFile().then(file => {
+            if (file) {
+                vscode.commands.executeCommand('setContext', 'crowdinConfigExists', true);
+            } else {
+                vscode.commands.executeCommand('setContext', 'crowdinConfigExists', false);
+            }
+        })
+    }
 }

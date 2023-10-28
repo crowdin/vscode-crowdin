@@ -12,7 +12,10 @@ export function initialize(context: vscode.ExtensionContext) {
     subscriptions.push(
         vscode.commands.registerCommand(
             Constants.SIGN_IN_COMMAND,
-            async () => await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: true })
+            async () => {
+                await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: true });
+                await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', true);
+            }
         )
     );
 
@@ -25,6 +28,7 @@ export function initialize(context: vscode.ExtensionContext) {
             }
             await provider.removeSession(session.id);
             await clearProject();
+            await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', false);
             vscode.window.showInformationMessage('You successfully logged out');
         })
     );
@@ -41,6 +45,9 @@ export function initialize(context: vscode.ExtensionContext) {
 const getSession = async () => {
     const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
     if (session) {
+        await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', true);
         vscode.window.showInformationMessage(`Welcome back ${session.account.label}`);
+    } else {
+        await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', false);
     }
 };

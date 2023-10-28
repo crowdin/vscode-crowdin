@@ -243,6 +243,24 @@
 					"when": "view == files && viewItem == file",
 					"group": "inline@4"
 				}
+			],
+			"commandPalette": [
+				{
+					"command": "crowdin.signIn",
+					"when": "!crowdinAuthenticated"
+				},
+				{
+					"command": "crowdin.signOut",
+					"when": "crowdinAuthenticated"
+				},
+				{
+					"command": "config.create",
+					"when": "!crowdinConfigExists"
+				},
+				{
+					"command": "config.open",
+					"when": "crowdinConfigExists"
+				}
 			]
 		}
 	},
