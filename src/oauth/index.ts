@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Constants } from '../constants';
 import { AUTH_TYPE, SCOPES } from './constants';
 import { CrowdinAuthenticationProvider } from './provider';
-import { clearProject, getProject, selectProject } from './selectProject';
+import { clearProject, selectProject } from './selectProject';
 
 export function initialize(context: vscode.ExtensionContext) {
     const subscriptions = context.subscriptions;
@@ -36,18 +36,6 @@ export function initialize(context: vscode.ExtensionContext) {
     subscriptions.push(vscode.authentication.onDidChangeSessions(async (e) => getSession()));
 
     subscriptions.push(vscode.commands.registerCommand(Constants.SELECT_PROJECT_COMMAND, () => selectProject()));
-
-    //for testing
-    subscriptions.push(
-        vscode.commands.registerCommand('crowdin.test', async () => {
-            const project = await getProject();
-            if (!project) {
-                vscode.window.showInformationMessage('Project not selected');
-            } else {
-                vscode.window.showInformationMessage(`Project selected : ${project}`);
-            }
-        })
-    );
 }
 
 const getSession = async () => {

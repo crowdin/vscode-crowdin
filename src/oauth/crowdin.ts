@@ -1,17 +1,15 @@
 import Crowdin from '@crowdin/crowdin-api-client';
-import axios from 'axios';
 import * as vscode from 'vscode';
-import { AUTH_TYPE, CLIENT_ID, CLIENT_SECRET, ORGANIZATION, SCOPES } from './constants';
+import { AUTH_TYPE, SCOPES } from './constants';
 
-interface CrowdinToken {
+export interface CrowdinToken {
     accessToken: string;
-    refreshToken: string;
     expireAt: number;
 }
 
 export async function getClient(token?: CrowdinToken): Promise<Crowdin | undefined> {
     if (token) {
-        return new Crowdin({ token: token.accessToken, organization: ORGANIZATION });
+        return new Crowdin({ token: token.accessToken, organization: getOrganization(token.accessToken) });
     }
 
     const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
@@ -21,23 +19,31 @@ export async function getClient(token?: CrowdinToken): Promise<Crowdin | undefin
     }
 
     const creds = JSON.parse(session.accessToken) as CrowdinToken;
-    //TODO check for expiration
-    return new Crowdin({ token: creds.accessToken, organization: ORGANIZATION });
+
+    //3 min buffer
+    if (creds.expireAt - 3 * 60 * 1000 < Date.now()) {
+        return;
+    }
+
+    return new Crowdin({ token: creds.accessToken, organization: getOrganization(creds.accessToken) });
 }
 
-export async function getToken(code: string, redirectUri: string): Promise<CrowdinToken> {
-    const resp = await axios.post('https://accounts.crowdin.com/oauth/token', {
-        grant_type: 'authorization_code',
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        redirect_uri: redirectUri,
-        code,
-    });
+export function isExpired(session: vscode.AuthenticationSession) {
+    const creds = JSON.parse(session.accessToken) as CrowdinToken;
+    return creds.expireAt - 3 * 60 * 1000 < Date.now();
+}
 
-    const { access_token, expires_in, refresh_token } = resp.data;
-    return {
-        accessToken: access_token,
-        refreshToken: refresh_token,
-        expireAt: Date.now() + expires_in * 1000,
-    };
+function getOrganization(token: string): string | undefined {
+    const parts = token.split('.');
+
+    for (const part of parts) {
+        try {
+            const object = JSON.parse(atob(part));
+            if (object.domain) {
+                return object.domain;
+            }
+        } catch (e) {
+            //do nothing
+        }
+    }
 }

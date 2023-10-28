@@ -94,11 +94,6 @@
 				"category": "Crowdin"
 			},
 			{
-				"command": "crowdin.test",
-				"title": "View Project",
-				"category": "Crowdin"
-			},
-			{
 				"command": "config.create",
 				"title": "Create configuration",
 				"category": "Crowdin"

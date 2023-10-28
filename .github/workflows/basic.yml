@@ -2,7 +2,6 @@ name: Basic CI
 
 env:
   CLIENT_ID: ${{ secrets.CLIENT_ID }} #OAuth app client id
-  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }} #OAuth app client secret
 
 on:
   pull_request:

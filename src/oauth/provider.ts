@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import * as vscode from 'vscode';
 import { AUTH_TYPE, CLIENT_ID, SCOPES } from './constants';
-import { getClient, getToken } from './crowdin';
+import { CrowdinToken, getClient, isExpired } from './crowdin';
 import { clearProject } from './selectProject';
 import { PromiseAdapter, promiseFromEvent } from './util';
 
@@ -11,7 +11,7 @@ class UriEventHandler extends vscode.EventEmitter<vscode.Uri> implements vscode.
     }
 }
 
-const AUTH_NAME = `CrowdinOAuth`;
+const AUTH_NAME = `Crowdin`;
 const SESSIONS_SECRET_KEY = `${AUTH_TYPE}.sessions`;
 
 export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvider, vscode.Disposable {
@@ -19,7 +19,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
         new vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>();
     private _disposable: vscode.Disposable;
     private _codeExchangePromise:
-        | { promise: Promise<string>; cancel: vscode.EventEmitter<void>; id: string }
+        | { promise: Promise<CrowdinToken>; cancel: vscode.EventEmitter<void>; id: string }
         | undefined;
     private _uriHandler = new UriEventHandler();
 
@@ -51,7 +51,14 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
         const allSessions = await this.context.secrets.get(SESSIONS_SECRET_KEY);
 
         if (allSessions) {
-            return JSON.parse(allSessions) as vscode.AuthenticationSession[];
+            const sessions = JSON.parse(allSessions) as vscode.AuthenticationSession[];
+            return sessions.filter((session) => {
+                if (isExpired(session)) {
+                    this.removeSession(session.id);
+                    return false;
+                }
+                return true;
+            });
         }
 
         return [];
@@ -64,13 +71,11 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
      */
     public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
         try {
-            const code = await this.login(scopes);
+            const token = await this.login(scopes);
 
-            if (!code) {
+            if (!token) {
                 throw new Error(`OAuth login failure`);
             }
-
-            const token = await getToken(code, this.redirectUri);
 
             const client = await getClient(token);
 
@@ -84,7 +89,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
                 id: uuid(),
                 accessToken: JSON.stringify(token),
                 account: {
-                    label: user.data.email,
+                    label: user.data.username,
                     id: user.data.email,
                 },
                 scopes: SCOPES,
@@ -133,7 +138,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
      * Log in to Crowdin OAuth
      */
     private async login(scopes: string[] = []) {
-        return await vscode.window.withProgress<string>(
+        return await vscode.window.withProgress<CrowdinToken>(
             {
                 location: vscode.ProgressLocation.Notification,
                 title: 'Signing in to Crowdin...',
@@ -145,7 +150,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
                 const searchParams = new URLSearchParams([
                     ['client_id', CLIENT_ID],
                     ['redirect_uri', this.redirectUri],
-                    ['response_type', 'code'],
+                    ['response_type', 'token'],
                     ['state', stateId],
                     ['scope', scopes.join(' ')],
                 ]);
@@ -162,7 +167,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
                 try {
                     return await Promise.race([
                         this._codeExchangePromise.promise,
-                        new Promise<string>((_, reject) => setTimeout(() => reject('Cancelled'), 60000)),
+                        new Promise<CrowdinToken>((_, reject) => setTimeout(() => reject('Cancelled'), 60000)),
                         promiseFromEvent<any, any>(token.onCancellationRequested, (_, __, reject) => {
                             reject('User Cancelled');
                         }).promise,
@@ -180,14 +185,15 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
      * @param scopes
      * @returns
      */
-    private handleUri: () => PromiseAdapter<vscode.Uri, string> = () => async (uri, resolve, reject) => {
+    private handleUri: () => PromiseAdapter<vscode.Uri, CrowdinToken> = () => async (uri, resolve, reject) => {
         const query = decodeURIComponent(uri.query);
         const params = new URLSearchParams(query);
         const state = params.get('state');
-        const code = params.get('code');
+        const accessToken = params.get('access_token');
+        const expiresIn = params.get('expires_in');
 
-        if (!code) {
-            reject(new Error('Code not found'));
+        if (!accessToken || !expiresIn) {
+            reject(new Error('Access token not found'));
             return;
         }
 
@@ -197,6 +203,9 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
             return;
         }
 
-        resolve(code);
+        resolve({
+            accessToken,
+            expireAt: Date.now() + Number(expiresIn) * 1000,
+        });
     };
 }

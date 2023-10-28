@@ -32,9 +32,8 @@ const config = {
         }]
     },
     plugins: [
-        new webpack.EnvironmentPlugin(['CLIENT_ID', 'CLIENT_SECRET']),
         new webpack.EnvironmentPlugin({
-            ORGANIZATION: null,
+            CLIENT_ID: null,
         }),
     ]
 }
