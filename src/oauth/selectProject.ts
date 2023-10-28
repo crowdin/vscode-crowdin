@@ -19,7 +19,14 @@ export async function selectProject() {
     );
 
     const project = await vscode.window.showQuickPick(
-        projects.data.map((e) => `${e.data.name} | ${e.data.id}`),
+        projects.data.map(
+            (e) =>
+                ({
+                    label: e.data.name,
+                    description: e.data.description,
+                    detail: e.data.id.toString(),
+                } as vscode.QuickPickItem)
+        ),
         {
             canPickMany: false,
             title: 'Please select a project',
@@ -31,7 +38,7 @@ export async function selectProject() {
         throw new Error('Project missing');
     }
 
-    const projectId = project.split(' | ').pop();
+    const projectId = project.detail;
 
     if (!projectId) {
         vscode.window.showErrorMessage('Please select a valid project');
