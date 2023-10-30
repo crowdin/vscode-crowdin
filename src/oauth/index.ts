@@ -36,10 +36,12 @@ export function initialize(context: vscode.ExtensionContext, onProjectSelected: 
 
     subscriptions.push(vscode.authentication.onDidChangeSessions(async (e) => getSession()));
 
-    subscriptions.push(vscode.commands.registerCommand(Constants.SELECT_PROJECT_COMMAND, async () => {
-        await selectProject();
-        await onProjectSelected();
-    }));
+    subscriptions.push(
+        vscode.commands.registerCommand(Constants.SELECT_PROJECT_COMMAND, async () => {
+            await selectProject();
+            await onProjectSelected();
+        })
+    );
 }
 
 const getSession = async () => {

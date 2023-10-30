@@ -53,7 +53,7 @@ export class CrowdinConfigHolder {
 
     async reload() {
         await this.load();
-        this.listeners.forEach(l => l());
+        this.listeners.forEach((l) => l());
     }
 
     private updateConfigWatchers(configFiles: string[]) {
