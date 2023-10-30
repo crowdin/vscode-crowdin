@@ -14,7 +14,7 @@ export async function selectProject() {
     }
 
     const projects = await CommonUtil.withProgress(
-        () => client.projectsGroupsApi.withFetchAll().listProjects({ hasManagerAccess: 1}),
+        () => client.projectsGroupsApi.withFetchAll().listProjects({ hasManagerAccess: 1 }),
         'Loading projects...'
     );
 
