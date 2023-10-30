@@ -168,7 +168,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
                 try {
                     return await Promise.race([
                         this._codeExchangePromise.promise,
-                        new Promise<CrowdinToken>((_, reject) => setTimeout(() => reject('Cancelled'), 60000)),
+                        new Promise<CrowdinToken>((_, reject) => setTimeout(() => reject('Cancelled'), 180000)),
                         promiseFromEvent<any, any>(token.onCancellationRequested, (_, __, reject) => {
                             reject('User Cancelled');
                         }).promise,
