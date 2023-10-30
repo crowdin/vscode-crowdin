@@ -4,7 +4,7 @@ import { AUTH_TYPE, SCOPES } from './constants';
 import { CrowdinAuthenticationProvider } from './provider';
 import { clearProject, selectProject } from './selectProject';
 
-export function initialize(context: vscode.ExtensionContext) {
+export function initialize(context: vscode.ExtensionContext, onProjectSelected: () => Promise<void>) {
     const subscriptions = context.subscriptions;
 
     const provider = new CrowdinAuthenticationProvider(context);
@@ -36,7 +36,10 @@ export function initialize(context: vscode.ExtensionContext) {
 
     subscriptions.push(vscode.authentication.onDidChangeSessions(async (e) => getSession()));
 
-    subscriptions.push(vscode.commands.registerCommand(Constants.SELECT_PROJECT_COMMAND, () => selectProject()));
+    subscriptions.push(vscode.commands.registerCommand(Constants.SELECT_PROJECT_COMMAND, async () => {
+        await selectProject();
+        await onProjectSelected();
+    }));
 }
 
 const getSession = async () => {

@@ -11,7 +11,6 @@ import { CommonUtil } from './util/commonUtil';
 
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
-    OAuth.initialize(context);
 
     const configHolder = new CrowdinConfigHolder();
     const filesProvider = new FilesProvider(configHolder);
@@ -20,6 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
     configHolder.addListener(() => progressProvider.refresh());
     configHolder.addListener(setConfigExists);
     configHolder.load();
+
+    OAuth.initialize(context, () => configHolder.reload());
 
     setConfigExists();
 

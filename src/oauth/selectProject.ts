@@ -47,7 +47,7 @@ export async function selectProject() {
 
     await Constants.EXTENSION_CONTEXT.secrets.store(KEY, projectId);
 
-    vscode.window.showInformationMessage(`Project ${project} selected`);
+    vscode.window.showInformationMessage(`Project ${project.label} selected`);
 }
 
 export async function getProject() {
