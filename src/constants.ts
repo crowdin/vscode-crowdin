@@ -20,6 +20,9 @@ export class Constants {
     static readonly REFRESH_COMMAND = 'files.refresh';
     static readonly UPDATE_SOURCE_FOLDER_COMMAND = 'files.updateSourceFolder';
     static readonly UPDATE_SOURCE_FILE_COMMAND = 'files.updateSourceFile';
+    static readonly SIGN_IN_COMMAND = 'crowdin.signIn';
+    static readonly SIGN_OUT_COMMAND = 'crowdin.signOut';
+    static readonly SELECT_PROJECT_COMMAND = 'crowdin.selectProject';
     //properties
     static readonly AUTO_REFRESH_PROPERTY = 'crowdin.autoRefresh';
     static readonly STRINGS_COMPLETION_PROPERTY = 'crowdin.stringsCompletion';

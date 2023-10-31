@@ -1,5 +1,8 @@
 name: Basic CI
 
+env:
+  CLIENT_ID: ${{ secrets.CLIENT_ID }} # OAuth app client id
+
 on:
   pull_request:
     branches: [ "master" ]

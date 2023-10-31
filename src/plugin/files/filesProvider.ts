@@ -18,8 +18,8 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     /**
      * Download translations
      */
-    download(folder?: FilesTreeItem): Promise<void> {
-        return CommonUtil.withProgress(() => {
+    download(folder?: FilesTreeItem): Promise<void[]> {
+        return CommonUtil.withProgress<void[]>(() => {
             let promises: Promise<void>[];
             if (!!folder) {
                 promises = [folder.update().catch((e) => ErrorHandler.handleError(e))];

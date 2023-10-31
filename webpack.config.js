@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -30,6 +31,9 @@ const config = {
             }]
         }]
     },
+    plugins: [
+        new webpack.EnvironmentPlugin(['CLIENT_ID']),
+    ]
 }
 
 module.exports = config;

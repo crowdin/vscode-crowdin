@@ -54,8 +54,8 @@ To work with the plugin in the Visual Studio Code workspace, there should be a C
 Configuration file example:
 
 ```yaml
-"project_id": "projectId"
-"api_token": "apiToken"
+"project_id": "projectId" // optional
+"api_token": "apiToken" // optional
 "base_path": "folder" // optional
 "branch": "master" // optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
@@ -106,31 +106,45 @@ To generate a new API token in Crowdin, go to your Account Settings.
 
 ## Setup
 
-1. Prepare a `crowdin.yml` or `crowdin.yaml` configuration file and add it to the needed workspace in Visual Studio Code.
-2. Install the *Crowdin* plugin using one of the following methods:
-    * open VS Code Extensions (**Ctrl+Shift+X**), search for *Crowdin* and click **Install**
+### Installation
 
-      or
+Install the *Crowdin* plugin using one of the following methods:
 
-    * launch VS Code Quick Open (**Ctrl+P**), paste the below command, and press **Enter**
+- open VS Code Extensions (**Ctrl+Shift+X**), search for *Crowdin* and click **Install**
+
+     or
+
+- launch VS Code Quick Open (**Ctrl+P**), paste the below command, and press **Enter**
         ```
         ext install Crowdin.vscode-crowdin
         ```
 
-3. The *Crowdin* plugin scans each Visual Studio Code workspace to find a Crowdin configuration file (*crowdin.yml* or *crowdin.yaml*). It automatically builds the tree with source files in the *Crowdin Explorer* component available in your Activity Bar.
-4. Use upward and downward arrows in the *Crowdin Explorer* component to upload source files to Crowdin and download translations correspondingly.
+### OAuth
+
+Run the following [commands](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) to prepare workspace:
+
+- `Crowdin: Sign In` to login into your Crowdin profile
+- `Crowdin: Select Project` to select Crowdin project
+- `Crowdin: Create configuration` to generate Crowdin configuration file
+  - Edit `files` according to your project needs
+
+### Manual
+
+1. Prepare a `crowdin.yml` or `crowdin.yaml` configuration file and add it to the needed workspace in Visual Studio Code.
+2. The *Crowdin* plugin scans each Visual Studio Code workspace to find a Crowdin configuration file (*crowdin.yml* or *crowdin.yaml*). It automatically builds the tree with source files in the *Crowdin Explorer* component available in your Activity Bar.
+3. Use upward and downward arrows in the *Crowdin Explorer* component to upload source files to Crowdin and download translations correspondingly.
 
 ## Extension Settings
 
 This extension contributes the following settings:
 
-* `crowdin.autoRefresh`: enable/disable auto refresh of the file tree after each change in the Crowdin configuration file
+- `crowdin.autoRefresh`: enable/disable auto refresh of the file tree after each change in the Crowdin configuration file
 
-* `crowdin.stringsCompletion`: enable/disable autocompletion of strings keys
+- `crowdin.stringsCompletion`: enable/disable autocompletion of strings keys
 
-* `crowdin.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files
+- `crowdin.stringsCompletionFileExtensions`: Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files
 
-* `crowdin.useGitBranch`: enable/disable the use of a Git branch as a Crowdin branch.
+- `crowdin.useGitBranch`: enable/disable the use of a Git branch as a Crowdin branch.
 
 ## Known Issues
 
@@ -147,6 +161,7 @@ Need help working with Crowdin Visual Studio Code Plugin or have any questions? 
 We are happy to accept contributions to the Crowdin Visual Studio Code Plugin. If you want to contribute, please read the [Contributing](/CONTRIBUTING.md) guidelines.
 
 ## License
+
 <pre>
 The Crowdin Visual Studio Code Plugin is licensed under the MIT License.
 See the LICENSE file distributed with this work for additional

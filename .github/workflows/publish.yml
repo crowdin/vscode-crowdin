@@ -4,6 +4,9 @@ on:
   release:
     types: [released]
 
+env:
+  CLIENT_ID: ${{ secrets.CLIENT_ID }} # OAuth app client id
+
 jobs:
   publish:
     runs-on: ubuntu-latest

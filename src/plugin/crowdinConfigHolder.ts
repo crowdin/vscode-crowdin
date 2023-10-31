@@ -51,6 +51,11 @@ export class CrowdinConfigHolder {
         this.updateConfigWatchers(configFiles);
     }
 
+    async reload() {
+        await this.load();
+        this.listeners.forEach((l) => l());
+    }
+
     private updateConfigWatchers(configFiles: string[]) {
         const autoRefresh = vscode.workspace.getConfiguration().get<boolean>(Constants.AUTO_REFRESH_PROPERTY);
         if (!autoRefresh) {
