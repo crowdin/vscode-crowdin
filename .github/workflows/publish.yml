@@ -5,7 +5,7 @@ on:
     types: [released]
 
 env:
-  CLIENT_ID: ${{ secrets.CLIENT_ID }} #OAuth app client id
+  CLIENT_ID: ${{ secrets.CLIENT_ID }} # OAuth app client id
 
 jobs:
   publish:
