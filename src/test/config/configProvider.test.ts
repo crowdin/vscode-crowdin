@@ -18,7 +18,7 @@ suite('Configuration file', function () {
             fsPath: path.join(__dirname, '..', '..', '..', 'test-resources'),
             path: '',
             query: '',
-            toJSON: () => { },
+            toJSON: () => {},
             toString: () => '',
             with: () => null as unknown as vscode.Uri,
         };

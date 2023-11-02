@@ -36,7 +36,7 @@ export class CrowdinClient {
         });
     }
 
-    get crowdinBranch(): { name: string, title: string } | undefined {
+    get crowdinBranch(): { name: string; title: string } | undefined {
         const useGitBranch = vscode.workspace.getConfiguration().get<boolean>(Constants.USE_GIT_BRANCH_PROPERTY);
 
         if (!useGitBranch) {
@@ -340,7 +340,8 @@ export class CrowdinClient {
             }
         } catch (error) {
             throw new Error(
-                `Failed to create/update file ${path.basename(file)} for project ${this.projectId
+                `Failed to create/update file ${path.basename(file)} for project ${
+                    this.projectId
                 }. ${this.getErrorMessage(error)}`
             );
         }
@@ -356,7 +357,9 @@ export class CrowdinClient {
         const branch = this.crowdinBranch;
 
         if (!!branch) {
-            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, { name: branch.name });
+            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
+                name: branch.name,
+            });
             const foundBranch = branches.data.find((e) => e.data.name === branch.name);
             if (!!foundBranch) {
                 branchId = foundBranch.data.id;
