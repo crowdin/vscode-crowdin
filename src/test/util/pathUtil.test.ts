@@ -65,4 +65,14 @@ suite('PathUtil', function () {
         );
         assert.strictEqual(newTranslation, '/%original_path%/%file_name%.es.%file_extension%');
     });
+
+    test('Normalize branch name', () => {
+        assert.strictEqual(PathUtil.normalizeBranchName('main|1>2'), 'main.1.2');
+        assert.strictEqual(PathUtil.normalizeBranchName('dev/1'), 'dev.1');
+        assert.strictEqual(PathUtil.normalizeBranchName('dev\\1'), 'dev.1');
+        assert.strictEqual(PathUtil.normalizeBranchName('feat:123?'), 'feat.123.');
+        assert.strictEqual(PathUtil.normalizeBranchName('base*'), 'base.');
+        assert.strictEqual(PathUtil.normalizeBranchName('test?"'), 'test..');
+        assert.strictEqual(PathUtil.normalizeBranchName('test<'), 'test.');
+    });
 });

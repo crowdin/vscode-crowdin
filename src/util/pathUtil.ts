@@ -4,6 +4,7 @@ import * as path from 'path';
 export class PathUtil {
     static PATH_SEPARATOR_REGEX = '\\' === path.sep ? '\\\\' : path.sep;
     static SPECIAL_SYMBOLS = ['*', '?', '[', ']', '.'];
+    static BRANCH_UNALLOWED_SYMBOLS = ['/', '\\', ':', '*', '?', '"', '<', '>', '|'];
 
     static PLACEHOLDER_ANDROID_CODE = '%android_code%';
     static PLACEHOLDER_FILE_EXTENTION = '%file_extension%';
@@ -140,5 +141,14 @@ export class PathUtil {
         result = path1.replace(basePath, path.sep);
         result = result.replace(new RegExp(PathUtil.PATH_SEPARATOR_REGEX + '+', 'g'), PathUtil.PATH_SEPARATOR_REGEX);
         return result;
+    }
+
+    static normalizeBranchName(branch: string): string {
+        let res = '';
+        for (let i = 0; i < branch.length; i++) {
+            const character = branch.charAt(i);
+            res += this.BRANCH_UNALLOWED_SYMBOLS.includes(character) ? '.' : character;
+        }
+        return res;
     }
 }
