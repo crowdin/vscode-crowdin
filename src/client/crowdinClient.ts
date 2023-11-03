@@ -36,11 +36,11 @@ export class CrowdinClient {
         });
     }
 
-    get crowdinBranch(): string | undefined {
+    get crowdinBranch(): { name: string; title: string } | undefined {
         const useGitBranch = vscode.workspace.getConfiguration().get<boolean>(Constants.USE_GIT_BRANCH_PROPERTY);
 
         if (!useGitBranch) {
-            return this.branch;
+            return this.branch ? { name: this.branch, title: this.branch } : undefined;
         }
 
         const extension = vscode.extensions.getExtension('vscode.git');
@@ -48,7 +48,8 @@ export class CrowdinClient {
         if (extension && extension.isActive) {
             const git = extension.exports.getAPI(1);
             const repository = git.getRepository(this.docUri);
-            return repository?.state?.HEAD?.name;
+            const name = repository?.state?.HEAD?.name;
+            return name ? { name: PathUtil.normalizeBranchName(name), title: name } : undefined;
         }
     }
 
@@ -69,9 +70,9 @@ export class CrowdinClient {
             let branchId: number | undefined;
             if (!!branch) {
                 const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
-                    name: branch,
+                    name: branch.name,
                 });
-                const foundBranch = branches.data.find((e) => e.data.name === branch);
+                const foundBranch = branches.data.find((e) => e.data.name === branch.name);
                 if (!!foundBranch) {
                     branchId = foundBranch.data.id;
                 }
@@ -190,14 +191,15 @@ export class CrowdinClient {
         if (!!branch) {
             try {
                 const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
-                    name: branch,
+                    name: branch.name,
                 });
-                const foundBranch = branches.data.find((e) => e.data.name === branch);
+                const foundBranch = branches.data.find((e) => e.data.name === branch.name);
                 if (!!foundBranch) {
                     branchId = foundBranch.data.id;
                 } else {
                     const res = await this.crowdin.sourceFilesApi.createBranch(this.projectId, {
-                        name: branch,
+                        name: branch.name,
+                        title: branch.title,
                     });
                     branchId = res.data.id;
                 }
@@ -206,7 +208,7 @@ export class CrowdinClient {
                     if (!this.concurrentIssue(error)) {
                         throw error;
                     }
-                    branchId = await this.waitAndFindBranch(branch);
+                    branchId = await this.waitAndFindBranch(branch.name);
                 } catch (error) {
                     throw new Error(
                         `Failed to create/find branch for project ${this.projectId}. ${this.getErrorMessage(error)}`
@@ -355,8 +357,10 @@ export class CrowdinClient {
         const branch = this.crowdinBranch;
 
         if (!!branch) {
-            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, { name: branch });
-            const foundBranch = branches.data.find((e) => e.data.name === branch);
+            const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
+                name: branch.name,
+            });
+            const foundBranch = branches.data.find((e) => e.data.name === branch.name);
             if (!!foundBranch) {
                 branchId = foundBranch.data.id;
             } else {

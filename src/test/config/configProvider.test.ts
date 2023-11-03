@@ -2,13 +2,14 @@ import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigProvider } from '../../config/configProvider';
+import { Constants } from '../../constants';
 
 suite('Configuration file', function () {
     let workspaceName;
     let uri: vscode.Uri;
     let workspace: vscode.WorkspaceFolder;
 
-    suiteSetup(() => {
+    suiteSetup(async () => {
         workspaceName = 'testWorkspace';
         uri = {
             scheme: '',
@@ -26,6 +27,13 @@ suite('Configuration file', function () {
             name: workspaceName,
             uri: uri,
         };
+        Constants.initialize({
+            //@ts-ignore
+            secrets: {
+                get: () => Promise.resolve(undefined),
+            },
+        });
+        await vscode.commands.executeCommand(Constants.SIGN_OUT_COMMAND);
     });
 
     test('Load valid config', async () => {
