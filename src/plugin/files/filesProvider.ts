@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { AUTH_TYPE, SCOPES } from '../../oauth/constants';
 import { CommonUtil } from '../../util/commonUtil';
 import { ErrorHandler } from '../../util/errorHandler';
 import { CrowdinConfigHolder } from '../crowdinConfigHolder';
@@ -12,6 +13,8 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     readonly onDidChangeTreeData: vscode.Event<FilesTreeItem | undefined> = this._onDidChangeTreeData.event;
 
     private rootTree: FilesTreeItem[] = [];
+
+    private welcomeMessage = true;
 
     constructor(readonly configHolder: CrowdinConfigHolder) {}
 
@@ -84,7 +87,15 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
         return element;
     }
 
-    getChildren(element?: FilesTreeItem): Thenable<FilesTreeItem[]> {
+    async getChildren(element?: FilesTreeItem): Promise<FilesTreeItem[]> {
+        if (!element && this.welcomeMessage) {
+            const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
+            if (session) {
+                vscode.window.showInformationMessage(`Welcome back ${session.account.label}`);
+            }
+            this.welcomeMessage = false;
+        }
+
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showWarningMessage('Project workspace is empty');
             return Promise.resolve([]);
