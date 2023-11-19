@@ -14,7 +14,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
 
     private rootTree: FilesTreeItem[] = [];
 
-    private welcomeMessage = true;
+    private showWelcomeMessage = true;
 
     constructor(readonly configHolder: CrowdinConfigHolder) {}
 
@@ -88,12 +88,12 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     }
 
     async getChildren(element?: FilesTreeItem): Promise<FilesTreeItem[]> {
-        if (!element && this.welcomeMessage) {
+        if (!element && this.showWelcomeMessage) {
             const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
             if (session) {
                 vscode.window.showInformationMessage(`Welcome back ${session.account.label}`);
             }
-            this.welcomeMessage = false;
+            this.showWelcomeMessage = false;
         }
 
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
