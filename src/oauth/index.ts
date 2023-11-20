@@ -46,10 +46,5 @@ export function initialize(context: vscode.ExtensionContext, onProjectSelected: 
 
 const getSession = async () => {
     const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
-    if (session) {
-        await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', true);
-        vscode.window.showInformationMessage(`Welcome back ${session.account.label}`);
-    } else {
-        await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', false);
-    }
+    await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', !!session);
 };
