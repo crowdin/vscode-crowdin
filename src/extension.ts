@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     configHolder.addListener(() => filesProvider.refresh());
     configHolder.addListener(() => progressProvider.refresh());
     configHolder.addListener(setConfigExists);
-    configHolder.load();
+    configHolder.initialize();
 
     OAuth.initialize(context, () => configHolder.reload());
 

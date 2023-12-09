@@ -111,7 +111,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     }
 
     private async buildRootTree(): Promise<FilesTreeItem[]> {
-        const configurations = this.configHolder.configurations;
+        const configurations = await this.configHolder.configurations();
         const promises = Array.from(configurations).map(async ([config, workspace]) => {
             try {
                 const rootTreeFolder = await FilesTreeBuilder.buildRootFolder(
