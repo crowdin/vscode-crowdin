@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Constants } from '../../constants';
 import { AUTH_TYPE, SCOPES } from '../../oauth/constants';
 import { CommonUtil } from '../../util/commonUtil';
 import { ErrorHandler } from '../../util/errorHandler';
@@ -16,7 +17,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
 
     private showWelcomeMessage = true;
 
-    constructor(readonly configHolder: CrowdinConfigHolder) {}
+    constructor(readonly configHolder: CrowdinConfigHolder) { }
 
     /**
      * Download translations
@@ -88,6 +89,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     }
 
     async getChildren(element?: FilesTreeItem): Promise<FilesTreeItem[]> {
+        Constants.APPLICATION_OPENED = true;
         if (!element && this.showWelcomeMessage) {
             const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
             if (session) {

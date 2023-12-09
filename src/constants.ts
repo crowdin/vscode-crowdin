@@ -34,6 +34,7 @@ export class Constants {
     static readonly CLIENT_RETRIES = 5;
     static readonly CLIENT_RETRY_WAIT_INTERVAL_MS = 750;
     static VSCODE_VERSION: string;
+    static APPLICATION_OPENED = false;
 
     static initialize(context: vscode.ExtensionContext) {
         Constants.VSCODE_VERSION = vscode.version;
