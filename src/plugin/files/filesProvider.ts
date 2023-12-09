@@ -17,7 +17,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
 
     private showWelcomeMessage = true;
 
-    constructor(readonly configHolder: CrowdinConfigHolder) { }
+    constructor(readonly configHolder: CrowdinConfigHolder) {}
 
     /**
      * Download translations
