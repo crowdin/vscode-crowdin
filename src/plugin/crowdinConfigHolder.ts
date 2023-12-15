@@ -10,12 +10,14 @@ export class CrowdinConfigHolder {
     private configurationToWorkspace: Map<ConfigModel, vscode.WorkspaceFolder> = new Map();
     private sourceStrings: Map<vscode.WorkspaceFolder, crowdin.SourceStringsModel.String[]> = new Map();
     private listeners: { (): void }[] = [];
+    private initializer: Promise<void> = Promise.resolve();
 
     addListener(listener: () => void) {
         this.listeners.push(listener);
     }
 
-    get configurations(): Map<ConfigModel, vscode.WorkspaceFolder> {
+    async configurations(): Promise<Map<ConfigModel, vscode.WorkspaceFolder>> {
+        await this.initializer;
         return this.configurationToWorkspace;
     }
 
@@ -25,6 +27,10 @@ export class CrowdinConfigHolder {
 
     reloadStrings() {
         this.configurationToWorkspace.forEach((workspace, config) => this.loadStrings(config, workspace));
+    }
+
+    initialize() {
+        this.initializer = this.load();
     }
 
     async load() {
@@ -79,14 +85,8 @@ export class CrowdinConfigHolder {
         });
         watchersToAdd.forEach((file) => {
             const wather = vscode.workspace.createFileSystemWatcher(file);
-            wather.onDidChange(async () => {
-                await this.load();
-                this.listeners.forEach((l) => l());
-            });
-            wather.onDidDelete(async () => {
-                await this.load();
-                this.listeners.forEach((l) => l());
-            });
+            wather.onDidChange(this.reload);
+            wather.onDidDelete(this.reload);
             this.configWatchers.set(file, wather);
         });
     }

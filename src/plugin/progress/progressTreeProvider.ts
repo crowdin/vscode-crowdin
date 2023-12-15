@@ -22,9 +22,10 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
         return element;
     }
 
-    getChildren(element?: ProgressTreeItem): Thenable<any[]> {
+    async getChildren(element?: ProgressTreeItem): Promise<any[]> {
         if (!element) {
-            const promises = Array.from(this.configHolder.configurations).map(async ([config, workspace]) => {
+            const configurations = await this.configHolder.configurations();
+            const promises = Array.from(configurations).map(async ([config, workspace]) => {
                 try {
                     const client = buildClient(workspace.uri, config);
                     const { translationStatusApi, projectsGroupsApi, languagesApi } = client.crowdin;

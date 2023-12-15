@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Constants } from '../../constants';
 import { AUTH_TYPE, SCOPES } from '../../oauth/constants';
 import { CommonUtil } from '../../util/commonUtil';
 import { ErrorHandler } from '../../util/errorHandler';
@@ -88,6 +89,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     }
 
     async getChildren(element?: FilesTreeItem): Promise<FilesTreeItem[]> {
+        Constants.APPLICATION_OPENED = true;
         if (!element && this.showWelcomeMessage) {
             const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
             if (session) {
@@ -109,7 +111,7 @@ export class FilesProvider implements vscode.TreeDataProvider<FilesTreeItem> {
     }
 
     private async buildRootTree(): Promise<FilesTreeItem[]> {
-        const configurations = this.configHolder.configurations;
+        const configurations = await this.configHolder.configurations();
         const promises = Array.from(configurations).map(async ([config, workspace]) => {
             try {
                 const rootTreeFolder = await FilesTreeBuilder.buildRootFolder(
