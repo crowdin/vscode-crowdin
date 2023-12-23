@@ -20,11 +20,9 @@ export class CrowdinConfigHolder {
         this.listeners.push(listener);
     }
 
-    async configurations(): Promise<
-        Map<{ config: ConfigModel; project: crowdin.ProjectsGroupsModel.Project }, vscode.WorkspaceFolder>
-    > {
+    async configurations() {
         await this.initializer;
-        return this.configurationToWorkspace;
+        return Array.from(this.configurationToWorkspace).sort((e1, e2) => e1[1].index - e2[1].index);
     }
 
     getCrowdinStrings(workspace: vscode.WorkspaceFolder): crowdin.SourceStringsModel.String[] | undefined {

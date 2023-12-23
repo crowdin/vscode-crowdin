@@ -5,6 +5,7 @@ import * as OAuth from './oauth';
 import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
 import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
+import { BundlesTreeItem } from './plugin/tree/bundles/bundlesTreeItem';
 import { FilesTreeItem } from './plugin/tree/files/filesTreeItem';
 import { TreeProvider } from './plugin/tree/treeProvider';
 import { CommonUtil } from './util/commonUtil';
@@ -92,6 +93,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
     vscode.commands.registerCommand(Constants.DOWNLOAD_COMMAND, (item: FilesTreeItem) =>
         downloadTreeProvider.download(item)
+    );
+    vscode.commands.registerCommand(Constants.DOWNLOAD_BUNDLE_COMMAND, (item: BundlesTreeItem) =>
+        downloadTreeProvider.downloadBundle(item)
+    );
+    vscode.commands.registerCommand(Constants.ADD_BUNDLE_COMMAND, () =>
+        vscode.env.openExternal(vscode.Uri.parse('https://crowdin.github.io/crowdin-cli/commands/crowdin-bundle-add'))
     );
     vscode.commands.registerCommand(Constants.EDIT_COMMAND, (item: FilesTreeItem) =>
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(item.config.configPath))

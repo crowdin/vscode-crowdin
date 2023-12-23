@@ -186,6 +186,19 @@
 					"light": "resources/light/download_source.svg",
 					"dark": "resources/dark/download_source.svg"
 				}
+			},
+			{
+				"command": "bundles.download",
+				"title": "Download bundle",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
+				"command": "bundles.add",
+				"title": "Add bundle",
+				"icon": "$(plus)"
 			}
 		],
 		"menus": {
@@ -214,7 +227,7 @@
 			"view/item/context": [
 				{
 					"command": "files.edit",
-					"when": "(view == upload || view == download) && viewItem == root",
+					"when": "(view == upload || view == download) && (viewItem == root ||viewItem == root_bundle)",
 					"group": "inline@0"
 				},
 				{
@@ -241,6 +254,16 @@
 					"command": "files.updateSourceFile",
 					"when": "view == download && viewItem == file",
 					"group": "inline@4"
+				},
+				{
+					"command": "bundles.download",
+					"when": "view == download && viewItem == bundle",
+					"group": "inline@0"
+				},
+				{
+					"command": "bundles.add",
+					"when": "view == download && viewItem == root_bundle",
+					"group": "inline@0"
 				}
 			],
 			"commandPalette": [

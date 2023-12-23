@@ -96,6 +96,8 @@ You can create a new configuration file by using the "Crowdin: Create configurat
 "base_path": "folder" // optional
 "branch": "master" // optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
+"update_strings": false // optional (for strings based projects)
+"cleanup_mode": true // optional (for strings based projects)
 
 "files": [
   {

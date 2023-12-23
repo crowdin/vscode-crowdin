@@ -5,5 +5,5 @@ export enum ContextValue {
     FILE = 'file',
     //bundles
     BUNDLE = 'bundle',
-    ROOT_BUNDLE = 'root-bundle',
+    ROOT_BUNDLE = 'root_bundle',
 }

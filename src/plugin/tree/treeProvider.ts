@@ -40,6 +40,20 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
     }
 
     /**
+     * Download bundle
+     */
+    downloadBundle(item: BundlesTreeItem): Promise<void> {
+        return CommonUtil.withProgress<void>(
+            () =>
+                item
+                    .download()
+                    .catch((e) => ErrorHandler.handleError(e))
+                    .finally(() => this._onDidChangeTreeData.fire(undefined)),
+            `Downloading bundle...`
+        );
+    }
+
+    /**
      * Reload files tree
      */
     refresh(): void {
@@ -113,7 +127,7 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
     private async buildRootTree(): Promise<TreeItem[]> {
         const configurations = await this.configHolder.configurations();
-        const promises = Array.from(configurations).map(async ([{ config, project }, workspace]) => {
+        const promises = configurations.map(async ([{ config, project }, workspace]) => {
             try {
                 const isStringsBased = project.type === ProjectsGroupsModel.Type.STRINGS_BASED;
                 if (this.isDownload && isStringsBased) {

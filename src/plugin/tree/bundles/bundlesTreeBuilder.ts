@@ -13,11 +13,16 @@ export class BundlesTreeBuilder {
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: ContextValue.ROOT_BUNDLE,
             config,
-            childs: BundlesTreeBuilder.bundlesTreeItems(config, client),
+            rootPath: workspace.uri.fsPath,
+            childs: BundlesTreeBuilder.bundlesTreeItems(config, client, workspace.uri.fsPath),
         });
     }
 
-    private static async bundlesTreeItems(config: ConfigModel, client: CrowdinClient): Promise<BundlesTreeItem[]> {
+    private static async bundlesTreeItems(
+        config: ConfigModel,
+        client: CrowdinClient,
+        rootPath: string
+    ): Promise<BundlesTreeItem[]> {
         const bundles = await client.crowdin.bundlesApi.withFetchAll().listBundles(config.projectId);
         return bundles.data.map(
             (bundle) =>
@@ -27,6 +32,7 @@ export class BundlesTreeBuilder {
                     collapsibleState: vscode.TreeItemCollapsibleState.None,
                     contextValue: ContextValue.BUNDLE,
                     config,
+                    rootPath,
                     bundle: bundle.data,
                 })
         );

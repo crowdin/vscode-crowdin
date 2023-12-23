@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as https from 'https';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { ConfigModel } from '../config/configModel';
 import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
@@ -14,18 +15,15 @@ https.globalAgent.options.rejectUnauthorized = false;
 
 export class CrowdinClient {
     readonly crowdin: Crowdin;
+    readonly projectId: number;
+    readonly branch?: string;
 
-    constructor(
-        readonly projectId: number,
-        readonly apiKey: string,
-        readonly docUri: vscode.Uri,
-        readonly branch?: string,
-        readonly organization?: string,
-        readonly stringsBased?: boolean
-    ) {
+    constructor(readonly docUri: vscode.Uri, readonly config: ConfigModel, readonly stringsBased?: boolean) {
+        this.projectId = config.projectId;
+        this.branch = config.branch;
         const credentials: Credentials = {
-            token: apiKey,
-            organization: organization,
+            token: config.apiKey,
+            organization: config.organization,
         };
         this.crowdin = new Crowdin(credentials, {
             userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`,
@@ -110,6 +108,61 @@ export class CrowdinClient {
             throw new Error(
                 `Failed to download translations for project ${this.projectId}. ${this.getErrorMessage(error)}`
             );
+        }
+    }
+
+    /**
+     * Downloads bundle for strings based project
+     */
+    async downloadBundle(unzipFolder: string, bundleId: number): Promise<any> {
+        const branch = this.crowdinBranch;
+        if (!branch) {
+            throw new Error('Branch is not specified');
+        }
+
+        const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
+            name: branch.name,
+        });
+        const branchId = branches.data.find((e) => e.data.name === branch.name)?.data.id;
+
+        if (!branchId) {
+            throw new Error(`Failed to find branch with name ${branch.name}`);
+        }
+
+        const { bundlesApi } = this.crowdin;
+
+        try {
+            const build = await bundlesApi.exportBundle(this.projectId, bundleId);
+            let finished = false;
+
+            while (!finished) {
+                const status = await bundlesApi.checkBundleExportStatus(
+                    this.projectId,
+                    bundleId,
+                    build.data.identifier
+                );
+                finished = status.data.status === 'finished';
+            }
+
+            const downloadLink = await bundlesApi.downloadBundle(this.projectId, bundleId, build.data.identifier);
+
+            const resp = await axios.get(downloadLink.data.url, {
+                responseType: 'arraybuffer',
+            });
+            const zip = new AdmZip(resp.data);
+
+            const entries = zip.getEntries().filter((entry) => !entry.isDirectory);
+
+            entries.forEach((file) => {
+                const filePath = path.join(unzipFolder, file.entryName);
+                const directory = path.dirname(filePath);
+                if (!fs.existsSync(directory)) {
+                    fs.mkdirSync(directory, { recursive: true });
+                }
+                fs.writeFileSync(filePath, file.getData());
+            });
+        } catch (error) {
+            throw new Error(`Failed to download bundle for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
     }
 
@@ -233,6 +286,8 @@ export class CrowdinClient {
                 //@ts-ignore
                 branchId,
                 storageId: resp.data.id,
+                cleanupMode: this.config.cleanupMode,
+                updateStrings: this.config.updateStrings,
             });
             let finished = false;
 

@@ -26,7 +26,7 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
     async getChildren(element?: ProgressTreeItem): Promise<any[]> {
         if (!element) {
             const configurations = await this.configHolder.configurations();
-            const promises = Array.from(configurations).map(async ([{ config, project }, workspace]) => {
+            const promises = configurations.map(async ([{ config, project }, workspace]) => {
                 try {
                     const isStringsBased = project.type === ProjectsGroupsModel.Type.STRINGS_BASED;
                     const client = buildClient(workspace.uri, config, isStringsBased);

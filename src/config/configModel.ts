@@ -10,8 +10,10 @@ export interface ConfigModel {
     branch?: string;
     basePath?: string;
     files: FileModel[];
+    updateStrings?: boolean;
+    cleanupMode?: boolean;
 }
 
 export function buildClient(docUri: vscode.Uri, config: ConfigModel, stringsBased = false) {
-    return new CrowdinClient(config.projectId, config.apiKey, docUri, config.branch, config.organization, stringsBased);
+    return new CrowdinClient(docUri, config, stringsBased);
 }

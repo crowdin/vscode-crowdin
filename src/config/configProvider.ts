@@ -169,6 +169,8 @@ export class ConfigProvider {
                 } as FileModel;
             }),
             organization,
+            cleanupMode: config.cleanup_mode,
+            updateStrings: config.update_strings,
         };
     }
 
@@ -226,6 +228,8 @@ interface PrivateConfigModel {
     base_path?: string;
     base_path_env?: string;
     files: PrivateFileModel[];
+    update_strings?: boolean;
+    cleanup_mode?: boolean;
 }
 
 interface PrivateFileModel {
