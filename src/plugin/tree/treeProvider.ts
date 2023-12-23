@@ -8,7 +8,6 @@ import { ErrorHandler } from '../../util/errorHandler';
 import { CrowdinConfigHolder } from '../crowdinConfigHolder';
 import { BundlesTreeBuilder } from './bundles/bundlesTreeBuilder';
 import { BundlesTreeItem } from './bundles/bundlesTreeItem';
-import { ContextValue } from './contextValue';
 import { FilesTreeBuilder } from './files/filesTreeBuilder';
 import { FilesTreeItem } from './files/filesTreeItem';
 
@@ -50,18 +49,16 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
     /**
      * Send file(s) to Crowdin
      */
-    save(item?: TreeItem): Promise<any> {
+    save(item?: FilesTreeItem): Promise<any> {
         if (!!item) {
-            if (this.isFilesItem(item)) {
-                const title = item.isLeaf ? `Uploading file ${item.label}` : `Uploading files in ${item.label}`;
-                return CommonUtil.withProgress(() => item.save().catch((e) => ErrorHandler.handleError(e)), title);
-            }
+            const title = item.isLeaf ? `Uploading file ${item.label}` : `Uploading files in ${item.label}`;
+            return CommonUtil.withProgress(() => item.save().catch((e) => ErrorHandler.handleError(e)), title);
         }
         return CommonUtil.withProgress(
             () =>
                 Promise.all(
                     this.rootTree
-                        .filter(this.isFilesItem)
+                        .map((e) => e as FilesTreeItem)
                         .map((e) => e.save().catch((e) => ErrorHandler.handleError(e)))
                 ),
             `Uploading all files...`
@@ -81,13 +78,11 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
     /**
      * Download source file from Crowdin
      */
-    async updateSourceFile(item: TreeItem): Promise<any> {
-        if (this.isFilesItem(item)) {
-            return CommonUtil.withProgress(
-                () => item.updateSourceFile().catch((e) => ErrorHandler.handleError(e)),
-                `Updating file ${item.label}`
-            );
-        }
+    async updateSourceFile(item: FilesTreeItem): Promise<any> {
+        return CommonUtil.withProgress(
+            () => item.updateSourceFile().catch((e) => ErrorHandler.handleError(e)),
+            `Updating file ${item.label}`
+        );
     }
 
     getTreeItem(element: TreeItem): TreeItem {
@@ -144,12 +139,5 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
         });
         const arr = await Promise.all(promises);
         return arr.filter((e) => e !== null);
-    }
-
-    private isFilesItem(item: TreeItem): item is FilesTreeItem {
-        return (
-            !!item.contextValue &&
-            [ContextValue.FILE, ContextValue.FOLDER, ContextValue.ROOT].includes(item.contextValue as ContextValue)
-        );
     }
 }
