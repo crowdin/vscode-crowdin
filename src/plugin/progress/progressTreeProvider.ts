@@ -1,3 +1,4 @@
+import { ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { buildClient } from '../../config/configModel';
@@ -27,7 +28,8 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
             const configurations = await this.configHolder.configurations();
             const promises = Array.from(configurations).map(async ([{ config, project }, workspace]) => {
                 try {
-                    const client = buildClient(workspace.uri, config);
+                    const isStringsBased = project.type === ProjectsGroupsModel.Type.STRINGS_BASED;
+                    const client = buildClient(workspace.uri, config, isStringsBased);
                     const { translationStatusApi, languagesApi } = client.crowdin;
                     const languages = await languagesApi.withFetchAll().listSupportedLanguages();
                     const progress = await translationStatusApi.withFetchAll().getProjectProgress(config.projectId);

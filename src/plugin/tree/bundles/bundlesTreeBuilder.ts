@@ -6,7 +6,7 @@ import { BundlesTreeItem } from './bundlesTreeItem';
 
 export class BundlesTreeBuilder {
     static async buildBundlesTree(workspace: vscode.WorkspaceFolder, config: ConfigModel): Promise<BundlesTreeItem> {
-        const client = buildClient(workspace.uri, config);
+        const client = buildClient(workspace.uri, config, true);
         return new BundlesTreeItem({
             client,
             label: workspace.name,

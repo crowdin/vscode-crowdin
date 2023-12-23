@@ -20,7 +20,8 @@ export class CrowdinClient {
         readonly apiKey: string,
         readonly docUri: vscode.Uri,
         readonly branch?: string,
-        readonly organization?: string
+        readonly organization?: string,
+        readonly stringsBased?: boolean
     ) {
         const credentials: Credentials = {
             token: apiKey,
@@ -185,6 +186,8 @@ export class CrowdinClient {
         scheme?: Scheme,
         type?: SourceFilesModel.FileType
     ): Promise<void> {
+        //TODO handle strings based projects
+
         let branchId: number | undefined;
         const branch = this.crowdinBranch;
 

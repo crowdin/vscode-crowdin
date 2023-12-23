@@ -12,6 +12,6 @@ export interface ConfigModel {
     files: FileModel[];
 }
 
-export function buildClient(docUri: vscode.Uri, config: ConfigModel) {
-    return new CrowdinClient(config.projectId, config.apiKey, docUri, config.branch, config.organization);
+export function buildClient(docUri: vscode.Uri, config: ConfigModel, stringsBased = false) {
+    return new CrowdinClient(config.projectId, config.apiKey, docUri, config.branch, config.organization, stringsBased);
 }

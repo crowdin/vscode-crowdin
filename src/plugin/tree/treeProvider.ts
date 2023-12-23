@@ -122,7 +122,7 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
                     return rootTreeFolder;
                 }
 
-                const client = buildClient(workspace.uri, config);
+                const client = buildClient(workspace.uri, config, isStringsBased);
 
                 const rootTreeFolder = await FilesTreeBuilder.buildRootFolder(
                     workspace,
