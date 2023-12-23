@@ -13,6 +13,12 @@ export async function selectProject() {
         return;
     }
 
+    const workspace = await CommonUtil.getWorkspace();
+
+    if (!workspace) {
+        return;
+    }
+
     const projects = await CommonUtil.withProgress(
         () => client.projectsGroupsApi.withFetchAll().listProjects({ hasManagerAccess: 1 }),
         'Loading projects...'
@@ -45,18 +51,21 @@ export async function selectProject() {
         return;
     }
 
-    await Constants.EXTENSION_CONTEXT.secrets.store(KEY, projectId);
+    await Constants.EXTENSION_CONTEXT.secrets.store(`${KEY}_${workspace.name}`, projectId);
 
     vscode.window.showInformationMessage(`Project ${project.label} selected`);
 }
 
-export async function getProject() {
-    const projectId = await Constants.EXTENSION_CONTEXT.secrets.get(KEY);
+export async function getProject(workspace: vscode.WorkspaceFolder) {
+    const projectId = await Constants.EXTENSION_CONTEXT.secrets.get(`${KEY}_${workspace.name}`);
     if (projectId) {
         return Number(projectId);
     }
 }
 
-export async function clearProject() {
-    await Constants.EXTENSION_CONTEXT.secrets.delete(KEY);
+export async function clearProjects() {
+    const promises = (vscode.workspace.workspaceFolders || []).map((workspace) =>
+        Constants.EXTENSION_CONTEXT.secrets.delete(`${KEY}_${workspace.name}`)
+    );
+    await Promise.all(promises);
 }

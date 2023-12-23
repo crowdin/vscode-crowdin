@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ConfigModel } from '../../../config/configModel';
-import { FileModel } from '../../../config/fileModel';
-import { Constants } from '../../../constants';
-import { FilesTreeBuilder } from '../../../plugin/files/filesTreeBuilder';
+import { ConfigModel } from '../../../../config/configModel';
+import { FileModel } from '../../../../config/fileModel';
+import { Constants } from '../../../../constants';
+import { FilesTreeBuilder } from '../../../../plugin/files-bundles/files/filesTreeBuilder';
 
 suite('Plugin tree', function () {
     let config: ConfigModel;
@@ -31,7 +31,7 @@ suite('Plugin tree', function () {
                 scheme: '',
                 authority: '',
                 fragment: '',
-                fsPath: path.join(__dirname, '..', '..', '..', '..', 'test-resources', 'tree'),
+                fsPath: path.join(__dirname, '..', '..', '..', '..', '..', 'test-resources', 'tree'),
                 path: '',
                 query: '',
                 toJSON: () => {},

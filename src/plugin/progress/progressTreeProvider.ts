@@ -25,12 +25,11 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
     async getChildren(element?: ProgressTreeItem): Promise<any[]> {
         if (!element) {
             const configurations = await this.configHolder.configurations();
-            const promises = Array.from(configurations).map(async ([config, workspace]) => {
+            const promises = Array.from(configurations).map(async ([{ config, project }, workspace]) => {
                 try {
                     const client = buildClient(workspace.uri, config);
-                    const { translationStatusApi, projectsGroupsApi, languagesApi } = client.crowdin;
+                    const { translationStatusApi, languagesApi } = client.crowdin;
                     const languages = await languagesApi.withFetchAll().listSupportedLanguages();
-                    const project = await projectsGroupsApi.getProject(config.projectId);
                     const progress = await translationStatusApi.withFetchAll().getProjectProgress(config.projectId);
                     const languagesProgress = progress.data.map((languageProgress) => {
                         const language = languages.data.find((l) => l.data.id === languageProgress.data.languageId);
@@ -58,7 +57,7 @@ export class ProgressTreeProvider implements vscode.TreeDataProvider<ProgressTre
                         );
                     });
                     return new ProgressTreeItem(
-                        `${workspace.name} (project ${project.data.name})`,
+                        `${workspace.name} (project ${project.name})`,
                         vscode.TreeItemCollapsibleState.Collapsed,
                         Promise.resolve(languagesProgress)
                     );

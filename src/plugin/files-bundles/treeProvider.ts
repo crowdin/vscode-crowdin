@@ -1,0 +1,169 @@
+import { ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
+import * as vscode from 'vscode';
+import { Constants } from '../../constants';
+import { AUTH_TYPE, SCOPES } from '../../oauth/constants';
+import { CommonUtil } from '../../util/commonUtil';
+import { ErrorHandler } from '../../util/errorHandler';
+import { CrowdinConfigHolder } from '../crowdinConfigHolder';
+import { BundlesTreeBuilder } from './bundles/bundlesTreeBuilder';
+import { BundlesTreeItem } from './bundles/bundlesTreeItem';
+import { ContextValue } from './contextValue';
+import { FilesTreeBuilder } from './files/filesTreeBuilder';
+import { FilesTreeItem } from './files/filesTreeItem';
+
+type TreeItem = FilesTreeItem | BundlesTreeItem;
+
+export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
+    private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined> = new vscode.EventEmitter<
+        TreeItem | undefined
+    >();
+    readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined> = this._onDidChangeTreeData.event;
+
+    private rootTree: TreeItem[] = [];
+
+    private showWelcomeMessage = true;
+
+    constructor(readonly configHolder: CrowdinConfigHolder) {}
+
+    /**
+     * Download translations
+     */
+    download(folder?: TreeItem): Promise<void[]> {
+        return CommonUtil.withProgress<void[]>(() => {
+            let promises: Promise<void>[] = [];
+            if (!!folder) {
+                if (this.isFilesItem(folder)) {
+                    promises = [folder.update().catch((e) => ErrorHandler.handleError(e))];
+                }
+            } else {
+                promises = this.rootTree
+                    .filter(this.isFilesItem)
+                    .map((rootFolder) => rootFolder.update().catch((e) => ErrorHandler.handleError(e)));
+            }
+            return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire(undefined));
+        }, `Downloading translations...`);
+    }
+
+    /**
+     * Reload files tree
+     */
+    refresh(): void {
+        this._onDidChangeTreeData.fire(undefined);
+    }
+
+    /**
+     * Send file(s) to Crowdin
+     */
+    save(item?: TreeItem): Promise<any> {
+        if (!!item) {
+            if (this.isFilesItem(item)) {
+                const title = item.isLeaf ? `Uploading file ${item.label}` : `Uploading files in ${item.label}`;
+                return CommonUtil.withProgress(() => item.save().catch((e) => ErrorHandler.handleError(e)), title);
+            }
+        }
+        return CommonUtil.withProgress(
+            () =>
+                Promise.all(
+                    this.rootTree
+                        .filter(this.isFilesItem)
+                        .map((e) => e.save().catch((e) => ErrorHandler.handleError(e)))
+                ),
+            `Uploading all files...`
+        );
+    }
+
+    /**
+     * Download source files from Crowdin
+     */
+    updateSourceFolder(folder?: TreeItem): Promise<any> {
+        if (!!folder) {
+            if (this.isFilesItem(folder)) {
+                return CommonUtil.withProgress(
+                    () => folder.updateSourceFolder().catch((e) => ErrorHandler.handleError(e)),
+                    `Updating files in ${folder.label}`
+                );
+            }
+        }
+        return CommonUtil.withProgress(
+            () =>
+                Promise.all(
+                    this.rootTree
+                        .filter(this.isFilesItem)
+                        .map((e) => e.updateSourceFolder().catch((e) => ErrorHandler.handleError(e)))
+                ),
+            `Updating source files...`
+        );
+    }
+
+    /**
+     * Download source file from Crowdin
+     */
+    async updateSourceFile(item: TreeItem): Promise<any> {
+        if (this.isFilesItem(item)) {
+            return CommonUtil.withProgress(
+                () => item.updateSourceFile().catch((e) => ErrorHandler.handleError(e)),
+                `Updating file ${item.label}`
+            );
+        }
+    }
+
+    getTreeItem(element: TreeItem): TreeItem {
+        return element;
+    }
+
+    async getChildren(element?: TreeItem): Promise<TreeItem[]> {
+        Constants.APPLICATION_OPENED = true;
+        if (!element && this.showWelcomeMessage) {
+            const session = await vscode.authentication.getSession(AUTH_TYPE, SCOPES, { createIfNone: false });
+            if (session) {
+                vscode.window.showInformationMessage(`Welcome back ${session.account.label}`);
+            }
+            this.showWelcomeMessage = false;
+        }
+
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showWarningMessage('Project workspace is empty');
+            return Promise.resolve([]);
+        }
+        if (!element) {
+            this.rootTree.length = 0;
+            return this.buildRootTree();
+        } else {
+            return element.childs;
+        }
+    }
+
+    private async buildRootTree(): Promise<TreeItem[]> {
+        const configurations = await this.configHolder.configurations();
+        const promises = Array.from(configurations).map(async ([{ config, project }, workspace]) => {
+            try {
+                const isStringsBased = project.type === ProjectsGroupsModel.Type.STRINGS_BASED;
+                if (isStringsBased) {
+                    const rootTreeFolder = await BundlesTreeBuilder.buildBundlesTree(workspace, config);
+                    this.rootTree.push(rootTreeFolder);
+                    return rootTreeFolder;
+                }
+
+                const rootTreeFolder = await FilesTreeBuilder.buildRootFolder(
+                    workspace,
+                    config,
+                    FilesTreeBuilder.buildSubTree(config, workspace)
+                );
+                this.rootTree.push(rootTreeFolder);
+                return rootTreeFolder;
+            } catch (err) {
+                ErrorHandler.handleError(err);
+            }
+            return null as unknown as FilesTreeItem;
+        });
+        const arr = await Promise.all(promises);
+        return arr.filter((e) => e !== null);
+    }
+
+    private isFilesItem(item: TreeItem): item is FilesTreeItem {
+        return (
+            !!item.contextValue &&
+            [ContextValue.FILE, ContextValue.FOLDER, ContextValue.ROOT].includes(item.contextValue as ContextValue)
+        );
+    }
+}

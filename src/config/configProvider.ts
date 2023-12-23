@@ -66,7 +66,7 @@ export class ConfigProvider {
     }
 
     private async validateAndGet(config: PrivateConfigModel, filePath: string): Promise<ConfigModel> {
-        const selectedProject = await getProject();
+        const selectedProject = await getProject(this.workspace);
         const projectId: number | string | undefined =
             selectedProject || this.getOrEnv(config, 'project_id', 'project_id_env');
         if (!projectId) {

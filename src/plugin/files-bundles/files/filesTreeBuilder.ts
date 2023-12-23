@@ -2,12 +2,12 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as util from 'util';
 import * as vscode from 'vscode';
-import { ConfigModel } from '../../config/configModel';
-import { FileModel } from '../../config/fileModel';
-import { Constants } from '../../constants';
-import { SourceFiles } from '../../model/sourceFiles';
+import { ConfigModel } from '../../../config/configModel';
+import { FileModel } from '../../../config/fileModel';
+import { Constants } from '../../../constants';
+import { SourceFiles } from '../../../model/sourceFiles';
+import { ContextValue } from '../contextValue';
 import { FilesTreeItem } from './filesTreeItem';
-import { FilesTreeItemContextValue } from './filesTreeItemContextValue';
 
 const asyncGlob = util.promisify(glob);
 
@@ -104,7 +104,7 @@ export class FilesTreeBuilder {
             childs,
             config,
             rootPath: workspace.uri.fsPath,
-            contextValue: FilesTreeItemContextValue.ROOT,
+            contextValue: ContextValue.ROOT,
             fullPath: workspace.uri.fsPath,
             sourceFilesArr,
         });
@@ -128,7 +128,7 @@ export class FilesTreeBuilder {
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             config,
             rootPath: workspace.uri.fsPath,
-            contextValue: FilesTreeItemContextValue.FILE,
+            contextValue: ContextValue.FILE,
             fullPath: filePath,
             command,
             file,
@@ -149,7 +149,7 @@ export class FilesTreeBuilder {
             childs: Promise.resolve(childs),
             config,
             rootPath: workspace.uri.fsPath,
-            contextValue: FilesTreeItemContextValue.FOLDER,
+            contextValue: ContextValue.FOLDER,
             fullPath: path,
         });
     }

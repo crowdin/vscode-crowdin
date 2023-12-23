@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import * as vscode from 'vscode';
 import { AUTH_TYPE, CLIENT_ID, SCOPES } from './constants';
 import { CrowdinToken, buildToken, getClient, isExpired } from './crowdin';
-import { clearProject } from './selectProject';
+import { clearProjects } from './selectProject';
 import { PromiseAdapter, promiseFromEvent } from './util';
 
 class UriEventHandler extends vscode.EventEmitter<vscode.Uri> implements vscode.UriHandler {
@@ -97,7 +97,7 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
             };
 
             await this.context.secrets.store(SESSIONS_SECRET_KEY, JSON.stringify([session]));
-            await clearProject();
+            await clearProjects();
 
             this._sessionChangeEmitter.fire({ added: [session], removed: [], changed: [] });
 

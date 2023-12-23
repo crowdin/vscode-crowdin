@@ -1,12 +1,12 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CrowdinClient } from '../../client/crowdinClient';
-import { buildClient, ConfigModel } from '../../config/configModel';
-import { FileModel } from '../../config/fileModel';
-import { Constants } from '../../constants';
-import { SourceFiles } from '../../model/sourceFiles';
-import { PathUtil } from '../../util/pathUtil';
-import { FilesTreeItemContextValue } from './filesTreeItemContextValue';
+import { CrowdinClient } from '../../../client/crowdinClient';
+import { buildClient, ConfigModel } from '../../../config/configModel';
+import { FileModel } from '../../../config/fileModel';
+import { Constants } from '../../../constants';
+import { SourceFiles } from '../../../model/sourceFiles';
+import { PathUtil } from '../../../util/pathUtil';
+import { ContextValue } from '../contextValue';
 
 export class FilesTreeItem extends vscode.TreeItem {
     private client: CrowdinClient;
@@ -38,7 +38,7 @@ export class FilesTreeItem extends vscode.TreeItem {
         collapsibleState: vscode.TreeItemCollapsibleState;
         config: ConfigModel;
         rootPath: string;
-        contextValue: FilesTreeItemContextValue;
+        contextValue: ContextValue;
         fullPath: string;
         childs?: Promise<FilesTreeItem[]>;
         sourceFilesArr?: SourceFiles[];
@@ -50,7 +50,7 @@ export class FilesTreeItem extends vscode.TreeItem {
         this.config = config;
         this.rootPath = rootPath;
         this.sourceFilesArr = sourceFilesArr;
-        this.isLeaf = contextValue === FilesTreeItemContextValue.FILE;
+        this.isLeaf = contextValue === ContextValue.FILE;
         this.file = file;
         this.fullPath = fullPath;
         this.label = label;

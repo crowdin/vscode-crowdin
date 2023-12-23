@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Constants } from '../constants';
 import { AUTH_TYPE, SCOPES } from './constants';
 import { CrowdinAuthenticationProvider } from './provider';
-import { clearProject, selectProject } from './selectProject';
+import { clearProjects, selectProject } from './selectProject';
 
 export function initialize(context: vscode.ExtensionContext, onProjectSelected: () => Promise<void>) {
     const subscriptions = context.subscriptions;
@@ -24,7 +24,7 @@ export function initialize(context: vscode.ExtensionContext, onProjectSelected: 
                 return;
             }
             await provider.removeSession(session.id);
-            await clearProject();
+            await clearProjects();
             await vscode.commands.executeCommand('setContext', 'crowdinAuthenticated', false);
             vscode.window.showInformationMessage('You successfully logged out');
         })
