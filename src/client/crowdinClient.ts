@@ -186,10 +186,14 @@ export class CrowdinClient {
         scheme?: Scheme,
         type?: SourceFilesModel.FileType
     ): Promise<void> {
-        //TODO handle strings based projects
-
         let branchId: number | undefined;
         const branch = this.crowdinBranch;
+
+        if (this.stringsBased) {
+            if (!branch) {
+                throw new Error('Branch is not specified');
+            }
+        }
 
         if (!!branch) {
             try {
@@ -218,6 +222,29 @@ export class CrowdinClient {
                     );
                 }
             }
+        }
+
+        const fileName = path.basename(file);
+        const fileContent = fs.readFileSync(fsPath);
+
+        if (this.stringsBased) {
+            const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
+            const build = await this.crowdin.sourceStringsApi.uploadStrings(this.projectId, {
+                //@ts-ignore
+                branchId,
+                storageId: resp.data.id,
+            });
+            let finished = false;
+
+            while (!finished) {
+                const status = await this.crowdin.sourceStringsApi.uploadStringsStatus(
+                    this.projectId,
+                    build.data.identifier
+                );
+                finished = status.data.status === 'finished';
+            }
+
+            return;
         }
 
         let parentId: number | undefined;
@@ -254,9 +281,6 @@ export class CrowdinClient {
                 );
             }
         }
-
-        const fileName = path.basename(file);
-        const fileContent = fs.readFileSync(fsPath);
 
         try {
             const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);

@@ -18,7 +18,6 @@ export class BundlesTreeBuilder {
     }
 
     private static async bundlesTreeItems(config: ConfigModel, client: CrowdinClient): Promise<BundlesTreeItem[]> {
-        //TODO pass branch
         const bundles = await client.crowdin.bundlesApi.withFetchAll().listBundles(config.projectId);
         return bundles.data.map(
             (bundle) =>

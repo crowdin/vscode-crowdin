@@ -14,6 +14,7 @@ export class CrowdinConfigHolder {
     private sourceStrings: Map<vscode.WorkspaceFolder, crowdin.SourceStringsModel.String[]> = new Map();
     private listeners: { (): void }[] = [];
     private initializer: Promise<void> = Promise.resolve();
+    private reloadInProgress = false;
 
     addListener(listener: () => void) {
         this.listeners.push(listener);
@@ -64,8 +65,16 @@ export class CrowdinConfigHolder {
     }
 
     async reload() {
+        //fs watcher may fire events too often
+        if (this.reloadInProgress) {
+            return;
+        }
+        this.reloadInProgress = true;
         await this.load();
         this.listeners.forEach((l) => l());
+        setTimeout(() => {
+            this.reloadInProgress = false;
+        }, 1000);
     }
 
     private updateConfigWatchers(configFiles: string[]) {
