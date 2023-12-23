@@ -1,5 +1,6 @@
 import { ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import * as vscode from 'vscode';
+import { buildClient } from '../../config/configModel';
 import { Constants } from '../../constants';
 import { AUTH_TYPE, SCOPES } from '../../oauth/constants';
 import { CommonUtil } from '../../util/commonUtil';
@@ -23,25 +24,20 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
     private showWelcomeMessage = true;
 
-    constructor(readonly configHolder: CrowdinConfigHolder) {}
+    constructor(readonly configHolder: CrowdinConfigHolder, readonly isDownload: boolean) {}
 
     /**
      * Download translations
      */
-    download(folder?: TreeItem): Promise<void[]> {
-        return CommonUtil.withProgress<void[]>(() => {
-            let promises: Promise<void>[] = [];
-            if (!!folder) {
-                if (this.isFilesItem(folder)) {
-                    promises = [folder.update().catch((e) => ErrorHandler.handleError(e))];
-                }
-            } else {
-                promises = this.rootTree
-                    .filter(this.isFilesItem)
-                    .map((rootFolder) => rootFolder.update().catch((e) => ErrorHandler.handleError(e)));
-            }
-            return Promise.all(promises).finally(() => this._onDidChangeTreeData.fire(undefined));
-        }, `Downloading translations...`);
+    download(folder: FilesTreeItem): Promise<void> {
+        return CommonUtil.withProgress<void>(
+            () =>
+                folder
+                    .update()
+                    .catch((e) => ErrorHandler.handleError(e))
+                    .finally(() => this._onDidChangeTreeData.fire(undefined)),
+            `Downloading translations...`
+        );
     }
 
     /**
@@ -75,23 +71,10 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
     /**
      * Download source files from Crowdin
      */
-    updateSourceFolder(folder?: TreeItem): Promise<any> {
-        if (!!folder) {
-            if (this.isFilesItem(folder)) {
-                return CommonUtil.withProgress(
-                    () => folder.updateSourceFolder().catch((e) => ErrorHandler.handleError(e)),
-                    `Updating files in ${folder.label}`
-                );
-            }
-        }
+    updateSourceFolder(folder: FilesTreeItem): Promise<any> {
         return CommonUtil.withProgress(
-            () =>
-                Promise.all(
-                    this.rootTree
-                        .filter(this.isFilesItem)
-                        .map((e) => e.updateSourceFolder().catch((e) => ErrorHandler.handleError(e)))
-                ),
-            `Updating source files...`
+            () => folder.updateSourceFolder().catch((e) => ErrorHandler.handleError(e)),
+            `Updating files in ${folder.label}`
         );
     }
 
@@ -138,16 +121,19 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
         const promises = Array.from(configurations).map(async ([{ config, project }, workspace]) => {
             try {
                 const isStringsBased = project.type === ProjectsGroupsModel.Type.STRINGS_BASED;
-                if (isStringsBased) {
+                if (this.isDownload && isStringsBased) {
                     const rootTreeFolder = await BundlesTreeBuilder.buildBundlesTree(workspace, config);
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
                 }
 
+                const client = buildClient(workspace.uri, config);
+
                 const rootTreeFolder = await FilesTreeBuilder.buildRootFolder(
                     workspace,
                     config,
-                    FilesTreeBuilder.buildSubTree(config, workspace)
+                    FilesTreeBuilder.buildSubTree(config, workspace, client),
+                    client
                 );
                 this.rootTree.push(rootTreeFolder);
                 return rootTreeFolder;

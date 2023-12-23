@@ -3,7 +3,8 @@ import * as vscode from 'vscode';
 export class Constants {
     static EXTENSION_CONTEXT: vscode.ExtensionContext;
     //tree providers
-    static readonly FILES = 'files';
+    static readonly UPLOAD = 'upload';
+    static readonly DOWNLOAD = 'download';
     static readonly PROGRESS = 'translationProgress';
     //commands
     static readonly VSCODE_OPEN_FILE = 'vscode.open';
@@ -11,13 +12,13 @@ export class Constants {
     static readonly OPEN_CONFIG_COMMAND = 'config.open';
     static readonly OPEN_FILE_COMMAND = 'extension.openFile';
     static readonly REFRESH_PROGRESS_COMMAND = 'translationProgress.refresh';
-    static readonly DOWNLOAD_ALL_COMMAND = 'files.downloadAll';
     static readonly SAVE_ALL_COMMAND = 'files.saveAll';
     static readonly SAVE_FOLDER_COMMAND = 'files.saveFolder';
     static readonly SAVE_FILE_COMMAND = 'files.saveFile';
     static readonly DOWNLOAD_COMMAND = 'files.download';
     static readonly EDIT_COMMAND = 'files.edit';
-    static readonly REFRESH_COMMAND = 'files.refresh';
+    static readonly REFRESH_UPLOAD_COMMAND = 'upload.refresh';
+    static readonly REFRESH_DOWNLOAD_COMMAND = 'download.refresh';
     static readonly UPDATE_SOURCE_FOLDER_COMMAND = 'files.updateSourceFolder';
     static readonly UPDATE_SOURCE_FILE_COMMAND = 'files.updateSourceFile';
     static readonly SIGN_IN_COMMAND = 'crowdin.signIn';

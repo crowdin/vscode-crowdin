@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CrowdinClient } from '../../../client/crowdinClient';
-import { buildClient, ConfigModel } from '../../../config/configModel';
+import { ConfigModel } from '../../../config/configModel';
 import { FileModel } from '../../../config/fileModel';
 import { Constants } from '../../../constants';
 import { SourceFiles } from '../../../model/sourceFiles';
@@ -21,7 +21,6 @@ export class FilesTreeItem extends vscode.TreeItem {
     readonly label: string;
 
     constructor({
-        workspace,
         label,
         collapsibleState,
         config,
@@ -32,8 +31,8 @@ export class FilesTreeItem extends vscode.TreeItem {
         sourceFilesArr = [],
         command,
         file,
+        client,
     }: {
-        workspace: vscode.WorkspaceFolder;
         label: string;
         collapsibleState: vscode.TreeItemCollapsibleState;
         config: ConfigModel;
@@ -44,6 +43,7 @@ export class FilesTreeItem extends vscode.TreeItem {
         sourceFilesArr?: SourceFiles[];
         command?: vscode.Command;
         file?: FileModel;
+        client: CrowdinClient;
     }) {
         super(label, collapsibleState);
         this.childs = childs;
@@ -66,7 +66,7 @@ export class FilesTreeItem extends vscode.TreeItem {
                 dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
             };
         }
-        this.client = buildClient(workspace.uri, this.config);
+        this.client = client;
     }
 
     async update(): Promise<void> {

@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ConfigModel } from '../../../../config/configModel';
+import { ConfigModel, buildClient } from '../../../../config/configModel';
 import { FileModel } from '../../../../config/fileModel';
 import { Constants } from '../../../../constants';
-import { FilesTreeBuilder } from '../../../../plugin/files-bundles/files/filesTreeBuilder';
+import { FilesTreeBuilder } from '../../../../plugin/tree/files/filesTreeBuilder';
 
 suite('Plugin tree', function () {
     let config: ConfigModel;
@@ -63,7 +63,7 @@ suite('Plugin tree', function () {
     });
 
     test('Build subtree', async () => {
-        const tree = await FilesTreeBuilder.buildSubTree(config, workspace);
+        const tree = await FilesTreeBuilder.buildSubTree(config, workspace, buildClient(workspace.uri, config));
         assert.strictEqual(1, tree.length);
         const subtree1 = await tree[0].childs;
         assert.strictEqual(1, subtree1.length);

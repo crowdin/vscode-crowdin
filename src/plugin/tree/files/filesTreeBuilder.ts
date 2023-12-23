@@ -2,6 +2,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as util from 'util';
 import * as vscode from 'vscode';
+import { CrowdinClient } from '../../../client/crowdinClient';
 import { ConfigModel } from '../../../config/configModel';
 import { FileModel } from '../../../config/fileModel';
 import { Constants } from '../../../constants';
@@ -12,7 +13,11 @@ import { FilesTreeItem } from './filesTreeItem';
 const asyncGlob = util.promisify(glob);
 
 export class FilesTreeBuilder {
-    static async buildSubTree(config: ConfigModel, workspace: vscode.WorkspaceFolder): Promise<FilesTreeItem[]> {
+    static async buildSubTree(
+        config: ConfigModel,
+        workspace: vscode.WorkspaceFolder,
+        client: CrowdinClient
+    ): Promise<FilesTreeItem[]> {
         let matrix = await this.buildFilesMatrix(config, workspace);
         let subtree: FilesTreeItem[] = [];
         let childs: Map<string, FilesTreeItem[]> = new Map();
@@ -24,14 +29,15 @@ export class FilesTreeBuilder {
                 let item;
                 const labelToDisplay = label.split(path.sep)[label.split(path.sep).length - 1];
                 if (isLeaf) {
-                    item = FilesTreeBuilder.buildLeaf(workspace, labelToDisplay, fullPath, config, file);
+                    item = FilesTreeBuilder.buildLeaf(workspace, labelToDisplay, fullPath, config, file, client);
                 } else {
                     item = FilesTreeBuilder.buildFolder(
                         workspace,
                         labelToDisplay,
                         (temp.get(label) || []).sort(FilesTreeBuilder.compare),
                         config,
-                        fullPath
+                        fullPath,
+                        client
                     );
                 }
                 if (!!parent) {
@@ -83,7 +89,8 @@ export class FilesTreeBuilder {
     static async buildRootFolder(
         workspace: vscode.WorkspaceFolder,
         config: ConfigModel,
-        childs: Promise<FilesTreeItem[]>
+        childs: Promise<FilesTreeItem[]>,
+        client: CrowdinClient
     ): Promise<FilesTreeItem> {
         const root = !!config.basePath ? path.join(workspace.uri.fsPath, config.basePath) : workspace.uri.fsPath;
         const promises = config.files.map(async (f) => {
@@ -98,7 +105,7 @@ export class FilesTreeBuilder {
         });
         const sourceFilesArr = await Promise.all(promises);
         return new FilesTreeItem({
-            workspace,
+            client,
             label: workspace.name,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             childs,
@@ -115,7 +122,8 @@ export class FilesTreeBuilder {
         label: string,
         filePath: string,
         config: ConfigModel,
-        file: FileModel
+        file: FileModel,
+        client: CrowdinClient
     ): FilesTreeItem {
         const command: vscode.Command = {
             command: Constants.OPEN_FILE_COMMAND,
@@ -123,7 +131,7 @@ export class FilesTreeBuilder {
             arguments: [filePath],
         };
         return new FilesTreeItem({
-            workspace,
+            client,
             label,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             config,
@@ -140,10 +148,11 @@ export class FilesTreeBuilder {
         label: string,
         childs: FilesTreeItem[],
         config: ConfigModel,
-        path: string
+        path: string,
+        client: CrowdinClient
     ) {
         return new FilesTreeItem({
-            workspace,
+            client,
             label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             childs: Promise.resolve(childs),

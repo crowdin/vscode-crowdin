@@ -4,18 +4,21 @@ import { Constants } from './constants';
 import * as OAuth from './oauth';
 import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
 import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
-import { FilesTreeItem } from './plugin/files-bundles/files/filesTreeItem';
-import { TreeProvider } from './plugin/files-bundles/treeProvider';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
+import { FilesTreeItem } from './plugin/tree/files/filesTreeItem';
+import { TreeProvider } from './plugin/tree/treeProvider';
 import { CommonUtil } from './util/commonUtil';
 
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
 
     const configHolder = new CrowdinConfigHolder();
-    const filesBundlesProvider = new TreeProvider(configHolder);
+    const uploadTreeProvider = new TreeProvider(configHolder, false);
+    const downloadTreeProvider = new TreeProvider(configHolder, true);
     const progressProvider = new ProgressTreeProvider(configHolder);
-    configHolder.addListener(() => filesBundlesProvider.refresh());
+
+    configHolder.addListener(() => uploadTreeProvider.refresh());
+    configHolder.addListener(() => downloadTreeProvider.refresh());
     configHolder.addListener(() => progressProvider.refresh());
     configHolder.addListener(setConfigExists);
     configHolder.initialize();
@@ -24,7 +27,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     setConfigExists();
 
-    vscode.window.registerTreeDataProvider(Constants.FILES, filesBundlesProvider);
+    vscode.window.registerTreeDataProvider(Constants.UPLOAD, uploadTreeProvider);
+    vscode.window.registerTreeDataProvider(Constants.DOWNLOAD, downloadTreeProvider);
     vscode.window.registerTreeDataProvider(Constants.PROGRESS, progressProvider);
 
     vscode.commands.registerCommand(Constants.CREATE_CONFIG_COMMAND, async () => {
@@ -62,32 +66,32 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     vscode.commands.registerCommand(Constants.REFRESH_PROGRESS_COMMAND, () => progressProvider.refresh());
-    vscode.commands.registerCommand(Constants.REFRESH_COMMAND, () => {
+    vscode.commands.registerCommand(Constants.REFRESH_DOWNLOAD_COMMAND, () => downloadTreeProvider.refresh());
+    vscode.commands.registerCommand(Constants.REFRESH_UPLOAD_COMMAND, () => {
         configHolder.reloadStrings();
-        filesBundlesProvider.refresh();
+        uploadTreeProvider.refresh();
     });
-    vscode.commands.registerCommand(Constants.DOWNLOAD_ALL_COMMAND, () => filesBundlesProvider.download());
     vscode.commands.registerCommand(Constants.SAVE_ALL_COMMAND, async () => {
-        await filesBundlesProvider.save();
+        await uploadTreeProvider.save();
         progressProvider.refresh();
     });
     vscode.commands.registerCommand(Constants.SAVE_FOLDER_COMMAND, async (item: FilesTreeItem) => {
-        await filesBundlesProvider.save(item);
+        await uploadTreeProvider.save(item);
         progressProvider.refresh();
     });
     vscode.commands.registerCommand(Constants.SAVE_FILE_COMMAND, async (item: FilesTreeItem) => {
-        await filesBundlesProvider.save(item);
+        await uploadTreeProvider.save(item);
         progressProvider.refresh();
     });
-    vscode.commands.registerCommand(Constants.UPDATE_SOURCE_FOLDER_COMMAND, async (item?: FilesTreeItem) => {
-        await filesBundlesProvider.updateSourceFolder(item);
-        filesBundlesProvider.refresh();
+    vscode.commands.registerCommand(Constants.UPDATE_SOURCE_FOLDER_COMMAND, async (item: FilesTreeItem) => {
+        await downloadTreeProvider.updateSourceFolder(item);
+        downloadTreeProvider.refresh();
     });
     vscode.commands.registerCommand(Constants.UPDATE_SOURCE_FILE_COMMAND, (item: FilesTreeItem) =>
-        filesBundlesProvider.updateSourceFile(item)
+        downloadTreeProvider.updateSourceFile(item)
     );
     vscode.commands.registerCommand(Constants.DOWNLOAD_COMMAND, (item: FilesTreeItem) =>
-        filesBundlesProvider.download(item)
+        downloadTreeProvider.download(item)
     );
     vscode.commands.registerCommand(Constants.EDIT_COMMAND, (item: FilesTreeItem) =>
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(item.config.configPath))
