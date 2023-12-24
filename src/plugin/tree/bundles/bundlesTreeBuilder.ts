@@ -15,6 +15,7 @@ export class BundlesTreeBuilder {
             config,
             rootPath: workspace.uri.fsPath,
             childs: BundlesTreeBuilder.bundlesTreeItems(config, client, workspace.uri.fsPath),
+            isRoot: true,
         });
     }
 

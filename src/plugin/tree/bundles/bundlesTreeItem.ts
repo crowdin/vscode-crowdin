@@ -23,6 +23,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
         childs = Promise.resolve([]),
         bundle,
         client,
+        isRoot = false,
     }: {
         label: string;
         rootPath: string;
@@ -32,6 +33,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
         childs?: Promise<BundlesTreeItem[]>;
         bundle?: BundlesModel.Bundle;
         client: CrowdinClient;
+        isRoot?: boolean;
     }) {
         super(label, collapsibleState);
         this.contextValue = contextValue;
@@ -41,10 +43,12 @@ export class BundlesTreeItem extends vscode.TreeItem {
         this.childs = childs;
         this.client = client;
         this.bundle = bundle;
-        this.iconPath = {
-            light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
-            dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
-        };
+        this.iconPath = isRoot
+            ? {
+                  light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
+                  dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
+              }
+            : new vscode.ThemeIcon('archive');
     }
 
     async download(): Promise<void> {
