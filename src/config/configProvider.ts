@@ -166,11 +166,11 @@ export class ConfigProvider {
                     scheme: this.getFileScheme(f.scheme),
                     dest: f.dest,
                     type: f.type,
+                    cleanupMode: f.cleanup_mode,
+                    updateStrings: f.update_strings,
                 } as FileModel;
             }),
             organization,
-            cleanupMode: config.cleanup_mode,
-            updateStrings: config.update_strings,
         };
     }
 
@@ -228,8 +228,6 @@ interface PrivateConfigModel {
     base_path?: string;
     base_path_env?: string;
     files: PrivateFileModel[];
-    update_strings?: boolean;
-    cleanup_mode?: boolean;
 }
 
 interface PrivateFileModel {
@@ -241,4 +239,6 @@ interface PrivateFileModel {
     scheme?: string;
     dest?: string;
     type?: string;
+    update_strings?: boolean;
+    cleanup_mode?: boolean;
 }

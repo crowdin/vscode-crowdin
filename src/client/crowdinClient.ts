@@ -80,8 +80,12 @@ export class CrowdinClient {
             let finished = false;
 
             while (!finished) {
-                const status = await this.crowdin.translationsApi.checkBuildStatus(this.projectId, build.data.id);
-                finished = status.data.status === 'finished';
+                const statusRes = await this.crowdin.translationsApi.checkBuildStatus(this.projectId, build.data.id);
+                const status = statusRes.data.status;
+                if (['failed', 'cancelled'].includes(status)) {
+                    throw new Error(`Build ${status}`);
+                }
+                finished = status === 'finished';
             }
 
             const downloadLink = await this.crowdin.translationsApi.downloadTranslations(this.projectId, build.data.id);
@@ -136,12 +140,16 @@ export class CrowdinClient {
             let finished = false;
 
             while (!finished) {
-                const status = await bundlesApi.checkBundleExportStatus(
+                const statusRes = await bundlesApi.checkBundleExportStatus(
                     this.projectId,
                     bundleId,
                     build.data.identifier
                 );
-                finished = status.data.status === 'finished';
+                const status = statusRes.data.status;
+                if (['failed', 'cancelled'].includes(status)) {
+                    throw new Error(`Build ${status}`);
+                }
+                finished = status === 'finished';
             }
 
             const downloadLink = await bundlesApi.downloadBundle(this.projectId, bundleId, build.data.identifier);
@@ -219,26 +227,30 @@ export class CrowdinClient {
 
     /**
      * Uploads file to the Crowdin system. Creates needed folders/branch is they are missing.
-     *
-     * @param fsPath full path to file
-     * @param exportPattern file export pattern
-     * @param file file path in crowdin system
-     * @param uploadOption upload option
-     * @param excludedTargetLanguages excluded target languages
-     * @param labels labels
-     * @param scheme import scheme
-     * @param type file type
      */
-    async upload(
-        fsPath: string,
-        exportPattern: string,
-        file: string,
-        uploadOption?: SourceFilesModel.UpdateOption,
-        excludedTargetLanguages?: string[],
-        labels?: string[],
-        scheme?: Scheme,
-        type?: SourceFilesModel.FileType
-    ): Promise<void> {
+    async upload({
+        fsPath,
+        exportPattern,
+        file,
+        uploadOption,
+        excludedTargetLanguages,
+        labels,
+        scheme,
+        type,
+        cleanupMode,
+        updateStrings,
+    }: {
+        fsPath: string;
+        exportPattern: string;
+        file: string;
+        uploadOption?: SourceFilesModel.UpdateOption;
+        excludedTargetLanguages?: string[];
+        labels?: string[];
+        scheme?: Scheme;
+        type?: SourceFilesModel.FileType;
+        cleanupMode?: boolean;
+        updateStrings?: boolean;
+    }): Promise<void> {
         let branchId: number | undefined;
         const branch = this.crowdinBranch;
 
@@ -281,22 +293,29 @@ export class CrowdinClient {
         const fileContent = fs.readFileSync(fsPath);
 
         if (this.stringsBased) {
+            if (!branchId) {
+                throw new Error('Branch is missing');
+            }
+
             const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
             const build = await this.crowdin.sourceStringsApi.uploadStrings(this.projectId, {
-                //@ts-ignore
                 branchId,
                 storageId: resp.data.id,
-                cleanupMode: this.config.cleanupMode,
-                updateStrings: this.config.updateStrings,
+                cleanupMode,
+                updateStrings,
             });
             let finished = false;
 
             while (!finished) {
-                const status = await this.crowdin.sourceStringsApi.uploadStringsStatus(
+                const statusRes = await this.crowdin.sourceStringsApi.uploadStringsStatus(
                     this.projectId,
                     build.data.identifier
                 );
-                finished = status.data.status === 'finished';
+                const status = statusRes.data.status;
+                if (['failed', 'cancelled'].includes(status)) {
+                    throw new Error('Failed to upload strings');
+                }
+                finished = status === 'finished';
             }
 
             return;

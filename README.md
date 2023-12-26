@@ -96,8 +96,6 @@ You can create a new configuration file by using the "Crowdin: Create configurat
 "base_path": "folder" // optional
 "branch": "master" // optional
 "base_url": "https://{organization-name}.crowdin.com" // optional (for Crowdin Enterprise only)
-"update_strings": false // optional (for strings based projects)
-"cleanup_mode": true // optional (for strings based projects)
 
 "files": [
   {
@@ -107,7 +105,9 @@ You can create a new configuration file by using the "Crowdin: Create configurat
     "excluded_target_languages": ["uk", "fr"], // optional
     "labels": ["android", "emails"], // optional
     "dest": "/app/%file_name%.xml", // optional
-    "type": "android" // optional
+    "type": "android", // optional
+    "update_strings": false, // optional (for strings based projects)
+    "cleanup_mode": true // optional (for strings based projects)
   },
   {
     "source": "multicolumn.csv",

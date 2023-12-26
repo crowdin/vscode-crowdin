@@ -92,16 +92,18 @@ export class FilesTreeItem extends vscode.TreeItem {
                 basePath
             );
             const crowdinFilePath = this.getCrowdinFilePath();
-            return this.client.upload(
-                this.fullPath,
-                exportPattern,
-                crowdinFilePath,
-                this.file?.updateOption,
-                this.file?.excludedTargetLanguages,
-                this.file?.labels,
-                this.file?.scheme,
-                this.file?.type
-            );
+            return this.client.upload({
+                fsPath: this.fullPath,
+                exportPattern: exportPattern,
+                file: crowdinFilePath,
+                uploadOption: this.file?.updateOption,
+                excludedTargetLanguages: this.file?.excludedTargetLanguages,
+                labels: this.file?.labels,
+                scheme: this.file?.scheme,
+                type: this.file?.type,
+                cleanupMode: this.file?.cleanupMode,
+                updateStrings: this.file?.updateStrings,
+            });
         } else {
             let promises: Promise<void>[] = [];
             for (const item of arr) {

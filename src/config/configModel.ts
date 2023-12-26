@@ -10,8 +10,6 @@ export interface ConfigModel {
     branch?: string;
     basePath?: string;
     files: FileModel[];
-    updateStrings?: boolean;
-    cleanupMode?: boolean;
 }
 
 export function buildClient(docUri: vscode.Uri, config: ConfigModel, stringsBased = false) {
