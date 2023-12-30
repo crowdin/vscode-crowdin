@@ -130,6 +130,8 @@ async function setConfigExists() {
 }
 
 function openBundleSettingsUrl(item: BundlesTreeItem) {
-    const url = `https://crowdin.com/project/${item.project.identifier}/download#bundles`;
+    const url = item.config.organization
+        ? `https://${item.config.organization}.crowdin.com/u/projects/${item.project.id}/translations#bundles`
+        : `https://crowdin.com/project/${item.project.identifier}/download#bundles`;
     vscode.env.openExternal(vscode.Uri.parse(url));
 }
