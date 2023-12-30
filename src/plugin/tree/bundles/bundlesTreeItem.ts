@@ -52,6 +52,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
                   light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),
                   dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
               }
+              //https://code.visualstudio.com/api/references/icons-in-labels
             : new vscode.ThemeIcon('archive');
     }
 
