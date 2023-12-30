@@ -94,12 +94,13 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(Constants.DOWNLOAD_COMMAND, (item: FilesTreeItem) =>
         downloadTreeProvider.download(item)
     );
+
     vscode.commands.registerCommand(Constants.DOWNLOAD_BUNDLE_COMMAND, (item: BundlesTreeItem) =>
         downloadTreeProvider.downloadBundle(item)
     );
-    vscode.commands.registerCommand(Constants.ADD_BUNDLE_COMMAND, () =>
-        vscode.env.openExternal(vscode.Uri.parse('https://crowdin.github.io/crowdin-cli/commands/crowdin-bundle-add'))
-    );
+    vscode.commands.registerCommand(Constants.ADD_BUNDLE_COMMAND, openBundleSettingsUrl);
+    vscode.commands.registerCommand(Constants.SETTINGS_BUNDLE_COMMAND, openBundleSettingsUrl);
+
     vscode.commands.registerCommand(Constants.EDIT_COMMAND, (item: FilesTreeItem) =>
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(item.config.configPath))
     );
@@ -126,4 +127,9 @@ async function setConfigExists() {
             }
         });
     }
+}
+
+function openBundleSettingsUrl(item: BundlesTreeItem) {
+    const url = `https://crowdin.com/project/${item.project.identifier}/download#bundles`;
+    vscode.env.openExternal(vscode.Uri.parse(url));
 }

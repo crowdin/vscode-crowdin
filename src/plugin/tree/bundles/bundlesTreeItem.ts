@@ -1,4 +1,4 @@
-import { BundlesModel } from '@crowdin/crowdin-api-client';
+import { BundlesModel, ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CrowdinClient } from '../../../client/crowdinClient';
@@ -13,6 +13,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
     readonly rootPath: string;
     readonly childs: Promise<BundlesTreeItem[]>;
     readonly bundle: BundlesModel.Bundle | undefined;
+    readonly project: ProjectsGroupsModel.Project;
 
     constructor({
         label,
@@ -24,6 +25,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
         bundle,
         client,
         isRoot = false,
+        project,
     }: {
         label: string;
         rootPath: string;
@@ -34,6 +36,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
         bundle?: BundlesModel.Bundle;
         client: CrowdinClient;
         isRoot?: boolean;
+        project: ProjectsGroupsModel.Project;
     }) {
         super(label, collapsibleState);
         this.contextValue = contextValue;
@@ -43,6 +46,7 @@ export class BundlesTreeItem extends vscode.TreeItem {
         this.childs = childs;
         this.client = client;
         this.bundle = bundle;
+        this.project = project;
         this.iconPath = isRoot
             ? {
                   light: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'light', 'folder.svg')),

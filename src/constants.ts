@@ -23,6 +23,7 @@ export class Constants {
     static readonly UPDATE_SOURCE_FILE_COMMAND = 'files.updateSourceFile';
     static readonly DOWNLOAD_BUNDLE_COMMAND = 'bundles.download';
     static readonly ADD_BUNDLE_COMMAND = 'bundles.add';
+    static readonly SETTINGS_BUNDLE_COMMAND = 'bundles.settings';
     static readonly SIGN_IN_COMMAND = 'crowdin.signIn';
     static readonly SIGN_OUT_COMMAND = 'crowdin.signOut';
     static readonly SELECT_PROJECT_COMMAND = 'crowdin.selectProject';

@@ -131,7 +131,7 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeItem> {
             try {
                 const isStringsBased = project.type === ProjectsGroupsModel.Type.STRINGS_BASED;
                 if (this.isDownload && isStringsBased) {
-                    const rootTreeFolder = await BundlesTreeBuilder.buildBundlesTree(workspace, config);
+                    const rootTreeFolder = await BundlesTreeBuilder.buildBundlesTree(workspace, config, project);
                     this.rootTree.push(rootTreeFolder);
                     return rootTreeFolder;
                 }

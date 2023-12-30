@@ -199,6 +199,14 @@
 				"command": "bundles.add",
 				"title": "Add bundle",
 				"icon": "$(plus)"
+			},
+			{
+				"command": "bundles.settings",
+				"title": "Settings",
+				"icon": {
+					"light": "resources/light/settings.svg",
+					"dark": "resources/dark/settings.svg"
+				}
 			}
 		],
 		"menus": {
@@ -228,7 +236,7 @@
 				{
 					"command": "files.edit",
 					"when": "(view == upload || view == download) && (viewItem == root ||viewItem == root_bundle)",
-					"group": "inline@0"
+					"group": "inline@4"
 				},
 				{
 					"command": "files.saveFolder",
@@ -264,6 +272,11 @@
 					"command": "bundles.add",
 					"when": "view == download && viewItem == root_bundle",
 					"group": "inline@0"
+				},
+				{
+					"command": "bundles.settings",
+					"when": "view == download && viewItem == bundle",
+					"group": "inline@1"
 				}
 			],
 			"commandPalette": [
