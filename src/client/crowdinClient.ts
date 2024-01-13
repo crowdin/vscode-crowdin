@@ -9,6 +9,7 @@ import { ConfigModel } from '../config/configModel';
 import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
+import { ErrorHandler } from '../util/errorHandler';
 import { PathUtil } from '../util/pathUtil';
 
 https.globalAgent.options.rejectUnauthorized = false;
@@ -297,25 +298,34 @@ export class CrowdinClient {
                 throw new Error('Branch is missing');
             }
 
-            const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
-            const build = await this.crowdin.sourceStringsApi.uploadStrings(this.projectId, {
-                branchId,
-                storageId: resp.data.id,
-                cleanupMode,
-                updateStrings,
-            });
-            let finished = false;
+            try {
+                const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
+                const build = await this.crowdin.sourceStringsApi.uploadStrings(this.projectId, {
+                    branchId,
+                    storageId: resp.data.id,
+                    cleanupMode,
+                    updateStrings,
+                });
+                let finished = false;
 
-            while (!finished) {
-                const statusRes = await this.crowdin.sourceStringsApi.uploadStringsStatus(
-                    this.projectId,
-                    build.data.identifier
-                );
-                const status = statusRes.data.status;
-                if (['failed', 'cancelled'].includes(status)) {
-                    throw new Error('Failed to upload strings');
+                while (!finished) {
+                    const statusRes = await this.crowdin.sourceStringsApi.uploadStringsStatus(
+                        this.projectId,
+                        build.data.identifier
+                    );
+                    const status = statusRes.data.status;
+                    if (['failed', 'cancelled'].includes(status)) {
+                        throw new Error('Failed to upload strings');
+                    }
+                    finished = status === 'finished';
                 }
-                finished = status === 'finished';
+            } catch (error) {
+                const msg = ErrorHandler.getMessage(error);
+                if (msg.includes('files are not allowed to upload in strings-based projects')) {
+                    vscode.window.showWarningMessage(msg);
+                } else {
+                    throw error;
+                }
             }
 
             return;
@@ -465,7 +475,7 @@ export class CrowdinClient {
             if (!!foundBranch) {
                 branchId = foundBranch.data.id;
             } else {
-                throw new Error(`File ${file} does not exist under branch ${branch}`);
+                throw new Error(`File ${file} does not exist under branch ${branch.name}`);
             }
         }
         let parentId: number | undefined;
