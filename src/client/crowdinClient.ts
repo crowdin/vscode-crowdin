@@ -619,6 +619,14 @@ export class CrowdinClient {
                             .find((c: string) => c.toLowerCase() === code.toLowerCase())
                 );
         }
+
+        if (e.validationCodes && Array.isArray(e.validationCodes)) {
+            return e.validationCodes
+                .filter((e: any) => !!e.codes)
+                .map((e: any) => e.codes)
+                .some((codes: string[]) => codes.includes(code));
+        }
+
         return false;
     }
 }
