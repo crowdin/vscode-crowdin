@@ -105,11 +105,18 @@ export class FilesTreeItem extends vscode.TreeItem {
                 updateStrings: this.file?.updateStrings,
             });
         } else {
-            let promises: Promise<void>[] = [];
-            for (const item of arr) {
-                promises.push(item.save());
+            // for SB we can not upload files in parallel due to concurrency issues
+            if (this.client.stringsBased) {
+                for (const item of arr) {
+                    await item.save();
+                }
+            } else {
+                let promises: Promise<void>[] = [];
+                for (const item of arr) {
+                    promises.push(item.save());
+                }
+                return Promise.all(promises);
             }
-            return Promise.all(promises);
         }
     }
 
