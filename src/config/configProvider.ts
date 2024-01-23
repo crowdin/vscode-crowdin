@@ -66,7 +66,7 @@ export class ConfigProvider {
     }
 
     private async validateAndGet(config: PrivateConfigModel, filePath: string): Promise<ConfigModel> {
-        const selectedProject = await getProject();
+        const selectedProject = await getProject(this.workspace);
         const projectId: number | string | undefined =
             selectedProject || this.getOrEnv(config, 'project_id', 'project_id_env');
         if (!projectId) {
@@ -166,6 +166,8 @@ export class ConfigProvider {
                     scheme: this.getFileScheme(f.scheme),
                     dest: f.dest,
                     type: f.type,
+                    cleanupMode: f.cleanup_mode,
+                    updateStrings: f.update_strings,
                 } as FileModel;
             }),
             organization,
@@ -237,4 +239,6 @@ interface PrivateFileModel {
     scheme?: string;
     dest?: string;
     type?: string;
+    update_strings?: boolean;
+    cleanup_mode?: boolean;
 }

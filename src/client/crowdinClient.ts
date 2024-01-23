@@ -5,26 +5,26 @@ import * as fs from 'fs';
 import * as https from 'https';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { ConfigModel } from '../config/configModel';
 import { Scheme } from '../config/fileModel';
 import { Constants } from '../constants';
 import { SourceFiles } from '../model/sourceFiles';
+import { ErrorHandler } from '../util/errorHandler';
 import { PathUtil } from '../util/pathUtil';
 
 https.globalAgent.options.rejectUnauthorized = false;
 
 export class CrowdinClient {
     readonly crowdin: Crowdin;
+    readonly projectId: number;
+    readonly branch?: string;
 
-    constructor(
-        readonly projectId: number,
-        readonly apiKey: string,
-        readonly docUri: vscode.Uri,
-        readonly branch?: string,
-        readonly organization?: string
-    ) {
+    constructor(readonly docUri: vscode.Uri, readonly config: ConfigModel, readonly stringsBased?: boolean) {
+        this.projectId = config.projectId;
+        this.branch = config.branch;
         const credentials: Credentials = {
-            token: apiKey,
-            organization: organization,
+            token: config.apiKey,
+            organization: config.organization,
         };
         this.crowdin = new Crowdin(credentials, {
             userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`,
@@ -81,8 +81,12 @@ export class CrowdinClient {
             let finished = false;
 
             while (!finished) {
-                const status = await this.crowdin.translationsApi.checkBuildStatus(this.projectId, build.data.id);
-                finished = status.data.status === 'finished';
+                const statusRes = await this.crowdin.translationsApi.checkBuildStatus(this.projectId, build.data.id);
+                const status = statusRes.data.status;
+                if (['failed', 'cancelled'].includes(status)) {
+                    throw new Error(`Build ${status}`);
+                }
+                finished = status === 'finished';
             }
 
             const downloadLink = await this.crowdin.translationsApi.downloadTranslations(this.projectId, build.data.id);
@@ -109,6 +113,65 @@ export class CrowdinClient {
             throw new Error(
                 `Failed to download translations for project ${this.projectId}. ${this.getErrorMessage(error)}`
             );
+        }
+    }
+
+    /**
+     * Downloads bundle for strings based project
+     */
+    async downloadBundle(unzipFolder: string, bundleId: number): Promise<any> {
+        const branch = this.crowdinBranch;
+        if (!branch) {
+            throw new Error('Branch is not specified');
+        }
+
+        const branches = await this.crowdin.sourceFilesApi.listProjectBranches(this.projectId, {
+            name: branch.name,
+        });
+        const branchId = branches.data.find((e) => e.data.name === branch.name)?.data.id;
+
+        if (!branchId) {
+            throw new Error(`Failed to find branch with name ${branch.name}`);
+        }
+
+        const { bundlesApi } = this.crowdin;
+
+        try {
+            const build = await bundlesApi.exportBundle(this.projectId, bundleId);
+            let finished = false;
+
+            while (!finished) {
+                const statusRes = await bundlesApi.checkBundleExportStatus(
+                    this.projectId,
+                    bundleId,
+                    build.data.identifier
+                );
+                const status = statusRes.data.status;
+                if (['failed', 'cancelled'].includes(status)) {
+                    throw new Error(`Build ${status}`);
+                }
+                finished = status === 'finished';
+            }
+
+            const downloadLink = await bundlesApi.downloadBundle(this.projectId, bundleId, build.data.identifier);
+
+            const resp = await axios.get(downloadLink.data.url, {
+                responseType: 'arraybuffer',
+            });
+            const zip = new AdmZip(resp.data);
+
+            const entries = zip.getEntries().filter((entry) => !entry.isDirectory);
+
+            entries.forEach((file) => {
+                const filePath = path.join(unzipFolder, file.entryName);
+                const directory = path.dirname(filePath);
+                if (!fs.existsSync(directory)) {
+                    fs.mkdirSync(directory, { recursive: true });
+                }
+                fs.writeFileSync(filePath, file.getData());
+            });
+        } catch (error) {
+            throw new Error(`Failed to download bundle for project ${this.projectId}. ${this.getErrorMessage(error)}`);
         }
     }
 
@@ -165,28 +228,38 @@ export class CrowdinClient {
 
     /**
      * Uploads file to the Crowdin system. Creates needed folders/branch is they are missing.
-     *
-     * @param fsPath full path to file
-     * @param exportPattern file export pattern
-     * @param file file path in crowdin system
-     * @param uploadOption upload option
-     * @param excludedTargetLanguages excluded target languages
-     * @param labels labels
-     * @param scheme import scheme
-     * @param type file type
      */
-    async upload(
-        fsPath: string,
-        exportPattern: string,
-        file: string,
-        uploadOption?: SourceFilesModel.UpdateOption,
-        excludedTargetLanguages?: string[],
-        labels?: string[],
-        scheme?: Scheme,
-        type?: SourceFilesModel.FileType
-    ): Promise<void> {
+    async upload({
+        fsPath,
+        exportPattern,
+        file,
+        uploadOption,
+        excludedTargetLanguages,
+        labels,
+        scheme,
+        type,
+        cleanupMode,
+        updateStrings,
+    }: {
+        fsPath: string;
+        exportPattern: string;
+        file: string;
+        uploadOption?: SourceFilesModel.UpdateOption;
+        excludedTargetLanguages?: string[];
+        labels?: string[];
+        scheme?: Scheme;
+        type?: SourceFilesModel.FileType;
+        cleanupMode?: boolean;
+        updateStrings?: boolean;
+    }): Promise<void> {
         let branchId: number | undefined;
         const branch = this.crowdinBranch;
+
+        if (this.stringsBased) {
+            if (!branch) {
+                throw new Error('Branch is not specified');
+            }
+        }
 
         if (!!branch) {
             try {
@@ -215,6 +288,47 @@ export class CrowdinClient {
                     );
                 }
             }
+        }
+
+        const fileName = path.basename(file);
+        const fileContent = fs.readFileSync(fsPath);
+
+        if (this.stringsBased) {
+            if (!branchId) {
+                throw new Error('Branch is missing');
+            }
+
+            try {
+                const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
+                const build = await this.crowdin.sourceStringsApi.uploadStrings(this.projectId, {
+                    branchId,
+                    storageId: resp.data.id,
+                    cleanupMode,
+                    updateStrings,
+                });
+                let finished = false;
+
+                while (!finished) {
+                    const statusRes = await this.crowdin.sourceStringsApi.uploadStringsStatus(
+                        this.projectId,
+                        build.data.identifier
+                    );
+                    const status = statusRes.data.status;
+                    if (['failed', 'cancelled'].includes(status)) {
+                        throw new Error('Failed to upload strings');
+                    }
+                    finished = status === 'finished';
+                }
+            } catch (error) {
+                const msg = ErrorHandler.getMessage(error);
+                if (msg.includes('files are not allowed to upload in strings-based projects')) {
+                    vscode.window.showWarningMessage(msg);
+                } else {
+                    throw error;
+                }
+            }
+
+            return;
         }
 
         let parentId: number | undefined;
@@ -251,9 +365,6 @@ export class CrowdinClient {
                 );
             }
         }
-
-        const fileName = path.basename(file);
-        const fileContent = fs.readFileSync(fsPath);
 
         try {
             const resp = await this.crowdin.uploadStorageApi.addStorage(fileName, fileContent);
@@ -364,7 +475,7 @@ export class CrowdinClient {
             if (!!foundBranch) {
                 branchId = foundBranch.data.id;
             } else {
-                throw new Error(`File ${file} does not exist under branch ${branch}`);
+                throw new Error(`File ${file} does not exist under branch ${branch.name}`);
             }
         }
         let parentId: number | undefined;
@@ -508,6 +619,14 @@ export class CrowdinClient {
                             .find((c: string) => c.toLowerCase() === code.toLowerCase())
                 );
         }
+
+        if (e.validationCodes && Array.isArray(e.validationCodes)) {
+            return e.validationCodes
+                .filter((e: any) => !!e.codes)
+                .map((e: any) => e.codes)
+                .some((codes: string[]) => codes.includes(code));
+        }
+
         return false;
     }
 }

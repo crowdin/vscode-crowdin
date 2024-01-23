@@ -7,18 +7,22 @@ import { ErrorHandler } from '../util/errorHandler';
 
 export class CrowdinConfigHolder {
     private configWatchers: Map<string, vscode.FileSystemWatcher> = new Map();
-    private configurationToWorkspace: Map<ConfigModel, vscode.WorkspaceFolder> = new Map();
+    private configurationToWorkspace: Map<
+        { config: ConfigModel; project: crowdin.ProjectsGroupsModel.Project },
+        vscode.WorkspaceFolder
+    > = new Map();
     private sourceStrings: Map<vscode.WorkspaceFolder, crowdin.SourceStringsModel.String[]> = new Map();
     private listeners: { (): void }[] = [];
     private initializer: Promise<void> = Promise.resolve();
+    private reloadInProgress = false;
 
     addListener(listener: () => void) {
         this.listeners.push(listener);
     }
 
-    async configurations(): Promise<Map<ConfigModel, vscode.WorkspaceFolder>> {
+    async configurations() {
         await this.initializer;
-        return this.configurationToWorkspace;
+        return Array.from(this.configurationToWorkspace).sort((e1, e2) => e1[1].index - e2[1].index);
     }
 
     getCrowdinStrings(workspace: vscode.WorkspaceFolder): crowdin.SourceStringsModel.String[] | undefined {
@@ -26,7 +30,7 @@ export class CrowdinConfigHolder {
     }
 
     reloadStrings() {
-        this.configurationToWorkspace.forEach((workspace, config) => this.loadStrings(config, workspace));
+        this.configurationToWorkspace.forEach((workspace, info) => this.loadStrings(info.config, workspace));
     }
 
     initialize() {
@@ -45,7 +49,8 @@ export class CrowdinConfigHolder {
                     configFiles.push(configPath);
                 }
                 const config = await configProvider.load();
-                this.configurationToWorkspace.set(config, workspace);
+                const project = await this.loadProject(config, workspace);
+                this.configurationToWorkspace.set({ config, project }, workspace);
                 //let's not block and invoke this without await
                 this.loadStrings(config, workspace);
                 return config;
@@ -58,8 +63,16 @@ export class CrowdinConfigHolder {
     }
 
     async reload() {
+        //fs watcher may fire events too often
+        if (this.reloadInProgress) {
+            return;
+        }
+        this.reloadInProgress = true;
         await this.load();
         this.listeners.forEach((l) => l());
+        setTimeout(() => {
+            this.reloadInProgress = false;
+        }, 1000);
     }
 
     private updateConfigWatchers(configFiles: string[]) {
@@ -85,8 +98,8 @@ export class CrowdinConfigHolder {
         });
         watchersToAdd.forEach((file) => {
             const wather = vscode.workspace.createFileSystemWatcher(file);
-            wather.onDidChange(this.reload);
-            wather.onDidDelete(this.reload);
+            wather.onDidChange(() => this.reload());
+            wather.onDidDelete(() => this.reload());
             this.configWatchers.set(file, wather);
         });
     }
@@ -99,5 +112,11 @@ export class CrowdinConfigHolder {
         } catch (e) {
             ErrorHandler.handleError(e);
         }
+    }
+
+    private async loadProject(config: ConfigModel, workspace: vscode.WorkspaceFolder) {
+        const client = buildClient(workspace.uri, config);
+        const project = await client.crowdin.projectsGroupsApi.getProject(config.projectId);
+        return project.data;
     }
 }

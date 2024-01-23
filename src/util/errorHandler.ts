@@ -6,6 +6,11 @@ export class ErrorHandler {
         if (!Constants.APPLICATION_OPENED) {
             return;
         }
+        const message = ErrorHandler.getMessage(e);
+        vscode.window.showErrorMessage(`Crowdin: ${message}`);
+    }
+
+    static getMessage(e: any): string {
         let message;
         if (typeof e === 'string') {
             message = e;
@@ -14,6 +19,6 @@ export class ErrorHandler {
         } else {
             message = JSON.stringify(e);
         }
-        vscode.window.showErrorMessage(`Crowdin: ${message}`);
+        return message;
     }
 }

@@ -19,15 +19,23 @@ Integrate your Visual Studio Code projects with Crowdin to streamline the locali
 
 A new component will be introduced in the Activity Bar called the *Crowdin*. The plugin will scan each workspace for a Crowdin-specific configuration file and will build a tree with source files.
 
-### Sources and translations sync, tracking project progress
+### Upload source files to Crowdin
 
-With this plugin you can:
+Upload source files to Crowdin for translation using the **"Upload"** panel. It displays all the source files matching the specified pattern in the configuration file. You can either individually select files to upload to Crowdin or upload all files at once.
 
-- Upload files for translation to Crowdin.
-- Download sources and translations from Crowdin.
-- Track progress of translated and approved strings for each project and target language.
+[<p align="center"><img src="resources/animations/upload.gif" data-canonical-src="resources/animations/upload.gif" width="600" height="auto" align="center"/></p>](https://store.crowdin.com/visual-studio-code/)
 
-[<p align="center"><img src="resources/plugin.png" data-canonical-src="resources/plugin.png" width="300" height="auto" align="center"/></p>](https://store.crowdin.com/visual-studio-code/)
+### Download source and translation files from Crowdin
+
+Download source and translation files from Crowdin using the **"Download"** panel. It displays all the source files matching the specified pattern in the configuration file. You can download translations for all target languages as well as download source files edited in Crowdin.
+
+[<p align="center"><img src="resources/animations/download.gif" data-canonical-src="resources/animations/download.gif" width="600" height="auto" align="center"/></p>](https://store.crowdin.com/visual-studio-code/)
+
+### Track translation progress
+
+Track progress of translated and approved strings for each project and target language.
+
+[<p align="center"><img src="resources/animations/progress.gif" data-canonical-src="resources/animations/progress.gif" width="600" height="auto" align="center"/></p>](https://store.crowdin.com/visual-studio-code/)
 
 ### String keys autocompletion
 
@@ -37,9 +45,23 @@ There is a possibility to configure file extensions, where the string keys autoc
 
 Strings for autocompletion are loaded during the bootstrap of VSCode and are also updated whenever there was a change in the `crowdin.yml` configuration file.
 
-[<p align="center"><img src="https://raw.githubusercontent.com/crowdin/vscode-crowdin/docs/autocompletion-demo.gif" data-canonical-src="https://raw.githubusercontent.com/crowdin/vscode-crowdin/docs/autocompletion-demo.gif" width="700" height="auto" align="center"/></p>](https://github.com/crowdin/vscode-crowdin/releases/tag/1.4.0/)
+[<p align="center"><img src="resources/animations/autocomplete.gif" data-canonical-src="resources/animations/autocomplete.gif" width="600" height="auto" align="center"/></p>](https://store.crowdin.com/visual-studio-code/)
 
 This gif illustrates the autocompletion of string keys in a React project that uses the [Lingui](https://lingui.dev/tools/crowdin) library.
+
+### Command Palette commands
+
+The plugin provides the following commands in the VS Code [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-) (<kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd>/<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>):
+
+- `Crowdin: Sign In` to log in into your Crowdin profile
+- `Crowdin: Sign Out` to log out from your Crowdin profile
+- `Crowdin: Select Project` to select Crowdin project
+- `Crowdin: Open Configuration` to open Crowdin configuration file
+- `Crowdin: Focus on Upload View` to focus on the Upload view
+- `Crowdin: Focus on Download View` to focus on the Download view
+- `Crowdin: Focus on Progress View` to focus on the Progress view
+
+[<p align="center"><img src="resources/animations/command-palette.gif" data-canonical-src="resources/animations/command-palette.gif" width="600" height="auto" align="center"/></p>](https://store.crowdin.com/visual-studio-code/)
 
 ## Setup
 
@@ -105,7 +127,9 @@ You can create a new configuration file by using the "Crowdin: Create configurat
     "excluded_target_languages": ["uk", "fr"], // optional
     "labels": ["android", "emails"], // optional
     "dest": "/app/%file_name%.xml", // optional
-    "type": "android" // optional
+    "type": "android", // optional
+    "update_strings": false, // optional (for strings based projects)
+    "cleanup_mode": true // optional (for strings based projects)
   },
   {
     "source": "multicolumn.csv",

@@ -9,6 +9,8 @@ export interface FileModel {
     scheme?: Scheme;
     dest?: string;
     type?: SourceFilesModel.FileType;
+    cleanupMode?: boolean;
+    updateStrings?: boolean;
 }
 
 export interface Scheme {

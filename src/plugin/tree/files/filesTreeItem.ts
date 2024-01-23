@@ -1,12 +1,12 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CrowdinClient } from '../../client/crowdinClient';
-import { buildClient, ConfigModel } from '../../config/configModel';
-import { FileModel } from '../../config/fileModel';
-import { Constants } from '../../constants';
-import { SourceFiles } from '../../model/sourceFiles';
-import { PathUtil } from '../../util/pathUtil';
-import { FilesTreeItemContextValue } from './filesTreeItemContextValue';
+import { CrowdinClient } from '../../../client/crowdinClient';
+import { ConfigModel } from '../../../config/configModel';
+import { FileModel } from '../../../config/fileModel';
+import { Constants } from '../../../constants';
+import { SourceFiles } from '../../../model/sourceFiles';
+import { PathUtil } from '../../../util/pathUtil';
+import { ContextValue } from '../contextValue';
 
 export class FilesTreeItem extends vscode.TreeItem {
     private client: CrowdinClient;
@@ -21,7 +21,6 @@ export class FilesTreeItem extends vscode.TreeItem {
     readonly label: string;
 
     constructor({
-        workspace,
         label,
         collapsibleState,
         config,
@@ -32,25 +31,26 @@ export class FilesTreeItem extends vscode.TreeItem {
         sourceFilesArr = [],
         command,
         file,
+        client,
     }: {
-        workspace: vscode.WorkspaceFolder;
         label: string;
         collapsibleState: vscode.TreeItemCollapsibleState;
         config: ConfigModel;
         rootPath: string;
-        contextValue: FilesTreeItemContextValue;
+        contextValue: ContextValue;
         fullPath: string;
         childs?: Promise<FilesTreeItem[]>;
         sourceFilesArr?: SourceFiles[];
         command?: vscode.Command;
         file?: FileModel;
+        client: CrowdinClient;
     }) {
         super(label, collapsibleState);
         this.childs = childs;
         this.config = config;
         this.rootPath = rootPath;
         this.sourceFilesArr = sourceFilesArr;
-        this.isLeaf = contextValue === FilesTreeItemContextValue.FILE;
+        this.isLeaf = contextValue === ContextValue.FILE;
         this.file = file;
         this.fullPath = fullPath;
         this.label = label;
@@ -66,7 +66,7 @@ export class FilesTreeItem extends vscode.TreeItem {
                 dark: Constants.EXTENSION_CONTEXT.asAbsolutePath(path.join('resources', 'dark', 'folder.svg')),
             };
         }
-        this.client = buildClient(workspace.uri, this.config);
+        this.client = client;
     }
 
     async update(): Promise<void> {
@@ -92,22 +92,31 @@ export class FilesTreeItem extends vscode.TreeItem {
                 basePath
             );
             const crowdinFilePath = this.getCrowdinFilePath();
-            return this.client.upload(
-                this.fullPath,
-                exportPattern,
-                crowdinFilePath,
-                this.file?.updateOption,
-                this.file?.excludedTargetLanguages,
-                this.file?.labels,
-                this.file?.scheme,
-                this.file?.type
-            );
+            return this.client.upload({
+                fsPath: this.fullPath,
+                exportPattern: exportPattern,
+                file: crowdinFilePath,
+                uploadOption: this.file?.updateOption,
+                excludedTargetLanguages: this.file?.excludedTargetLanguages,
+                labels: this.file?.labels,
+                scheme: this.file?.scheme,
+                type: this.file?.type,
+                cleanupMode: this.file?.cleanupMode,
+                updateStrings: this.file?.updateStrings,
+            });
         } else {
-            let promises: Promise<void>[] = [];
-            for (const item of arr) {
-                promises.push(item.save());
+            // for SB we can not upload files in parallel due to concurrency issues
+            if (this.client.stringsBased) {
+                for (const item of arr) {
+                    await item.save();
+                }
+            } else {
+                let promises: Promise<void>[] = [];
+                for (const item of arr) {
+                    promises.push(item.save());
+                }
+                return Promise.all(promises);
             }
-            return Promise.all(promises);
         }
     }
 
