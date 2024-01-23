@@ -5,6 +5,20 @@ All notable changes to the Crowdin Visual Studio Code Plugin extension will be d
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0]
+
+### What's changed
+
+* Support for string-based projects (bundle management)
+  * Main panel has been split into 2 separate panels:
+    - Upload panel - same as before, but only for uploading sources
+    - Download panel
+      - For file-based projects same as before but with only download sources & translations
+      - For string-based projects we show list of bundles with download action
+* Fixes for multi-workspace setup
+  * Now if there is more than 1 workspace, we show workspace selection before selecting a project
+  * Project is saved for workspace instead of global setting
+
 ## [1.6.3]
 
 - fix: suppress error notifications & reload issue

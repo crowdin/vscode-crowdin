@@ -3,7 +3,7 @@
 	"displayName": "Crowdin",
 	"description": "Crowdin Explorer for Visual Studio Code",
 	"publisher": "Crowdin",
-	"version": "1.6.3",
+	"version": "2.0.0",
 	"license": "MIT",
 	"engines": {
 		"vscode": "^1.66.0"
