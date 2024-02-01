@@ -332,7 +332,7 @@
 		"webpack-cli": "5.1.4"
 	},
 	"dependencies": {
-		"@crowdin/crowdin-api-client": "1.28.2",
+		"@crowdin/crowdin-api-client": "1.29.5",
 		"adm-zip": "^0.5.10",
 		"axios": "^1.6.3",
 		"glob": "^7.1.4",
