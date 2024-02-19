@@ -102,8 +102,21 @@ export class CrowdinClient {
             });
 
             if (downloadedTranslationFiles.length > 0 && filesToUnzip.length === 0) {
-                ErrorHandler.handleError("Downloaded translations don't match the current project configuration. The translations for the following sources will be omitted");
+                vscode.window.showWarningMessage(
+                    "Downloaded translations don't match the current project configuration. The translations for the following sources will be omitted"
+                );
                 return;
+            }
+
+            const omittedFiles = downloadedTranslationFiles
+                .map((file) => file.entryName)
+                .filter((entryName) => !filesToUnzip.some((entry) => entry.entryName === entryName));
+
+            if (omittedFiles.length > 0) {
+                vscode.window.showWarningMessage(
+                    'Due to missing respective sources, the following translations will be omitted: ' +
+                        omittedFiles.join(', ')
+                );
             }
 
             filesToUnzip.forEach((file) => {
@@ -456,7 +469,8 @@ export class CrowdinClient {
             }
         } catch (error) {
             throw new Error(
-                `Failed to create/update file ${path.basename(file)} for project ${this.projectId
+                `Failed to create/update file ${path.basename(file)} for project ${
+                    this.projectId
                 }. ${this.getErrorMessage(error)}`
             );
         }
