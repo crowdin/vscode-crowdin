@@ -101,6 +101,11 @@ export class CrowdinClient {
                 return translationFilesToDownload.includes(path.join(unzipFolder, file.entryName));
             });
 
+            if (downloadedTranslationFiles.length > 0 && filesToUnzip.length === 0) {
+                ErrorHandler.handleError("Downloaded translations don't match the current project configuration. The translations for the following sources will be omitted");
+                return;
+            }
+
             filesToUnzip.forEach((file) => {
                 const filePath = path.join(unzipFolder, file.entryName);
                 const directory = path.dirname(filePath);
@@ -451,8 +456,7 @@ export class CrowdinClient {
             }
         } catch (error) {
             throw new Error(
-                `Failed to create/update file ${path.basename(file)} for project ${
-                    this.projectId
+                `Failed to create/update file ${path.basename(file)} for project ${this.projectId
                 }. ${this.getErrorMessage(error)}`
             );
         }
