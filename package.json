@@ -87,6 +87,11 @@
 		},
 		"commands": [
 			{
+				"command": "string.extract",
+				"enablement": "editorHasSelection && !editorHasMultipleSelections",
+				"title": "Crowdin: Extract string"
+			},
+			{
 				"command": "crowdin.signIn",
 				"title": "Sign in",
 				"category": "Crowdin"
@@ -214,6 +219,12 @@
 			}
 		],
 		"menus": {
+			"editor/context": [
+				{
+					"command": "string.extract",
+					"when": "editorHasSelection && !editorHasMultipleSelections"
+				}
+			],
 			"view/title": [
 				{
 					"command": "download.refresh",

@@ -1,10 +1,7 @@
 import * as vscode from 'vscode';
 import { Constants } from '../../constants';
-import { CrowdinConfigHolder } from '../crowdinConfigHolder';
 
 export class StringsAutocompleteProvider implements vscode.CompletionItemProvider {
-    constructor(readonly configHolder: CrowdinConfigHolder) {}
-
     provideCompletionItems(
         document: vscode.TextDocument
     ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
@@ -32,7 +29,7 @@ export class StringsAutocompleteProvider implements vscode.CompletionItemProvide
             return [];
         }
 
-        const strings = this.configHolder.getCrowdinStrings(workspace);
+        const strings = Constants.CONFIG_HOLDER.getCrowdinStrings(workspace);
 
         if (!strings || strings.length === 0) {
             return [];

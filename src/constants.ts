@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
+import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 
 export class Constants {
     static EXTENSION_CONTEXT: vscode.ExtensionContext;
+    static CONFIG_HOLDER: CrowdinConfigHolder;
     //tree providers
     static readonly UPLOAD = 'upload';
     static readonly DOWNLOAD = 'download';
@@ -27,6 +29,7 @@ export class Constants {
     static readonly SIGN_IN_COMMAND = 'crowdin.signIn';
     static readonly SIGN_OUT_COMMAND = 'crowdin.signOut';
     static readonly SELECT_PROJECT_COMMAND = 'crowdin.selectProject';
+    static readonly STRING_EXTRACT_COMMAND = 'string.extract';
     //properties
     static readonly AUTO_REFRESH_PROPERTY = 'crowdin.autoRefresh';
     static readonly STRINGS_COMPLETION_PROPERTY = 'crowdin.stringsCompletion';
@@ -43,5 +46,6 @@ export class Constants {
     static initialize(context: vscode.ExtensionContext) {
         Constants.VSCODE_VERSION = vscode.version;
         Constants.EXTENSION_CONTEXT = context;
+        Constants.CONFIG_HOLDER = new CrowdinConfigHolder();
     }
 }

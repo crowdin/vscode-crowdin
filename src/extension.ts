@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
+import { createConfig } from './commands/createConfig';
+import { extractString } from './commands/extractString';
+import { openConfig } from './commands/openConfig';
 import { ConfigProvider } from './config/configProvider';
 import { Constants } from './constants';
 import * as OAuth from './oauth';
 import { StringsAutocompleteProvider } from './plugin/autocomplete/stringsAutocompleteProvider';
-import { CrowdinConfigHolder } from './plugin/crowdinConfigHolder';
 import { ProgressTreeProvider } from './plugin/progress/progressTreeProvider';
 import { BundlesTreeItem } from './plugin/tree/bundles/bundlesTreeItem';
 import { FilesTreeItem } from './plugin/tree/files/filesTreeItem';
@@ -13,18 +15,17 @@ import { CommonUtil } from './util/commonUtil';
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
 
-    const configHolder = new CrowdinConfigHolder();
-    const uploadTreeProvider = new TreeProvider(configHolder, false);
-    const downloadTreeProvider = new TreeProvider(configHolder, true);
-    const progressProvider = new ProgressTreeProvider(configHolder);
+    const uploadTreeProvider = new TreeProvider(Constants.CONFIG_HOLDER, false);
+    const downloadTreeProvider = new TreeProvider(Constants.CONFIG_HOLDER, true);
+    const progressProvider = new ProgressTreeProvider(Constants.CONFIG_HOLDER);
 
-    configHolder.addListener(() => uploadTreeProvider.refresh());
-    configHolder.addListener(() => downloadTreeProvider.refresh());
-    configHolder.addListener(() => progressProvider.refresh());
-    configHolder.addListener(setConfigExists);
-    configHolder.initialize();
+    Constants.CONFIG_HOLDER.addListener(() => uploadTreeProvider.refresh());
+    Constants.CONFIG_HOLDER.addListener(() => downloadTreeProvider.refresh());
+    Constants.CONFIG_HOLDER.addListener(() => progressProvider.refresh());
+    Constants.CONFIG_HOLDER.addListener(setConfigExists);
+    Constants.CONFIG_HOLDER.initialize();
 
-    OAuth.initialize(context, () => configHolder.reload());
+    OAuth.initialize(context, () => Constants.CONFIG_HOLDER.reload());
 
     setConfigExists();
 
@@ -32,35 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerTreeDataProvider(Constants.DOWNLOAD, downloadTreeProvider);
     vscode.window.registerTreeDataProvider(Constants.PROGRESS, progressProvider);
 
-    vscode.commands.registerCommand(Constants.CREATE_CONFIG_COMMAND, async () => {
-        const workspace = await CommonUtil.getWorkspace();
-        if (!workspace) {
-            vscode.window.showWarningMessage('Project workspace is empty');
-            return;
-        }
-        const configProvider = new ConfigProvider(workspace);
-        const { file, isNew } = await configProvider.create();
-        vscode.commands.executeCommand('setContext', 'crowdinConfigExists', true);
-        vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
-        if (isNew) {
-            await configHolder.load();
-        }
-    });
+    vscode.commands.registerCommand(Constants.CREATE_CONFIG_COMMAND, () => createConfig());
 
-    vscode.commands.registerCommand(Constants.OPEN_CONFIG_COMMAND, async () => {
-        const workspace = await CommonUtil.getWorkspace();
-        if (!workspace) {
-            vscode.window.showWarningMessage('Project workspace is empty');
-            return;
-        }
-        const configProvider = new ConfigProvider(workspace);
-        const file = await configProvider.getFile();
-        if (!file) {
-            vscode.window.showWarningMessage(`Could not find configuration file in ${workspace.name}`);
-            return;
-        }
-        vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(file));
-    });
+    vscode.commands.registerCommand(Constants.OPEN_CONFIG_COMMAND, () => openConfig());
 
     vscode.commands.registerCommand(Constants.OPEN_FILE_COMMAND, (fsPath) =>
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(fsPath))
@@ -69,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(Constants.REFRESH_PROGRESS_COMMAND, () => progressProvider.refresh());
     vscode.commands.registerCommand(Constants.REFRESH_DOWNLOAD_COMMAND, () => downloadTreeProvider.refresh());
     vscode.commands.registerCommand(Constants.REFRESH_UPLOAD_COMMAND, () => {
-        configHolder.reloadStrings();
+        Constants.CONFIG_HOLDER.reloadStrings();
         uploadTreeProvider.refresh();
     });
     vscode.commands.registerCommand(Constants.SAVE_ALL_COMMAND, async () => {
@@ -105,15 +80,17 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(item.config.configPath))
     );
 
+    vscode.commands.registerCommand(Constants.STRING_EXTRACT_COMMAND, (file) => extractString());
+
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration((e) => {
             if (e.affectsConfiguration(Constants.AUTO_REFRESH_PROPERTY)) {
-                configHolder.load();
+                Constants.CONFIG_HOLDER.load();
             }
         })
     );
 
-    vscode.languages.registerCompletionItemProvider({ pattern: '**' }, new StringsAutocompleteProvider(configHolder));
+    vscode.languages.registerCompletionItemProvider({ pattern: '**' }, new StringsAutocompleteProvider());
 }
 
 async function setConfigExists() {
