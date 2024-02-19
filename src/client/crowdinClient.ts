@@ -101,6 +101,24 @@ export class CrowdinClient {
                 return translationFilesToDownload.includes(path.join(unzipFolder, file.entryName));
             });
 
+            if (downloadedTranslationFiles.length > 0 && filesToUnzip.length === 0) {
+                vscode.window.showWarningMessage(
+                    "Downloaded translations don't match the current project configuration. The translations for the following sources will be omitted"
+                );
+                return;
+            }
+
+            const omittedFiles = downloadedTranslationFiles
+                .map((file) => file.entryName)
+                .filter((entryName) => !filesToUnzip.some((entry) => entry.entryName === entryName));
+
+            if (omittedFiles.length > 0) {
+                vscode.window.showWarningMessage(
+                    'Due to missing respective sources, the following translations will be omitted: ' +
+                        omittedFiles.join(', ')
+                );
+            }
+
             filesToUnzip.forEach((file) => {
                 const filePath = path.join(unzipFolder, file.entryName);
                 const directory = path.dirname(filePath);
