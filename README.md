@@ -49,6 +49,10 @@ Strings for autocompletion are loaded during the bootstrap of VSCode and are als
 
 This gif illustrates the autocompletion of string keys in a React project that uses the [Lingui](https://lingui.dev/tools/crowdin) library.
 
+### String extraction
+
+The plugin allows you to extract strings from your source files and upload them to Crowdin. Just select the necessary text and use the `"Crowdin: Extract String"` from the context menu. You will then be asked to enter the key for that string and select the file to upload it to.
+
 ### Command Palette commands
 
 The plugin provides the following commands in the VS Code [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-) (<kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd>/<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>):
