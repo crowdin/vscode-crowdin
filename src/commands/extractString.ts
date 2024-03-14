@@ -1,9 +1,25 @@
-import { ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
+import { ProjectsGroupsModel, SourceFilesModel } from '@crowdin/crowdin-api-client';
 import * as vscode from 'vscode';
 import { buildClient } from '../config/configModel';
 import { Constants } from '../constants';
 import { CommonUtil } from '../util/commonUtil';
 import { ErrorHandler } from '../util/errorHandler';
+
+const editableFileTypes = [
+    'csv',
+    'resx',
+    'json',
+    'i18next_json',
+    'android',
+    'macosx',
+    'strings',
+    'properties',
+    'xliff',
+    'arb',
+    'gettext',
+    'yaml',
+    'xlsx',
+];
 
 export async function extractString() {
     CommonUtil.withProgress(async () => {
@@ -64,9 +80,10 @@ async function addString() {
 
     if (!isStringsBased) {
         const files = await client.listFiles();
+        const allowedFiles = files.filter((f) => editableFileTypes.includes(f.type));
 
         const file = await vscode.window.showQuickPick(
-            files.map(
+            allowedFiles.map(
                 (e) =>
                     ({
                         label: e.name,
