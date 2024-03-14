@@ -332,27 +332,27 @@
 		"@types/adm-zip": "^0.5.5",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.6",
-		"@types/node": "^18.19.12",
+		"@types/node": "^18.19.21",
 		"@types/uuid": "^9.0.8",
 		"@types/vscode": "1.66.0",
 		"@types/yaml": "^1.9.6",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"@vscode/test-electron": "2.3.9",
-		"mocha": "^10.2.0",
+		"mocha": "^10.3.0",
 		"prettier": "2.8.8",
 		"ts-loader": "9.5.1",
 		"typescript": "^5.3.3",
-		"webpack": "5.90.0",
+		"webpack": "5.90.3",
 		"webpack-cli": "5.1.4"
 	},
 	"dependencies": {
-		"@crowdin/crowdin-api-client": "1.29.5",
+		"@crowdin/crowdin-api-client": "1.30.0",
 		"adm-zip": "^0.5.10",
 		"axios": "^1.6.7",
 		"glob": "^7.1.4",
 		"original-fs": "^1.2.0",
 		"uuid": "^9.0.1",
-		"yaml": "^2.3.4"
+		"yaml": "^2.4.0"
 	}
 }
