@@ -16,6 +16,7 @@ https.globalAgent.options.rejectUnauthorized = false;
 
 export class CrowdinClient {
     readonly crowdin: Crowdin;
+    readonly crowdinWithouRetry: Crowdin;
     readonly projectId: number;
     readonly branch?: string;
 
@@ -34,6 +35,9 @@ export class CrowdinClient {
                 waitInterval: Constants.CLIENT_RETRY_WAIT_INTERVAL_MS,
             },
         });
+        this.crowdinWithouRetry = new Crowdin(credentials, {
+            userAgent: `crowdin-vscode-plugin/${Constants.PLUGIN_VERSION} vscode/${Constants.VSCODE_VERSION}`,
+        });
     }
 
     get crowdinBranch(): { name: string; title: string } | undefined {
@@ -51,6 +55,66 @@ export class CrowdinClient {
             const name = repository?.state?.HEAD?.name;
             return name ? { name: PathUtil.normalizeBranchName(name), title: name } : undefined;
         }
+    }
+
+    async listFiles() {
+        let branchId: number | undefined;
+        const branch = this.crowdinBranch;
+
+        if (this.stringsBased) {
+            if (!branch) {
+                throw new Error('Branch is not specified');
+            }
+        }
+
+        if (branch) {
+            const branches = await this.crowdinWithouRetry.sourceFilesApi.listProjectBranches(this.projectId, {
+                name: branch.name,
+            });
+            branchId = branches.data.find((e) => e.data.name === branch.name)?.data.id;
+
+            if (!branchId) {
+                throw new Error(`Failed to find branch with name ${branch.name}`);
+            }
+        }
+
+        const files = await this.crowdinWithouRetry.sourceFilesApi
+            .withFetchAll()
+            .listProjectFiles(this.projectId, { branchId });
+
+        return files.data.map((f) => f.data);
+    }
+
+    async addString({ text, id, fileId }: { text: string; id: string; fileId?: number }) {
+        if (!this.stringsBased) {
+            await this.crowdinWithouRetry.sourceStringsApi.addString(this.projectId, {
+                text,
+                identifier: id,
+                fileId,
+            });
+            return;
+        }
+
+        const branch = this.crowdinBranch;
+
+        if (!branch) {
+            throw new Error('Branch is not specified');
+        }
+
+        const branches = await this.crowdinWithouRetry.sourceFilesApi.listProjectBranches(this.projectId, {
+            name: branch.name,
+        });
+        const branchId = branches.data.find((e) => e.data.name === branch.name)?.data.id;
+
+        if (!branchId) {
+            throw new Error(`Failed to find branch with name ${branch.name}`);
+        }
+
+        await this.crowdinWithouRetry.sourceStringsApi.addString(this.projectId, {
+            branchId,
+            text,
+            identifier: id,
+        });
     }
 
     async getStrings() {
