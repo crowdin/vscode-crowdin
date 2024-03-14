@@ -1,4 +1,4 @@
-import { ProjectsGroupsModel, SourceFilesModel } from '@crowdin/crowdin-api-client';
+import { ProjectsGroupsModel } from '@crowdin/crowdin-api-client';
 import * as vscode from 'vscode';
 import { buildClient } from '../config/configModel';
 import { Constants } from '../constants';
