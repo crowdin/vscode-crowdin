@@ -80,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand(Constants.VSCODE_OPEN_FILE, vscode.Uri.file(item.config.configPath))
     );
 
-    vscode.commands.registerCommand(Constants.STRING_EXTRACT_COMMAND, (file) => extractString());
+    vscode.commands.registerCommand(Constants.STRING_EXTRACT_COMMAND, () => extractString());
 
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration((e) => {
