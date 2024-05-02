@@ -332,7 +332,7 @@
 		"@types/adm-zip": "^0.5.5",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.6",
-		"@types/node": "^18.19.28",
+		"@types/node": "^18.19.31",
 		"@types/uuid": "^9.0.8",
 		"@types/vscode": "1.66.0",
 		"@types/yaml": "^1.9.6",
@@ -342,7 +342,7 @@
 		"mocha": "^10.4.0",
 		"prettier": "2.8.8",
 		"ts-loader": "9.5.1",
-		"typescript": "^5.4.3",
+		"typescript": "^5.4.5",
 		"webpack": "5.91.0",
 		"webpack-cli": "5.1.4"
 	},
