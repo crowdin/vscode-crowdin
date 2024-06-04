@@ -99,6 +99,8 @@ export class CrowdinAuthenticationProvider implements vscode.AuthenticationProvi
             await this.context.secrets.store(SESSIONS_SECRET_KEY, JSON.stringify([session]));
             await clearProjects();
 
+            vscode.window.showInformationMessage(`You successfully logged in as ${user.data.username}`);
+
             this._sessionChangeEmitter.fire({ added: [session], removed: [], changed: [] });
 
             return session;
