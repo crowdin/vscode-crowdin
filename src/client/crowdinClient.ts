@@ -179,7 +179,7 @@ export class CrowdinClient {
             if (omittedFiles.length > 0) {
                 vscode.window.showWarningMessage(
                     'Due to missing respective sources, the following translations will be omitted: ' +
-                    omittedFiles.join(', ')
+                        omittedFiles.join(', ')
                 );
             }
 
@@ -533,7 +533,8 @@ export class CrowdinClient {
             }
         } catch (error) {
             throw new Error(
-                `Failed to create/update file ${path.basename(file)} for project ${this.projectId
+                `Failed to create/update file ${path.basename(file)} for project ${
+                    this.projectId
                 }. ${this.getErrorMessage(error)}`
             );
         }
