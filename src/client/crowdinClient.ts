@@ -80,7 +80,7 @@ export class CrowdinClient {
 
         const files = await this.crowdinWithouRetry.sourceFilesApi
             .withFetchAll()
-            .listProjectFiles(this.projectId, { branchId });
+            .listProjectFiles(this.projectId, { branchId, recursion: true });
 
         return files.data.map((f) => f.data);
     }
@@ -90,7 +90,7 @@ export class CrowdinClient {
             await this.crowdinWithouRetry.sourceStringsApi.addString(this.projectId, {
                 text,
                 identifier: id,
-                fileId,
+                fileId: fileId!,
             });
             return;
         }
@@ -578,7 +578,7 @@ export class CrowdinClient {
         const fileName = path.basename(file);
         const files = await this.crowdin.sourceFilesApi
             .withFetchAll()
-            .listProjectFiles(this.projectId, undefined, parentId);
+            .listProjectFiles(this.projectId, { directoryId: parentId });
         const foundFile = files.data
             .filter((f) => {
                 if (!branchId) {
@@ -612,7 +612,7 @@ export class CrowdinClient {
     private async findDirectory(name: string, parentId?: number, branchId?: number): Promise<number | undefined> {
         const dirs = await this.crowdin.sourceFilesApi
             .withFetchAll()
-            .listProjectDirectories(this.projectId, undefined, parentId);
+            .listProjectDirectories(this.projectId, { directoryId: parentId });
         const foundDir = dirs.data
             .filter((dir) => {
                 if (!branchId) {
