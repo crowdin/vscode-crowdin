@@ -331,8 +331,8 @@
 	"devDependencies": {
 		"@types/adm-zip": "^0.5.5",
 		"@types/glob": "^8.1.0",
-		"@types/mocha": "^10.0.7",
-		"@types/node": "^18.19.47",
+		"@types/mocha": "^10.0.8",
+		"@types/node": "^18.19.54",
 		"@types/uuid": "^9.0.8",
 		"@types/vscode": "1.66.0",
 		"@types/yaml": "^1.9.6",
@@ -342,8 +342,8 @@
 		"mocha": "^10.7.3",
 		"prettier": "2.8.8",
 		"ts-loader": "9.5.1",
-		"typescript": "^5.5.4",
-		"webpack": "5.94.0",
+		"typescript": "^5.6.2",
+		"webpack": "5.95.0",
 		"webpack-cli": "5.1.4"
 	},
 	"dependencies": {
