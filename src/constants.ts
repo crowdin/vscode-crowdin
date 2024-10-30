@@ -37,7 +37,7 @@ export class Constants {
     static readonly USE_GIT_BRANCH_PROPERTY = 'crowdin.useGitBranch';
     //general
     static readonly CROWDIN_PATH_SEPARATOR = '/';
-    static readonly PLUGIN_VERSION = '2.2.2';
+    static readonly PLUGIN_VERSION = '2.2.3';
     static readonly CLIENT_RETRIES = 5;
     static readonly CLIENT_RETRY_WAIT_INTERVAL_MS = 750;
     static VSCODE_VERSION: string;
