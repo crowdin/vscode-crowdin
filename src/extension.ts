@@ -113,9 +113,7 @@ function openBundleSettingsUrl(item: BundlesTreeItem) {
             ? `https://${item.config.organization}.crowdin.com/u/projects/${item.project.id}/download`
             : `https://crowdin.com/project/${item.project.identifier}/download#bundles`;
     } else {
-        url = item.config.organization
-            ? `https://${item.config.organization}.crowdin.com/u/projects/${item.project.id}/translations/bundle/${item.bundle.id}`
-            : `https://crowdin.com/project/${item.project.identifier}/download#bundles:${item.bundle.id}`;
+        url = item.bundle.webUrl;
     }
     vscode.env.openExternal(vscode.Uri.parse(url));
 }
