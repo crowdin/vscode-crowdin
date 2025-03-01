@@ -349,7 +349,7 @@
 	"dependencies": {
 		"@crowdin/crowdin-api-client": "1.41.1",
 		"adm-zip": "^0.5.16",
-		"axios": "^1.7.9",
+		"axios": "^1.8.1",
 		"glob": "^7.1.4",
 		"original-fs": "^1.2.0",
 		"uuid": "^9.0.1",
