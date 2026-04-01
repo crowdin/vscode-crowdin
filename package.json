@@ -329,7 +329,7 @@
 		"url": "https://github.com/crowdin/vscode-crowdin.git"
 	},
 	"devDependencies": {
-		"@types/adm-zip": "^0.5.7",
+		"@types/adm-zip": "^0.5.8",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.10",
 		"@types/node": "^18.19.130",
@@ -343,7 +343,7 @@
 		"prettier": "2.8.8",
 		"ts-loader": "9.5.4",
 		"typescript": "^5.9.3",
-		"webpack": "5.105.3",
+		"webpack": "5.105.4",
 		"webpack-cli": "5.1.4"
 	},
 	"dependencies": {
