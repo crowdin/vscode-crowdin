@@ -6,10 +6,10 @@ Integrate your Visual Studio Code projects with Crowdin to streamline the locali
 
 [Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 
-[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/Crowdin.vscode-crowdin?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
-[![Visual Studio Marketplace Downloads](https://badgen.net/vs-marketplace/d/Crowdin.vscode-crowdin?cache=1000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
-[![Visual Studio Marketplace Rating (Stars)](https://img.shields.io/visual-studio-marketplace/stars/Crowdin.vscode-crowdin?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin&ssr=false#review-details)
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/Crowdin.vscode-crowdin?cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
+[![Visual Studio Marketplace Installs](https://vsmarketplacebadges.dev/installs-short/Crowdin.vscode-crowdin.svg?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
+[![Visual Studio Marketplace Downloads](https://vsmarketplacebadges.dev/downloads-short/Crowdin.vscode-crowdin.svg?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
+[![Visual Studio Marketplace Rating (Stars)](https://vsmarketplacebadges.dev/rating-star/Crowdin.vscode-crowdin.svg?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin&ssr=false#review-details)
+[![Visual Studio Marketplace Version](https://vsmarketplacebadges.dev/version/Crowdin.vscode-crowdin.svg?logo=visual-studio-code&cacheSeconds=3000)](https://marketplace.visualstudio.com/items?itemName=Crowdin.vscode-crowdin)
 
  </div>
 
