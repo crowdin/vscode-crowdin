@@ -27,33 +27,33 @@
 	"contributes": {
 		"configuration": [
 			{
-				"title": "Crowdin",
+				"title": "%crowdin%",
 				"properties": {
 					"crowdin.useGitBranch": {
 						"type": "boolean",
 						"default": "false",
-						"description": "Use a Git branch as a Crowdin branch",
+						"description": "%crowdin.useGitBranch.desc%",
 						"scope": "window",
 						"order": 0
 					},
 					"crowdin.stringsCompletion": {
 						"type": "boolean",
 						"default": "true",
-						"description": "Enables or disables auto completion of strings keys.",
+						"description": "%crowdin.stringsCompletion.desc%",
 						"scope": "window",
 						"order": 1
 					},
 					"crowdin.stringsCompletionFileExtensions": {
 						"type": "string",
 						"default": "*",
-						"description": "Comma-separated list of file extensions for which autocomplete should be active. By default strings autocomplete will be active in all files.",
+						"description": "%crowdin.stringsCompletionFileExtensions.desc%",
 						"scope": "window",
 						"order": 2
 					},
 					"crowdin.autoRefresh": {
 						"type": "boolean",
 						"default": "true",
-						"description": "Enables or disables auto refresh after each change in Crowdin configuration file.",
+						"description": "%crowdin.autoRefresh.desc%",
 						"scope": "window",
 						"order": 3
 					}
@@ -64,7 +64,7 @@
 			"activitybar": [
 				{
 					"id": "crowdin",
-					"title": "Crowdin",
+					"title": "%crowdin%",
 					"icon": "resources/icon.svg"
 				}
 			]
@@ -73,15 +73,15 @@
 			"crowdin": [
 				{
 					"id": "upload",
-					"name": "Upload"
+					"name": "%crowdin.views.upload%"
 				},
 				{
 					"id": "download",
-					"name": "Download"
+					"name": "%crowdin.views.download%"
 				},
 				{
 					"id": "translationProgress",
-					"name": "Progress"
+					"name": "%crowdin.views.translationProgress%"
 				}
 			]
 		},
@@ -89,36 +89,38 @@
 			{
 				"command": "string.extract",
 				"enablement": "editorHasSelection && !editorHasMultipleSelections",
-				"title": "Crowdin: Extract string"
+				"title": "%crowdin.command.string.extract%",
+				"category": "%crowdin%"
 			},
 			{
 				"command": "crowdin.signIn",
-				"title": "Sign in",
-				"category": "Crowdin"
+				"title": "%crowdin.command.signIn%",
+				"category": "%crowdin%"
 			},
 			{
 				"command": "crowdin.signOut",
-				"title": "Sign out",
-				"category": "Crowdin"
+				"title": "%crowdin.command.signOut%",
+				"category": "%crowdin%"
 			},
 			{
 				"command": "crowdin.selectProject",
-				"title": "Select Project",
-				"category": "Crowdin"
+				"title": "%crowdin.command.selectProject%",
+				"category": "%crowdin%"
 			},
 			{
 				"command": "config.create",
-				"title": "Create configuration",
-				"category": "Crowdin"
+				"title": "%crowdin.command.config.create%",
+				"category": "%crowdin%"
 			},
 			{
 				"command": "config.open",
-				"title": "Open configuration",
-				"category": "Crowdin"
+				"title": "%crowdin.command.config.open%",
+				"category": "%crowdin%"
 			},
 			{
 				"command": "upload.refresh",
-				"title": "Refresh",
+				"title": "%crowdin.command.upload.refresh%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
@@ -126,7 +128,8 @@
 			},
 			{
 				"command": "download.refresh",
-				"title": "Refresh",
+				"title": "%crowdin.command.download.refresh%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
@@ -134,7 +137,8 @@
 			},
 			{
 				"command": "files.download",
-				"title": "Download project translations",
+				"title": "%crowdin.command.files.download%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/download.svg",
 					"dark": "resources/dark/download.svg"
@@ -142,7 +146,8 @@
 			},
 			{
 				"command": "files.saveAll",
-				"title": "Upload all source files",
+				"title": "%crowdin.command.files.saveAll%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/upload.svg",
 					"dark": "resources/dark/upload.svg"
@@ -150,7 +155,8 @@
 			},
 			{
 				"command": "files.saveFolder",
-				"title": "Upload source folder",
+				"title": "%crowdin.command.files.saveFolder%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/upload.svg",
 					"dark": "resources/dark/upload.svg"
@@ -158,7 +164,8 @@
 			},
 			{
 				"command": "files.saveFile",
-				"title": "Upload source file",
+				"title": "%crowdin.command.files.saveFile%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/upload.svg",
 					"dark": "resources/dark/upload.svg"
@@ -166,7 +173,8 @@
 			},
 			{
 				"command": "files.edit",
-				"title": "Edit configuration",
+				"title": "%crowdin.command.files.edit%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/settings.svg",
 					"dark": "resources/dark/settings.svg"
@@ -174,7 +182,8 @@
 			},
 			{
 				"command": "translationProgress.refresh",
-				"title": "Refresh progress",
+				"title": "%crowdin.command.translationProgress.refresh%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
@@ -182,7 +191,8 @@
 			},
 			{
 				"command": "files.updateSourceFolder",
-				"title": "Download source files",
+				"title": "%crowdin.command.files.updateSourceFolder%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/download_source.svg",
 					"dark": "resources/dark/download_source.svg"
@@ -190,7 +200,8 @@
 			},
 			{
 				"command": "files.updateSourceFile",
-				"title": "Download source file",
+				"title": "%crowdin.command.files.updateSourceFile%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/download_source.svg",
 					"dark": "resources/dark/download_source.svg"
@@ -198,7 +209,8 @@
 			},
 			{
 				"command": "bundles.download",
-				"title": "Download bundle",
+				"title": "%crowdin.command.bundles.download%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/download.svg",
 					"dark": "resources/dark/download.svg"
@@ -206,12 +218,14 @@
 			},
 			{
 				"command": "bundles.add",
-				"title": "Add bundle",
+				"title": "%crowdin.command.bundles.add%",
+				"category": "%crowdin%",
 				"icon": "$(plus)"
 			},
 			{
 				"command": "bundles.settings",
-				"title": "Settings",
+				"title": "%crowdin.command.bundles.settings%",
+				"category": "%crowdin%",
 				"icon": {
 					"light": "resources/light/settings.svg",
 					"dark": "resources/dark/settings.svg"

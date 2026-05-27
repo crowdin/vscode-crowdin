@@ -1,0 +1,37 @@
+{
+    "crowdin": "Crowdin",
+
+
+    "crowdin.useGitBranch.desc": "Use a Git branch as a Crowdin branch.",
+    "crowdin.stringsCompletion.desc": "Enables or disables auto completion of strings keys.",
+    "crowdin.stringsCompletionFileExtensions.desc": "Comma-separated list of file extensions for which autocomplete should be active. By default, strings autocomplete will be active in all files.",
+    "crowdin.autoRefresh.desc": "Enables or disables auto refresh after each change in the Crowdin configuration file.",
+
+
+    "crowdin.views.upload": "Upload",
+    "crowdin.views.download": "Download",
+    "crowdin.views.translationProgress": "Progress",
+
+
+    "crowdin.command.string.extract": "Extract string",
+    "crowdin.command.signIn": "Sign in",
+    "crowdin.command.signOut": "Sign out",
+    "crowdin.command.selectProject": "Select Project",
+    "crowdin.command.config.create": "Create configuration",
+    "crowdin.command.config.open": "Open configuration",
+    "crowdin.command.upload.refresh": "Refresh (Uploads)",
+    "crowdin.command.download.refresh": "Refresh (Downloads)",
+
+    "crowdin.command.files.download": "Download project translations",
+    "crowdin.command.files.saveAll":"Upload all source files",
+    "crowdin.command.files.saveFolder": "Upload source folder",
+    "crowdin.command.files.saveFile": "Upload source file",
+    "crowdin.command.files.edit": "Edit configuration",
+    "crowdin.command.translationProgress.refresh": "Refresh progress",
+    "crowdin.command.files.updateSourceFolder": "Download source files",
+    "crowdin.command.files.updateSourceFile": "Download source file",
+
+    "crowdin.command.bundles.download": "Download bundle",
+    "crowdin.command.bundles.add": "Add bundle",
+    "crowdin.command.bundles.settings": "Bundle settings"
+}
